@@ -9,7 +9,7 @@ const myComponent = () => {
       <video controls>
         <source
           src="https://marcel-de-mayotte.latelier22.fr/videos/videomarcel.mov"
-          type="video/mp4"
+          type="video/mov"
         />
         Votre navigateur ne prend pas en charge la vidéo.
       </video>
