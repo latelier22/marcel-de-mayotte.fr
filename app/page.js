@@ -1,0 +1,37 @@
+import React from "react";
+import RootLayout from "../app/layout";
+import Navbar from "./NavBar";
+import HeaderSimple from "./headerSimple";
+import Footer from "./Footer";
+import Cards from "./Cards";
+import Section from "./Section";
+import Banner from "./Banner";
+import {cards, sections, site, photos} from "./site"
+import MyVideo from "./MyVideo"
+
+const Home = () => {
+  // Dynamic metadata for the home page
+  const pageTitle = "Accueil";
+  const pageDescription = "Bienvenue sur le site de Marcel Séjour";
+
+  // DÃ©clarer les photos dans un tableau d&apos;objets
+  console.log(photos);
+
+  const backgroundColor = "bg-teal-500";
+
+  return (
+    <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
+      <Navbar />
+      <HeaderSimple photos={photos} siteTitle ={site.title} title={pageTitle}/>
+      {/* <Pictos /> */}
+      <Banner photo = {photos[0]} />
+      <Section section={sections[0]} />
+
+      <MyVideo />
+
+      <Footer />
+    </RootLayout>
+  );
+};
+
+export default Home;
