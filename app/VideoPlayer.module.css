@@ -1,0 +1,24 @@
+/* VideoPlayer.module.css */
+.container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .overlay {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    transform: translate(-10%, -10%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 20px;
+    border-radius: 5px;
+    opacity: 1; /* Opacité complète au début */
+    transition: opacity 3s ease-in-out; /* Animation de transition */
+  }
+  
+  .overlay.hidden {
+    opacity: 0; /* Opacité nulle pour cacher le texte */
+  }
+  
