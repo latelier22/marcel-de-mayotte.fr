@@ -14,7 +14,7 @@ const Navbar = () => {
   return (
     <>
     <nav
-      className="z-40 md:fixed flex w-full items-center justify-between bg-sky-600 py-2 text-white shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-black dark:text-gold-500 md:flex-wrap"
+      className="z-40 md:fixed flex w-full items-center justify-between bg-neutral-200 py-2 text-white shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-black dark:text-gold-500 md:flex-wrap"
       data-te-navbar-ref
     >
       <div className="flex w-full  items-center  px-3">
@@ -68,7 +68,7 @@ const Navbar = () => {
                 data-te-nav-item-ref
               >
                 <a
-                  className={`block transition duration-150 ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                  className={`block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                   href={menuItem.route}
                   data-te-nav-link-ref
                   data-te-ripple-init

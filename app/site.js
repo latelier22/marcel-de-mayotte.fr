@@ -155,6 +155,9 @@ export const Pages = {
         link: "/livre/5",
         url: "livre-5.png",
         alt: "Mémoires de Marcel Séjour",
+        nbPages :"14",
+        bookHeight :"842",
+        bookWidth :"595"
       },
 
       {
@@ -165,6 +168,9 @@ export const Pages = {
         link: "/livre/4",
         url: "livre-4.png",
         alt: "Une île, deux regards",
+        nbPages :"37",
+        bookHeight :"765",
+        bookWidth :"1191"
       },
       {
         title: "Mayotte",
@@ -174,6 +180,9 @@ export const Pages = {
         link: "/livre/3",
         url: "livre-3.png",
         alt: "Mayotte",
+        nbPages :"64",
+        bookHeight :"1669",
+        bookWidth :"1669"
       },
      
       {
@@ -184,6 +193,9 @@ export const Pages = {
         link: "/livre/2",
         url: "livre-2.png",
         alt: "Liberté, Egalité, Magnégné",
+        nbPages :"417",
+        bookHeight :"661",
+        bookWidth :"512"
       },
       {
         title: "Portraits de Mayotte... et d'Anjouan",
@@ -193,6 +205,9 @@ export const Pages = {
         link: "/livre/1",
         url: "livre-1.png",
         alt: "Livre épuisé",
+        nbPages :"15",
+        bookHeight :"700",
+        bookWidth :"700"
       },
       
       

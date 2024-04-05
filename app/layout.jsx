@@ -21,7 +21,7 @@ export default function RootLayout({
   // const description = `${siteDescription} | ${pageDescription || ''}`;
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="">
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -29,7 +29,7 @@ export default function RootLayout({
         <meta name="description" content={description} />
         {/* Add other meta tags if needed */}
       </head>
-      <body className={`${inter.className} bg-neutral-900`}>
+      <body className={`${inter.className} bg-white dark:bg-neutral-900`}>
         {children}
       </body>
     </html>
