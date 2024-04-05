@@ -4,13 +4,13 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styles from './VideoPlayer.module.css'; // Importez vos styles CSS
 
-const VideoPlayer = () => {
+const VideoPlayer = ( {videoId} ) => {
   const [showText, setShowText] = useState(true);
   const videoRef = useRef(null);
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.currentTime = 10.5; // Démarrer la lecture à partir de 1 minute 20 secondes (80 secondes)
+      videoRef.current.currentTime = 3; // Démarrer la lecture à partir de 1 minute 20 secondes (80 secondes)
     }
   }, []);
 
@@ -39,9 +39,9 @@ const VideoPlayer = () => {
   }, []);
 
   return (
-    <div className={styles.container}>
+    <div className="mx-auto">
       <video ref={videoRef} controls>
-        <source src="https://marcel-de-mayotte.latelier22.fr/videos/videomarcel-sd.mp4" />
+        <source src={`https://marcel-de-mayotte.latelier22.fr/videos/video-${videoId}.mp4`} />
         Votre navigateur ne prend pas en charge la lecture de vidéos.
       </video>
       {showText && <div className={styles.overlay}>Entretien de Marcel Séjour</div>}

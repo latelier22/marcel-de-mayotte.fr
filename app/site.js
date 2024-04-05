@@ -16,11 +16,13 @@ export const site = {
 
 export const menuItems = [
   { label: "Accueil", route: "/" },
-  { label: "Actualités", route: "/actualites" },
+  // { label: "Actualités", route: "/actualites" },
   { label: "Galerie", route: "/galerie" },
-  { label: "Expositions", route: "/expositions" },
-  { label: "Produits dérivés", route: "/boutique" },
-  { label: "Livres", route: "/livres" },
+  // { label: "Expositions", route: "/expositions" },
+  // { label: "Produits dérivés", route: "/boutique" },
+  { label: "Livres", route: "/livre" },
+  { label: "Vidéos", route: "/video" },
+
   { label: "Blog", route: "https://liberteegalitemagnegne.fr/" },
   { label: "Contact", route: "/contact" },
 ];
@@ -193,6 +195,106 @@ export const Pages = {
         alt: "Livre épuisé",
       },
       
+      
+    ]
+  },
+  videos: {
+    title: "Vidéos",
+    description: "Vidéos, reportages et interview de Marcel Séjour",
+    photos: [
+      { url: "livre-1.png", alt: "Livre épuisé" },
+      { url: "livre-2.png", alt: "Liberté, Egalité, Magnégné: beau livre d'art" },
+      { url: "livre-3.png", alt: "Mayotte, livret 64 pages, carré" },
+      { url: "livre-4.png", alt: "Une île, deux regards - Marcel Séjour & Nicolas FRAISSE" },
+    ],
+    sections: [
+      {
+        title: "",
+        body: (
+          <ul className="list-disc text-gold-400 pl-4">
+            <li>  </li>
+            <li>  </li>
+            <li>  </li>
+          </ul>
+        ),
+      },
+    ],
+    cards: [
+      {
+        title: "Interview dans son atelier de Marcel Séjour",
+        text: "15min",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/video/1",
+        url: "video-1.png",
+        alt: "Interview de Marcel Séjour",
+      },
+      {
+        title: "Des élèves du lycée de Mamoudzou Nord rencontrent le peintre Marcel Séjour",
+        text: "2min41",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/video/2",
+        url: "video-2.png",
+        alt: "Des élèves du lycée de Mamoudzou Nord rencontrent le peintre Marcel Séjour",
+      },
+      {
+        title: "Marcel Séjour, artiste peintre, nous parle de sa dernière création. Mayotte, le 20 octobre",
+        text: "2min15",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/video/3",
+        url: "video-3.png",
+        alt: "Marcel Séjour, artiste peintre, nous parle de sa dernière création. Mayotte, le 20 octobre",
+      },
+      {
+        title: "Art_ Lancement de la marque Marcel Séjour.",
+        text: "1m29",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/video/4",
+        url: "video-4.png",
+        alt: "Art_ Lancement de la marque Marcel Séjour.",
+      },
+      {
+        title: "Le confinement de Marcel Séjour.",
+        text: "1m29",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/video/5",
+        url: "video-5.png",
+        alt: "Confinement",
+      },
+      {
+        title: "Emission TV Place publique",
+        text: "1m29 - Mayotte Première - 08/11/2017",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/video/6",
+        url: "video-6.png",
+        alt: "Art_ Lancement de la marque Marcel Séjour.",
+      },
+      {
+        title: "Emission Témoins d'outre-mer: La peinture de Marcel Séjour",
+        text: "3m06 - LTOM - 16/03/2020",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/video/7",
+        url: "video-7.png",
+        alt: "La peinture de Marcel Séjour",
+      },
+      {
+        title: "CULTURE 1ère avec Melade Jean Paul et ses invités : Le peintre mahorais, Marcel Sejour, sort un livre sur ses 25 ans de peinture (liberté, égalité, magnégné)",
+        text: "3m06 - Réunion la 1èere - 30/11/2017",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/video/8",
+        url: "video-8.png",
+        alt: "Le peintre mahorais, Marcel Sejour, sort un livre sur ses 25 ans de peinture (liberté, égalité, magnégné)",
+      },
+
+  
+
       
     ]
   },

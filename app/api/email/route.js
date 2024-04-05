@@ -31,7 +31,7 @@ export async function POST(request) {
 	const sendGridMail = {
 		to: "contact@marcel-de-mayotte.fr",
 		from: "contact@marcel-de-mayotte.fr",
-		templateId: "d-ce48ad5a6f0443aea3397551ddb25906",
+		templateId: "d-d2285e5ff97b4e0aadeeca03dfefaa2d",
 		dynamic_template_data: {
 			prenom: prenom,
 			nom: nom,
@@ -44,7 +44,7 @@ export async function POST(request) {
 	
 
     try {
-		//console.log(sendGridMail)
+		
         const {data} = await sgMail.send(sendGridMail);
 		console.log(sendGridMail)
         return NextResponse.json({

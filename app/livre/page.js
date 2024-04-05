@@ -9,7 +9,7 @@ import { Pages, site } from "../site";
 const Page = () => {
 
   const page= Pages["livres"];
-  console.log(page)
+  
 
   const pageTitle = page.title;
   const pageDescription = page.description;
@@ -18,7 +18,7 @@ const Page = () => {
       <Navbar />
       <HeaderSimple  siteTitle ={site.title} title={pageTitle}/>
 
-      <Cards className="mb-24" cards = {page.cards} />
+      <Cards className="mb-24" cards = {page.cards} label={"FEUILLETER LE LIVRE"} />
 
 
 

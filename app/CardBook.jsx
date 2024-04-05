@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import MyModal from "./MyModal";
 
-const Card = ({ index, card, buttonColor, children, syliusCard }) => {
+const Card = ({ index, card, buttonColor, children, syliusCard, label }) => {
   useEffect(() => {
     const init = async () => {
       const { Ripple, initTE } = await import("tw-elements");
@@ -45,7 +45,7 @@ const Card = ({ index, card, buttonColor, children, syliusCard }) => {
                 data-te-ripple-init
                 data-te-ripple-color="light"
               >
-                {/* {card.button} */} FEUILLETER
+                {/* {card.button} */} {label}
               </button>
             </a>
             <MyModal

@@ -18,7 +18,6 @@ const ListeActionsGauche = ({
     init();
   }, []);
 
-  console.log(photo);
 
   return (
 <div className={`container mx-auto px-5 py-2 lg:px-32 lg:pt-12 ${gauche ? "animate-slideLeft" : "animate-slideRight"}`}>

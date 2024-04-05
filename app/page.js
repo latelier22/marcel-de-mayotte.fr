@@ -7,7 +7,6 @@ import Cards from "./Cards";
 import Section from "./Section";
 import Banner from "./Banner";
 import {cards, sections, site, photos} from "./site"
-import MyVideo from "./MyVideo"
 
 const Home = () => {
   // Dynamic metadata for the home page
@@ -27,7 +26,7 @@ const Home = () => {
       <Banner photo = {photos[0]} />
       <Section section={sections[0]} />
 
-      <MyVideo />
+      
 
       <Footer />
     </RootLayout>

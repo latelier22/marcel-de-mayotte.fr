@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import CardBook from "./CardBook";
 
-const Cards = ({ cards, buttonColor , syliusCard}) => {
+const Cards = ({ cards, buttonColor , syliusCard, label}) => {
   useEffect(() => {
     const init = async () => {
       const { Tooltip, initTE } = await import("tw-elements");
@@ -23,7 +23,8 @@ const Cards = ({ cards, buttonColor , syliusCard}) => {
                 className="flex md:mb-8 justify-center w-full md:w-1/2 lg:w-1/3 flex-wrap "
               >
                 <div style={{ flex: "1" }}>
-                  <CardBook
+                  <CardBook 
+                    label={label}
                     index ={index}
                     syliusCard={syliusCard}
                     card={card}
