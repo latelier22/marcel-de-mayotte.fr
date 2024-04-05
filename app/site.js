@@ -9,8 +9,8 @@ export const site = {
   codePostal: "97600",
   ville: "MAMOUDZOU",
   email: "contact@marcel-de-mayotte.fr",
-  logo: { url: "images/logo-barre-du-haut.png", alt: "logo Marcel Séjour" },
-  Logo: { url: "images/logo-banniere.png", alt: "logo logo Marcel Séjour" },
+  logo: { url: "/images/logo-barre-du-haut.png", alt: "logo Marcel Séjour" },
+  Logo: { url: "/images/logo-banniere.png", alt: "logo logo Marcel Séjour" },
   facebook :"https://www.facebook.com/profile.php?id=100010085468800"
 };
 
