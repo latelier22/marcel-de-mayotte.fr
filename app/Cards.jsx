@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import Card from "./Card";
+import CardBook from "./CardBook";
 
 const Cards = ({ cards, buttonColor , syliusCard}) => {
   useEffect(() => {
@@ -23,7 +23,7 @@ const Cards = ({ cards, buttonColor , syliusCard}) => {
                 className="flex md:mb-8 justify-center w-full md:w-1/2 lg:w-1/3 flex-wrap "
               >
                 <div style={{ flex: "1" }}>
-                  <Card
+                  <CardBook
                     index ={index}
                     syliusCard={syliusCard}
                     card={card}
@@ -32,7 +32,7 @@ const Cards = ({ cards, buttonColor , syliusCard}) => {
                     }
                   >
                     
-                  </Card>
+                  </CardBook>
                 </div>
               </div>
             ))}

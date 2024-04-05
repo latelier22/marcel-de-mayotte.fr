@@ -1,19 +1,25 @@
 // components/FlipBook.js
 import React from 'react';
 import PageFlip from 'react-pageflip';
+import FlipPage from 'react-flip-page';
 
-function FlipBook() {
+function FlipBook( {livre, nbPages}) {
     // Récupérer les images du flip book depuis le dossier public/flipbook
-    const images = [...Array(10).keys()].map(index => `/flipbook/image_${index + 1}.png`);
+    const images = [...Array(nbPages+1).keys()].map(index => `/livres/livre-${livre}/image_${index}.png`);
 
     return (
-        <PageFlip width={600} height={400}>
-            {images.map((image, index) => (
-                <div key={index} className="page">
-                    <img src={image} alt={`Page ${index + 1}`} />
-                </div>
-            ))}
-        </PageFlip>
+        <header>
+            <div className="container mx-auto mt-16 md:py-8 md:px-12 lg:px-20 lg:py-12 animate-appear">
+               
+                <PageFlip width={512} height={661}>
+                    {images.map((image, index) => (
+                        <div key={index} className="page">
+                            <img src={image} alt={`Page ${index + 1}`} />
+                        </div>
+                    ))}
+                </PageFlip>
+            </div>
+        </header>
     );
 }
 
