@@ -23,6 +23,7 @@ const ImagesBar = ({ photo }) => {
             src={`/images/${photo.url}`}
             width="500"
             height="200"
+            priority // Add this property
           />
           {/* Make sure the h3 element is properly styled and visible */}
         </div>
