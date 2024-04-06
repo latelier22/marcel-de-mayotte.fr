@@ -15,19 +15,22 @@ const Card = ({ index, card, buttonColor, children, syliusCard, label }) => {
 
   return (
     <header>
-      <div className="block md:mx-10 rounded-lg border-4 border-gold-700 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:bg-neutral-700">
+      <div className=" md:mx-10 rounded-lg border-4 border-gold-700 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:bg-neutral-700">
         <a
           href="#!"
-          className="block relative rounded-t-lg overflow-hidden w-full h-0"
+          className="relative rounded-t-lg  w-full h-0"
           style={{ paddingTop: "100%" }}
         >
+          <div className="flew flex-row justify-center items-start">
           <img
-            className="absolute top-0 left-0 w-full h-full object-cover object-center"
+            className="z-4 top-0 mx-auto w-auto h-full object-fill object-center"
             src={syliusCard ? card.url : `images/${card.url}`}
             data-te-toggle="modal"
             data-te-target={`#myModal2-${index}`}
           />
+          </div>
         </a>
+
 
         <div className="p-6">
           <h5 className="mb-2 text-xl font-medium leading-tight text-neutral-800 dark:text-neutral-50">
