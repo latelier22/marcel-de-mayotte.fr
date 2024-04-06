@@ -32,9 +32,9 @@ const MyPage = ({ params }) => {
       {/* <ImagesBar photos={page.photos} /> */}
       <MyLightBox photos={page.photos} />
 
-      {page.sections.map((section, index) => (
+      {/* {page.sections.map((section, index) => (
         <Section key={index} section={section} />
-      ))}
+      ))} */}
      
 
       <div className="">

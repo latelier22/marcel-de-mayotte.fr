@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { menuItems, site } from "./site";
 import Title from "./TitleLine";
 import Image from 'next/image';
+import Link from "next/link";
 
 const Footer = () => {
   useEffect(() => {
@@ -40,16 +41,19 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 mb-4">
           <div className="mb-6">
             <h5 className="mb-2.5 font-bold text-gold-800 dark:text-gold-800">
-              Qui suis-je?
+              Contact
             </h5>
 
             <ul className="mb-0 list-none text-black dark:text-gold-200">
               {/* <li>{site.societe}</li> */}
               <li>{site.contact}</li>
               <li>{site.adresse}</li>
+              <li>{site.adresse2}</li>
               <li>{site.codePostal} {site.ville}</li>
               {/* <li>{site.telephone}</li> */}
+              <a href="/contact">
               <li>{site.email}</li>
+              </a>
               <br/>
               {/* <li className=" text-gold-800">N° de SIRET {site.SIRET}</li> */}
             </ul>

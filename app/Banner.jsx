@@ -21,8 +21,8 @@ const ImagesBar = ({ photo }) => {
             alt={photo.alt}
             className="picto block w-full h-auto my-12 object-cover object-center"
             src={`/images/${photo.url}`}
-            width="500"
-            height="200"
+            width="2400"
+            height="1564"
             priority // Add this property
           />
           {/* Make sure the h3 element is properly styled and visible */}
