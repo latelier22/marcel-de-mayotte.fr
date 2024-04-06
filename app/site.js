@@ -160,7 +160,7 @@ export const Pages = {
         link: "/livre/5",
         url: "livre-5.png",
         alt: "Mémoires de Marcel Séjour",
-        nbPages :"15",
+        nbPages :"18",
         bookHeight :"600",
         bookWidth :"424"
       },
