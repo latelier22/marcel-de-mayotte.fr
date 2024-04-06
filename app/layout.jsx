@@ -21,7 +21,7 @@ export default function RootLayout({
   // const description = `${siteDescription} | ${pageDescription || ''}`;
 
   return (
-    <html lang="en" className="">
+    <html lang="en" className="dark">
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
