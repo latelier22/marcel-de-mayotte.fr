@@ -50,8 +50,8 @@ export const cards2 = [
 export const sections = [
   {
     title: "Qui suis-je?",
-    body: "Marcel Séjour, né à Angers le 9 juillet 1948. Etudes secondaires à Angers, puis Sup de Co à Nantes. Vit en Australie de 1972 à1987\
-    y découvre à trente ans le dessin et la peinture, et décide alors qu’il ne fera plus que ça. Bref passage en France de 1987 à 1993 ; licence d’Anglais, puis CAPES,\
+    body: "Marcel Séjour, né à Angers le 9 juillet 1948. Etudes secondaires à Angers, puis Sup de Co à Nantes. Vit en Australie de 1972 à1987,\
+    y découvre, à trente ans, le dessin et la peinture, et décide alors qu’il ne fera plus que ça. Bref passage en France de 1987 à 1993 ; licence d’Anglais, puis CAPES,\
       puis en poste à Stenay dans la Meuse. Direction Mayotte, en 1993. Séduction immédiate pour les couleurs, la lumière, les peaux noires et la rusticité.\
       Retour en métropole en 2021 et tentative d’installation pour raisons familiales, et pour préparer une exposition dont Mayotte serait le thème.\
       Echec de la tentative et retour à Mayotte en juin 2022. Ré installation et retour probablement définitifs. Exposition en France prévue pour 2026. Si le Ciel l’entend ainsi.",
