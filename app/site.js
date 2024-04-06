@@ -354,7 +354,7 @@ export const Pages = {
       { url: "galerie-01-34.jpg", alt: "Image 34" },
       { url: "galerie-01-35.jpg", alt: "Image 35" },
       { url: "galerie-01-36.jpg", alt: "Image 36" },
-      { url: "galerie-01-37.jpg", alt: "Image 37" },
+      { url: "galerie-01-37a.jpg", alt: "Image 37" },
       { url: "galerie-01-38.jpg", alt: "Image 38" },
       { url: "galerie-01-39.jpg", alt: "Image 39" },
       { url: "galerie-01-40.jpg", alt: "Image 40" },
