@@ -318,6 +318,94 @@ export const Pages = {
       
     ]
   },
+  blog: {
+    title: "Blog",
+    description: "Les articles des différents blog de Marcel Séjour",
+    photos: [
+      { url: "livre-1.png", alt: "Livre épuisé" },
+      { url: "livre-2.png", alt: "Liberté, Egalité, Magnégné: beau livre d'art" },
+      { url: "livre-3.png", alt: "Mayotte, livret 64 pages, carré" },
+      { url: "livre-4.png", alt: "Une île, deux regards - Marcel Séjour & Nicolas FRAISSE" },
+    ],
+    sections: [
+      {
+        title: "Livre en cours d'écriture : Les mémoires de Marcel Séjour",
+        body: (
+          <ul className="list-disc text-gold-400 pl-4">
+            <li> Préface </li>
+            <li> Chapitre 1 </li>
+            <li> A suivre </li>
+          </ul>
+        ),
+      },
+    ],
+    cards: [
+      {
+        title: "Mémoires d'un artiste Magnégné",
+        text: "En cours d'écriture",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/livre/5",
+        url: "livre-5.png",
+        alt: "Mémoires de Marcel Séjour",
+        nbPages :"18",
+        bookHeight :"600",
+        bookWidth :"424"
+      },
+
+      {
+        title: "Une île, deux regards",
+        text: "Marcel Séjour & Nicolas FRAISSE",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/livre/4",
+        url: "livre-4.png",
+        alt: "Une île, deux regards",
+        nbPages :"76",
+        bookHeight :"600",
+        bookWidth :"476"
+      },
+      {
+        title: "Mayotte",
+        text: "Marcel Séjour- livret 64 pages, carré",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/livre/3",
+        url: "livre-3.png",
+        alt: "Mayotte",
+        nbPages :"64",
+        bookHeight :"600",
+        bookWidth :"600"
+      },
+     
+      {
+        title: "Liberté, Egalité, Magnégné",
+        text: "Marcel Séjour - Beau livre d'art",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/livre/2",
+        url: "livre-2.png",
+        alt: "Liberté, Egalité, Magnégné",
+        nbPages :"417",
+        bookHeight :"661",
+        bookWidth :"512"
+      },
+      {
+        title: "Portraits de Mayotte... et d'Anjouan",
+        text: "Livre épuisé",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/livre/1",
+        url: "livre-1.png",
+        alt: "Livre épuisé",
+        nbPages :"16",
+        bookHeight :"600",
+        bookWidth :"600"
+      },
+      
+      
+    ]
+  },
   "galerie": {
     title: "galerie",
     description: "",
