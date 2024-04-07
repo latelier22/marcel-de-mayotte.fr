@@ -18,8 +18,8 @@ const Navbar = () => {
       data-te-navbar-ref
     >
       <div className="flex w-full  items-center  px-3">
-        <a href="/" className="ml-2">
-          <img src={site.logo.url} className="h-12 w-auto logo" alt="Accueil" />
+        <a href="/" className="md:hidden ml-2">
+          <img src={site.logo.url} className="h-24 w-auto logo" alt="Accueil" />
         </a>
         <div className="flex items-center">
           <button
@@ -31,14 +31,14 @@ const Navbar = () => {
             aria-expanded="false"
             aria-label="Toggle navigation"
           >
-            <span className="[&>svg]:w-5">
+            <span className="[&>svg]:w-10">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth="1.5"
+                strokeWidth="2.5"
                 stroke="currentColor"
-                className="h-7 w-7"
+                className="h-14 w-14"
               >
                 <path
                   strokeLinecap="round"
@@ -51,7 +51,7 @@ const Navbar = () => {
         </div>
 
         <div
-          className="!visible hidden grow basis-[100%] items-center lg:!flex lg:basis-auto mx-auto"
+          className="hidden grow basis-[100%] items-center lg:!flex lg:basis-auto mx-auto"
           id="navbarSupportedContentY"
           data-te-collapse-item
         >
@@ -68,7 +68,7 @@ const Navbar = () => {
                 data-te-nav-item-ref
               >
                 <a
-                  className={`block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                  className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                   href={menuItem.route}
                   data-te-nav-link-ref
                   data-te-ripple-init

@@ -21,6 +21,10 @@ const Page = () => {
       <Navbar />
       <HeaderSimple  siteTitle ={site.title} title={pageTitle}/>
 
+      <div className="font-note">
+      Les articles du blog
+    </div>
+
       <TitleLine  title ={"PAGE 1"}/>
       <ArticleList url="https://liberteegalitemagnegne.fr/index.php/author/marcelsejour/" />
       <TitleLine  title ={"PAGE 2"}/>

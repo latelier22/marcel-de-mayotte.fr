@@ -20,7 +20,7 @@ const Page = ({ params }) => {
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
-      <div className="container mx-auto py-2 md:py-8 md:px-12 lg:px-20 lg:py-12 animate-appear">
+      <div className="container w-full mx-0 md:mx-auto py-2 md:py-8 md:px-12 lg:px-20 lg:py-12 animate-appear">
         <FlipBook
           livre={pageSlug}
           nbPages={nbPages}

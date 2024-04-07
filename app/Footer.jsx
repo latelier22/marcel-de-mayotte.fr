@@ -40,11 +40,11 @@ const Footer = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 mb-4">
           <div className="mb-6">
-            <h5 className="mb-2.5 font-bold text-gold-800 dark:text-gold-800">
+            <h5 className="font-note mb-2.5 font-bold text-gold-800 dark:text-gold-800">
               Contact
             </h5>
 
-            <ul className="mb-0 list-none text-black dark:text-gold-200">
+            <ul className="font-lien mb-0 list-none text-black dark:text-gold-200">
               {/* <li>{site.societe}</li> */}
               <li>{site.contact}</li>
               <li>{site.adresse}</li>
@@ -67,7 +67,7 @@ const Footer = () => {
             >
               <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" />
             </svg>
-            <p className="pl-4">La page facebook de Marcel Séjour !</p>
+            <p className="font-lien pl-4">La page facebook de Marcel Séjour !</p>
           </a>
           
         </div>
@@ -81,11 +81,11 @@ const Footer = () => {
           </div>
 
           <div className="mb-6">
-            <h5 className="mb-2.5 font-bold  text-gold-800  dark:text-gold-800">
+            <h5 className="font-note mb-2.5 font-bold  text-gold-800  dark:text-gold-800">
               Nos services
             </h5>
 
-            <ul className="mb-0 list-none">
+            <ul className="font-lien mb-0 list-none">
               {menuItems.map((menuItem, index) => (
                 <li key={index}>
                   <a

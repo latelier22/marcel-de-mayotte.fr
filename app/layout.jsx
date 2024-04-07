@@ -28,8 +28,11 @@ export default function RootLayout({
         <title>{title}</title>
         <meta name="description" content={description} />
         {/* Add other meta tags if needed */}
+        <link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin/>
+        <link href="https://fonts.googleapis.com/css2?family=BioRhyme:wght@200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet"/>
       </head>
-      <body className={`${inter.className} bg-white dark:bg-neutral-900`}>
+      <body className="font-texte bg-white dark:bg-neutral-900">
         {children}
       </body>
     </html>

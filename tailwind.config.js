@@ -1,4 +1,7 @@
 // TW Elements is free under AGPL, with a commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com
+
+const { Linefont } = require('next/font/google');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -12,6 +15,11 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        texte: ['"Playfair Display"'],
+        note: ['"BioRhyme"'],
+        lien: ['"Montserrat"']
+      },
       colors: {
         gold: {
           50: '#FFFAF0',

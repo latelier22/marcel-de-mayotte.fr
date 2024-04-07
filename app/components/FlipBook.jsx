@@ -18,7 +18,7 @@ function FlipBook( {livre, nbPages,bookWidth,bookHeight}) {
 
     return (
         <header>
-            <div className="container flex- flex-roww mx-auto mt-16 md:py-8 md:px-12 lg:px-20 lg:py-12 animate-appear rounded-3xl bg-black">
+            <div className="container flex flex-roww mx-auto mt-16 md:py-8 md:px-12 lg:px-20 lg:py-12 animate-appear rounded-3xl bg-black">
                
                 <PageFlip className="mx-auto" width={bookWidth} height={bookHeight}>
                     {images.map((image, index) => (
