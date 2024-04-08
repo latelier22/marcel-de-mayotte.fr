@@ -12,6 +12,8 @@ import MyLightBox from "../MyLightBox";
 import getImages  from "../components/getImages"
 import getTags from "../components/getTags"
 import Tags from "../components/Tags"
+import MyCatalog from "../MyCatalog"
+
 
 async function Page  () {
   const listePhotos = await getImages();
@@ -33,20 +35,17 @@ async function Page  () {
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
-      {/* <HeaderSimple  siteTitle ={site.title} title={pageTitle}/> */}
+      <div className="pt-24 pl-8 ml-8 grid grid-cols-[auto,1fr] gap-8">
+        {/* Tags sur la gauche avec une marge */}
+        <div className="flex mt-36 flex-col fixed top-0 h-screen max-h-full overflow-y-auto">
+          <Tags tags={listeTags} />
+        </div>
 
-      <div className="pt-24 grid grid-cols-[auto,1fr] gap-8">
-  {/* Tags sur la gauche avec une marge */}
-  <div className="flex flex-col justify-start h-full">
-    <Tags tags={listeTags} />
-  </div>
-
-  {/* Images à droite */}
-  <div>
-    <MyLightBox photos={listePhotos} />
-  </div>
-</div>
-
+        {/* Images à droite */}
+        <div className="ml-20">
+          <MyCatalog photos={listePhotos} />
+        </div>
+      </div>
       <Footer />
     </RootLayout>
   );

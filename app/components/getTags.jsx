@@ -1,3 +1,5 @@
+import getSlug from "./getSlug"
+
 async function getTags(tableauPhotos) {
   const tagsCount = {};
 
@@ -13,7 +15,8 @@ async function getTags(tableauPhotos) {
   // Créer un tableau d'objets avec le nom du tag et le nombre de photos
   const tagsArray = Object.keys(tagsCount).map(tag => ({
     name: tag,
-    count: tagsCount[tag]
+    count: tagsCount[tag],
+    slug: getSlug(tag)
   }));
 
   // Trier le tableau d'objets par ordre décroissant du nombre de photos

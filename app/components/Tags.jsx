@@ -1,5 +1,8 @@
 "use client";
 
+
+import Link from "next/link";
+
 const Tags = ({tags}) => {
 
     const total = tags[0].count
@@ -11,7 +14,9 @@ const Tags = ({tags}) => {
         <h2>Liste des tags :</h2>
         <ul>
           {tags.map((tag, index) => (
-            <li key={index}>{tag.name} ({tag.count} / {total})</li>
+             <Link href={`/catalogue/${tag.slug}`} key={index}>
+            <li>{tag.name} ({tag.count} / {total})</li>
+            </Link>
           ))}
         </ul>
       </div>
