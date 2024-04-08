@@ -27,7 +27,9 @@ async function getImages() {
         const tagsMatch = nomFichier.match(/TAG(.*?)\.jpg/); // Capturer tout entre "TAG" et ".jpg"
         const tags = tagsMatch ? tagsMatch[1].split(',').map(tag => tag.trim()) : null;
 
-        
+        // Créer l'attribut alt à partir des tags
+        const alt = tags ? tags.join(', ') : 'Image sans description';
+
 
         return {
             numero,
@@ -35,6 +37,7 @@ async function getImages() {
             tags,
             nomFichierComplet: cheminRelatif,
             url: cheminRelatif,
+            alt: alt
         };
     }).filter(image => image.tags !== null); // Filtrer les images qui ont des tags définis
 
