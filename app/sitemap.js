@@ -4,7 +4,7 @@
 const URL = "https://www.marcel-de-mayotte.fr"
 
 // Vos routes statiques
-const SITE_ROUTES = ["/", "/contact", "/galerie", "/livre","/video"]
+const SITE_ROUTES = ["/", "/contact", "/galerie", "/livre","/video" ,"/blog", "/catalogue" ]
 
 // Vos routes dynamiques
 // Ici, on utilisera plus souvent le résultat d'un call API
