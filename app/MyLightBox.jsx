@@ -1,6 +1,7 @@
 // TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com 
 "use client";
 import { useEffect } from "react";
+import Image from "next/image";
 
 const MyLightBox = ({ photos }) => {
   useEffect(() => {
@@ -24,13 +25,18 @@ const MyLightBox = ({ photos }) => {
         key={index}
         className="flex mx-auto w-full h-auto lg:w-1/5 "
       >
-        <img
-          src={`images/${photo.url}`}
-          data-te-img={`images/${photo.url}`}
-          alt={photo.alt}
+        <Image
+          src={`/images/${photo.url}`}
+          alt= {photo.tags[0]}
+          data-te-img={`/images/${photo.url}`}
           className={`mb-5 w-72 h-72  object-cover object-center cursor-zoom-in hover:object-contain data-[te-lightbox-disabled]:cursor-auto`}
-          
+          loading="lazy"
+          width="300"
+          height="300"
         />
+
+         
+    
       
       </div>
     ))}

@@ -498,5 +498,29 @@ export const Pages = {
     ],
     cards: [],
   },
+ catalogue: {
+    title: "Catalogue complet de Marcel Séjour",
+    description: "Toutes les oeuvres, dessins et esquisses de Marcel SEJOUR, à Mayotte, Comores, en Anjour et ailleurs....",
+    photos: [
+      { url: "", alt: "" },
+      
+    ],
+    sections: [
+      {
+        title: "Catalogue complet de Marcel Séjour",
+        body: (
+          <ul className="list-disc text-gold-400 pl-4">
+            <li> </li>
+            <li>  </li>
+            <li>  </li>
+          </ul>
+        ),
+      },
+    ],
+    cards: [
+      
+      
+    ]
+  },
 
 };
