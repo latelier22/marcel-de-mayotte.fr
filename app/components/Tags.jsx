@@ -5,7 +5,7 @@ import Link from "next/link";
 
 const Tags = ({tags}) => {
 
-    const total = tags[0].count
+    const total = 1700;
   
     return (
      

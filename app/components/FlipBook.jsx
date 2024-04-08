@@ -14,7 +14,7 @@ function FlipBook( {livre, nbPages,bookWidth,bookHeight}) {
     const images = [...Array(nbPages+1).keys()].map(index => `/livres/livre-${livre}/image_${index}.png`);
 
     console.log ( nbPages,bookWidth,bookHeight)
-    console.log(images)
+    // console.log(images)
 
     return (
         <header>

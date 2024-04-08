@@ -24,9 +24,9 @@ async function Page  ({ params }) {
   const pageTitle = page.title;
   const pageDescription = page.description;
 
-  console.log(listePhotos);
+  // console.log(listePhotos);
   const listeTags = await getTags(listePhotos)
-  console.log(listeTags)
+  // console.log(listeTags)
 
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
