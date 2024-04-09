@@ -19,6 +19,7 @@ export const menuItems = [
   { label: "Accueil", route: "/" },
   // { label: "Actualités", route: "/actualites" },
   { label: "Galerie", route: "/galerie" },
+  { label: "Catalogue complet", route: "/catalogue" },
   // { label: "Expositions", route: "/expositions" },
   // { label: "Produits dérivés", route: "/boutique" },
   { label: "Livres", route: "/livre" },
