@@ -8,26 +8,34 @@ import Tags from "../../components/Tags"
 import MyCatalog from "../../MyCatalog"
 import { Pages, site } from "../../site";
 import getImagesbyTag  from "../../components/getImagesbyTag"
+import getImages from "../../components/getImages";
 
 
 async function Page  ({ params }) {
   // const searchParams = useSearchParams();
+  const page= Pages["catalogue"];
+  const pageTitle = page.title;
+  const pageDescription = page.description;
+
   const limit =200;
   const tagSlug = params.tagSlug;
   // const nbPages = parseInt(searchParams.get("n"), 10); // Assurez-vous de spécifier la base 10 pour la conversion en nombre entier
   // const bookWidth = parseInt(searchParams.get("w"), 10); // Utilisez parseInt pour convertir la largeur en nombre entier
   // const bookHeight = parseInt(searchParams.get("h"), 10); // Utilisez parseInt pour convertir la hauteur en nombre entier
 
-  const listePhotos = await getImagesbyTag(tagSlug, limit);
-
-  const page= Pages["catalogue"];
-
-  const pageTitle = page.title;
-  const pageDescription = page.description;
+  const allPhotos = await getImages();
+  const allTags = await getTags(allPhotos);
+  const listePhotos = await getImagesbyTag(tagSlug);
+  const listeTags = await getTags(listePhotos)
+  
+// Marquez les tags présents dans listeTags
+allTags.forEach(tag => {
+  tag.present = listeTags.some(listeTag => listeTag.name === tag.name);
+});
 
   // console.log(listePhotos);
-  const listeTags = await getTags(listePhotos)
-  // console.log(listeTags)
+ 
+   console.log(allTags)
 
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
@@ -35,7 +43,7 @@ async function Page  ({ params }) {
       <div className="pt-24 pl-8 ml-8 grid grid-cols-[auto,1fr] gap-8">
         {/* Tags sur la gauche avec une marge */}
         <div className="flex mt-36 flex-col fixed top-0 h-screen max-h-full overflow-y-auto">
-          <Tags tags={listeTags} />
+          <Tags tags={allTags} />
         </div>
 
         {/* Images à droite */}
