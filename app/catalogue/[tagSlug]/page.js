@@ -12,12 +12,13 @@ import getImagesbyTag  from "../../components/getImagesbyTag"
 
 async function Page  ({ params }) {
   // const searchParams = useSearchParams();
+  const limit =10;
   const tagSlug = params.tagSlug;
   // const nbPages = parseInt(searchParams.get("n"), 10); // Assurez-vous de spécifier la base 10 pour la conversion en nombre entier
   // const bookWidth = parseInt(searchParams.get("w"), 10); // Utilisez parseInt pour convertir la largeur en nombre entier
   // const bookHeight = parseInt(searchParams.get("h"), 10); // Utilisez parseInt pour convertir la hauteur en nombre entier
 
-  const listePhotos = await getImagesbyTag(tagSlug);
+  const listePhotos = await getImagesbyTag(tagSlug, limit);
 
   const page= Pages["catalogue"];
 

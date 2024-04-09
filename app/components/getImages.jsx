@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import path from 'path';
 
 
-async function getImages() {
+async function getImages(limit = 64) {
     const serverUrl = 'https:/marcel-de-mayotte.latelier22.fr'
     const url = `${serverUrl}/images/catalogue/MINI`;
     const response = await fetch(url);
@@ -36,8 +36,10 @@ async function getImages() {
             alt: alt
         };
     });
+
+
     
-    return tableauPhotos;
+    return tableauPhotos.slice(0, limit);;
     
  
  
