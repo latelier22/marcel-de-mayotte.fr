@@ -7,31 +7,26 @@ async function getImages() {
     const url = `${serverUrl}/images/catalogue/MINI`;
     const response = await fetch(url);
     const data = await response.json();
-    // console.log(data);
-
-    // const entries = Object.entries(data);
-// console.log(entries)
-    // Traitement des données récupérées
-    const tableauPhotos = data.map(( name) => {
+ 
+    const tableauPhotos = data.map((name) => {
         const nomFichier = name;
         const cheminRelatif = `catalogue/MINI/${nomFichier}`;
-
+    
         // Extraire le numéro
-        const numeroMatch = nomFichier.match(/-CAT(\d{4})-/);
-        const numero = numeroMatch ? parseInt(numeroMatch[1]) : null;
-
+        const numeroIndex = nomFichier.indexOf('-CAT');
+        const numero = numeroIndex !== -1 ? parseInt(nomFichier.slice(numeroIndex + 4, numeroIndex + 8)) : null;
+    
         // Extraire les dimensions
-        const dimensionsMatch = nomFichier.match(/DIM(\d+ x \d+)/);
-        const dimensions = dimensionsMatch ? dimensionsMatch[1].split(' x ').map(dim => parseInt(dim)) : null;
-
+        const dimensionsIndex = nomFichier.indexOf('DIM');
+        const dimensions = dimensionsIndex !== -1 ? nomFichier.slice(dimensionsIndex + 3, dimensionsIndex + 13).split(' x ').map(dim => parseInt(dim)) : null;
+    
         // Extraire les tags
-        const tagsMatch = nomFichier.match(/TAG(.*?)\.jpg/); // Capturer tout entre "TAG" et ".jpg"
-        const tags = tagsMatch ? tagsMatch[1].split(',').map(tag => tag.trim()) : null;
-
+        const tagsIndex = nomFichier.indexOf('TAG');
+        const tags = tagsIndex !== -1 ? nomFichier.slice(tagsIndex + 3, -4).split(',').map(tag => tag.trim()) : null;
+    
         // Créer l'attribut alt à partir des tags
         const alt = tags ? tags.join(', ') : 'Image sans description';
-
-
+    
         return {
             numero,
             dimensions: dimensions ? { largeur: dimensions[0], hauteur: dimensions[1] } : null,
@@ -40,9 +35,49 @@ async function getImages() {
             url: cheminRelatif,
             alt: alt
         };
-    }); // Filtrer les images qui ont des tags définis
-
+    });
+    
     return tableauPhotos;
+    
+ 
+ 
+ 
+    // console.log(data);
+
+    // const entries = Object.entries(data);
+// console.log(entries)
+    // Traitement des données récupérées
+    // const tableauPhotos = data.map(( name) => {
+    //     const nomFichier = name;
+    //     const cheminRelatif = `catalogue/MINI/${nomFichier}`;
+
+    //     // Extraire le numéro
+    //     const numeroMatch = nomFichier.match(/-CAT(\d{4})-/);
+    //     const numero = numeroMatch ? parseInt(numeroMatch[1]) : null;
+
+    //     // Extraire les dimensions
+    //     const dimensionsMatch = nomFichier.match(/DIM(\d+ x \d+)/);
+    //     const dimensions = dimensionsMatch ? dimensionsMatch[1].split(' x ').map(dim => parseInt(dim)) : null;
+
+    //     // Extraire les tags
+    //     const tagsMatch = nomFichier.match(/TAG(.*?)\.jpg/); // Capturer tout entre "TAG" et ".jpg"
+    //     const tags = tagsMatch ? tagsMatch[1].split(',').map(tag => tag.trim()) : null;
+
+    //     // Créer l'attribut alt à partir des tags
+    //     const alt = tags ? tags.join(', ') : 'Image sans description';
+
+
+    //     return {
+    //         numero,
+    //         dimensions: dimensions ? { largeur: dimensions[0], hauteur: dimensions[1] } : null,
+    //         tags,
+    //         nomFichierComplet: cheminRelatif,
+    //         url: cheminRelatif,
+    //         alt: alt
+    //     };
+    // }); // Filtrer les images qui ont des tags définis
+
+    // return tableauPhotos;
 }
 
 export default getImages;
