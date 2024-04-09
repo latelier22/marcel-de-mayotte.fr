@@ -7,11 +7,12 @@ async function getImages() {
     const url = `${serverUrl}/images/catalogue/MINI`;
     const response = await fetch(url);
     const data = await response.json();
+    // console.log(data);
 
-    const entries = Object.entries(data);
-
+    // const entries = Object.entries(data);
+// console.log(entries)
     // Traitement des données récupérées
-    const tableauPhotos = entries.map(([key, name]) => {
+    const tableauPhotos = data.map(( name) => {
         const nomFichier = name;
         const cheminRelatif = `catalogue/MINI/${nomFichier}`;
 
@@ -39,7 +40,7 @@ async function getImages() {
             url: cheminRelatif,
             alt: alt
         };
-    }).filter(image => image.tags !== null); // Filtrer les images qui ont des tags définis
+    }); // Filtrer les images qui ont des tags définis
 
     return tableauPhotos;
 }
