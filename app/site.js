@@ -1,3 +1,5 @@
+import { Vesper_Libre } from "next/font/google";
+
 export const site = {
   title: "Liberté Egalité Magnégné",
   description: "Artiste peintre de Mayotte - Marcel Séjour - 0639676875",
@@ -12,7 +14,8 @@ export const site = {
   email: "contact@marcel-de-mayotte.fr",
   logo: { url: "/images/logo-barre-du-haut.png", alt: "logo Marcel Séjour" },
   Logo: { url: "/images/logo-banniere.png", alt: "logo logo Marcel Séjour" },
-  facebook :"https://www.facebook.com/profile.php?id=100010085468800"
+  facebook :"https://www.facebook.com/profile.php?id=100010085468800",
+  vpsServer :"https://marcel-de-mayotte.latelier22.fr"
 };
 
 export const menuItems = [

@@ -54,7 +54,7 @@ async function Page  () {
         {/* Images à droite */}
         <div className="col-span-5 flex justify-center">
           {/* <MyCatalog photos={listePhotos} /> */}
-          <Cards className="mb-24" cards = {tagCards} label={"PARCOURIR"} />
+          <Cards className="mb-24" cards = {tagCards} label={"PARCOURIR"} syliusCard={true}/>
         </div>
       </div>
       <Footer />
