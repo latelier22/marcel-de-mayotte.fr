@@ -45,14 +45,17 @@ async function Page  () {
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
-      <div className="pt-24 pl-8 ml-8 grid grid-cols-6 gap-8">
+      <div className="pt-24 pl-8 ml-8 grid grid-cols-12 gap-8">
         {/* Tags sur la gauche avec une marge */}
         <div className="flex mt-36 flex-col fixed top-0 h-screen max-h-full overflow-y-auto col-span-1">
           <Tags tags={listeTags} />
         </div>
+        <div className=" col-span-2">
+          
+        </div>
 
         {/* Images à droite */}
-        <div className="col-span-5 flex justify-center">
+        <div className="col-span-9 flex justify-center">
           {/* <MyCatalog photos={listePhotos} /> */}
           <Cards className="mb-24" cards = {tagCards} label={"PARCOURIR"} syliusCard={true}/>
         </div>
