@@ -17,7 +17,12 @@ async function getTags(tableauPhotos) {
   tableauPhotos.forEach(photo => {
     if (photo.tags) {
       photo.tags.forEach(tag => {
-        tagsCount[tag] = (tagsCount[tag] || 0) + 1;
+        // Convertir le tag en minuscules pour éviter les cas de "NU" ou "Nu" ou "nU"
+        const lowercaseTag = tag.toLowerCase();
+        // Exclure les tags "nu" ou "NU"
+        if (lowercaseTag !== "nu") {
+          tagsCount[tag] = (tagsCount[tag] || 0) + 1;
+        }
       });
     }
   });
@@ -45,3 +50,4 @@ async function getTags(tableauPhotos) {
 }
 
 export default getTags;
+
