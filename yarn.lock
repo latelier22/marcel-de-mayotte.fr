@@ -2549,6 +2549,11 @@ react-pageflip@^2.0.3:
   dependencies:
     page-flip latest
 
+react-photo-album@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.npmjs.org/react-photo-album/-/react-photo-album-2.3.1.tgz"
+  integrity sha512-c7ofDx2DAbQa9AW9wUWOBX9zUKf/QjvdQK+fPNKEiKprks/n8t4c2viyBZ6EWpQLFLU0ad3yVBTgFvxEZ46/Iw==
+
 react-side-effect@^2.1.0, react-side-effect@^2.1.2:
   version "2.1.2"
   resolved "https://registry.npmjs.org/react-side-effect/-/react-side-effect-2.1.2.tgz"
