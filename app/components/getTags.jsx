@@ -44,7 +44,7 @@ async function getTags(tableauPhotos) {
   // Trier le tableau d'objets par ordre décroissant du nombre de photos
   tagsArray.sort((a, b) => b.count - a.count);
 
-  console.log(tagsArray)
+  // console.log(tagsArray)
 
   return tagsArray;
 }

@@ -23,7 +23,7 @@ async function Page  () {
   const pageTitle = page.title;
   const pageDescription = page.description;
 
-  // console.log(listePhotos);
+  
 
   const listeTags = await getTags(listePhotos)
 

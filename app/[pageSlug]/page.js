@@ -8,7 +8,7 @@ import Section from "../Section";
 import Cards from "../Cards";
 import MyLightBox from "../MyLightBox";
 import { Pages, site } from "../site";
-import { permanentRedirect } from 'next/navigation'
+import { permanentRedirect } from 'next/navigation';
 
 const MyPage = ({ params }) => {
   const pageSlug = params.pageSlug;
