@@ -6,28 +6,27 @@ import RootLayout from "../layout";
 import Cards from "../Cards";
 import HeaderSimple from "../headerSimple";
 import { Pages, site } from "../site";
-import ArticleList from "../components/getPostsSlugs";
-import TitleLine from "../TitleLine"
-import MyLightBox from "../MyLightBox";
-import getImages  from "../components/getImages"
+
+import getImages from "../components/getImages"
 import getTags from "../components/getTags"
 import Tags from "../components/Tags"
-import MyCatalog from "../MyCatalog"
+import listePhotos from "../components/catalogue.json"
+
+import Gallery from "../components/album/Gallery"
+
+import styles from '../page.module.css'; // Importez votre fichier CSS
+
+async function Page() {
 
 
-async function Page  () {
-  const listePhotos = await getImages();
 
-  const page= Pages["catalogue"];
-
+  const page = Pages["catalogue"];
   const pageTitle = page.title;
   const pageDescription = page.description;
 
-  
-
+  const listePhotos = await getImages();
   const listeTags = await getTags(listePhotos)
-
-  // console.log(listeTags)
+  console.log(listeTags);
 
   const tagCards = listeTags.map(tag => ({
     title: tag.name,
@@ -39,27 +38,37 @@ async function Page  () {
     alt: tag.name, // Remplacez ceci par la description de l'image associée au tag si nécessaire
   }));
 
-  
-
+  const photos = listePhotos.map((photo) => {
+    // Vérifier si photo.dimensions est défini et n'est pas null
+    if (photo.dimensions && photo.dimensions.length >= 2) {
+      return {
+        "src": `${site.vpsServer}/images/${photo.url}`,
+        "width": photo.dimensions[0],
+        "height": photo.dimensions[1]
+      };
+    } else {
+      // Gérer le cas où photo.dimensions est null ou n'a pas au moins deux éléments
+      // Par exemple, vous pouvez retourner un objet par défaut ou ignorer cette photo
+      return {
+        "src": `${site.vpsServer}/images/${photo.url}`,
+        "width": 0, // Valeur par défaut pour la largeur
+        "height": 0 // Valeur par défaut pour la hauteur
+      };
+    }
+  });
 
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
-      <div className="pt-24 pl-8 ml-8 grid grid-cols-12 gap-8">
-        {/* Tags sur la gauche avec une marge */}
-        <div className="flex mt-36 flex-col fixed top-0 h-screen max-h-full overflow-y-auto col-span-1">
-          <Tags tags={listeTags} />
-        </div>
-        <div className=" col-span-2">
-          
-        </div>
+      <div className="grid flexflex-row grid-cols-12 justify-center items-start"
+      style={{scrollbarWidth: 'thin', scrollbarColor: 'brown black'}} >  
+        <div className="col-span-2 pt-16 px-16 sticky  text-white bg-yellow-200  top-0 h-screen max-h-full overflow-y-auto"> <Tags className="text-center " tags={listeTags}/>  </div>
 
-        {/* Images à droite */}
-        <div className="col-span-9 flex justify-center">
-          {/* <MyCatalog photos={listePhotos} /> */}
-          <Cards className="mb-24" cards = {tagCards} label={"PARCOURIR"} syliusCard={true}/>
+        <div className="col-span-10 ">
+          <Gallery photos={photos} mysize={400}/>
         </div>
       </div>
+
       <Footer />
     </RootLayout>
   );

@@ -1,14 +1,17 @@
-import { useSearchParams } from "next/navigation";
+
 import Navbar from "../../NavBar";
 import Footer from "../../Footer";
 import RootLayout from "../../layout";
 
+import { Pages, site } from "../../site";
+
+import getImages from "../../components/getImages"
 import getTags from "../../components/getTags"
 import Tags from "../../components/Tags"
-import MyCatalog from "../../MyCatalog"
-import { Pages, site } from "../../site";
 import getImagesbyTag  from "../../components/getImagesbyTag"
-import getImages from "../../components/getImages";
+import listePhotos from "../../components/catalogue.json"
+
+import Gallery from "../../components/album/Gallery"
 
 
 async function Page  ({ params }) {
@@ -17,11 +20,8 @@ async function Page  ({ params }) {
   const pageTitle = page.title;
   const pageDescription = page.description;
 
-  const limit =200;
   const tagSlug = params.tagSlug;
-  // const nbPages = parseInt(searchParams.get("n"), 10); // Assurez-vous de spécifier la base 10 pour la conversion en nombre entier
-  // const bookWidth = parseInt(searchParams.get("w"), 10); // Utilisez parseInt pour convertir la largeur en nombre entier
-  // const bookHeight = parseInt(searchParams.get("h"), 10); // Utilisez parseInt pour convertir la hauteur en nombre entier
+
 
   const allPhotos = await getImages();
   const allTags = await getTags(allPhotos);
@@ -33,24 +33,48 @@ allTags.forEach(tag => {
   tag.present = listeTags.some(listeTag => listeTag.name === tag.name);
 });
 
-  // console.log(listePhotos);
+
+
+  console.log(listePhotos.slice(0,9));
+
+  const photos = listePhotos.map((photo) => {
+    // Vérifier si photo.dimensions est défini et n'est pas null
+    if (photo.dimensions && photo.dimensions.length >= 2) {
+      return {
+        "src": `/images/${photo.url}`,
+        "width": photo.dimensions[0],
+        "height": photo.dimensions[1]
+      };
+    } else {
+      // Gérer le cas où photo.dimensions est null ou n'a pas au moins deux éléments
+      // Par exemple, vous pouvez retourner un objet par défaut ou ignorer cette photo
+      return {
+        "src": `/images/${photo.url}`,
+        "width": 0, // Valeur par défaut pour la largeur
+        "height": 0 // Valeur par défaut pour la hauteur
+      };
+    }
+  });
+
+  console.log(photos);
+
+
+
  
   //  console.log(allTags)
 
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
-      <div className="pt-24 pl-8 ml-8 grid grid-cols-[auto,1fr] gap-8">
-        {/* Tags sur la gauche avec une marge */}
-        <div className="flex mt-36 flex-col fixed top-0 h-screen max-h-full overflow-y-auto">
-          <Tags tags={allTags} />
-        </div>
+      <div className="grid flexflex-row grid-cols-12 justify-center items-start"
+      style={{scrollbarWidth: 'thin', scrollbarColor: 'brown black'}} >  
+        <div className="col-span-2 pt-16 px-16 sticky  text-white bg-yellow-200  top-0 h-screen max-h-full overflow-y-auto"> <Tags className="text-center " tags={allTags}/>  </div>
 
-        {/* Images à droite */}
-        <div className="ml-20">
-          <MyCatalog photos={listePhotos} />
+        <div className="col-span-10 ">
+          <Gallery photos={photos} mysize={400}/>
         </div>
       </div>
+
       <Footer />
     </RootLayout>
   );

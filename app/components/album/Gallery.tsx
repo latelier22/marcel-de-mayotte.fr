@@ -16,7 +16,7 @@ import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 
-const Gallery = ({ photos }) => {
+const Gallery = ({ photos, mysize }) => {
   const [index, setIndex] = useState(-1);
   return (
     <div className="-mt-96">

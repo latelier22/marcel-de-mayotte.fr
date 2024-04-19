@@ -20,9 +20,12 @@ async function getTags(tableauPhotos) {
         // Convertir le tag en minuscules pour éviter les cas de "NU" ou "Nu" ou "nU"
         const lowercaseTag = tag.toLowerCase();
         // Exclure les tags "nu" ou "NU"
-        if (lowercaseTag !== "nu") {
+        // if (lowercaseTag !== "nu") {
+        //   tagsCount[tag] = (tagsCount[tag] || 0) + 1;
+        // }
+      
           tagsCount[tag] = (tagsCount[tag] || 0) + 1;
-        }
+        
       });
     }
   });
