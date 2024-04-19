@@ -19,8 +19,16 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 const Gallery = ({ photos }) => {
   const [index, setIndex] = useState(-1);
   return (
-    <>
-       <PhotoAlbum photos={photos} layout="rows" targetRowHeight={350} onClick={({ index }) => setIndex(index)} />
+    <div className="-mt-96">
+      
+      <PhotoAlbum 
+       
+        photos={photos}
+        spacing={50}
+        padding={20}
+        layout="rows"
+        targetRowHeight={350}
+        onClick={({ index }) => setIndex(index)} />
 
       <Lightbox
         slides={photos}
@@ -32,7 +40,7 @@ const Gallery = ({ photos }) => {
         plugins={[Fullscreen, Slideshow, Thumbnails
         ]}
       />
-    </>
+    </div>
 
   );
 }
