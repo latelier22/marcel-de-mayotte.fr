@@ -28,7 +28,9 @@ const Gallery = ({ photos }) => {
         index={index}
         close={() => setIndex(-1)}
         // enable optional lightbox plugins
-        plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
+        // plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
+        plugins={[Fullscreen, Slideshow, Thumbnails
+        ]}
       />
     </>
 
