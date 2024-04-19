@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "PORT=3006 next dev",
     "build": "next build",
-    "start": "PORT=3976 next start",
+    "start": "PORT=3977 next start",
     "lint": "next lint"
   },
   "dependencies": {
@@ -32,7 +32,8 @@
     "sharp": "^0.33.3",
     "slick-carousel": "^1.8.1",
     "slugify": "^1.6.6",
-    "tw-elements": "^1.1.0"
+    "tw-elements": "^1.1.0",
+    "yet-another-react-lightbox": "^3.17.3"
   },
   "devDependencies": {
     "@types/node": "20.11.8",
