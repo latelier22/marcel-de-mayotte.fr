@@ -6,18 +6,14 @@ import RootLayout from "../layout";
 import Cards from "../Cards";
 import HeaderSimple from "../headerSimple";
 import { Pages, site } from "../site";
-
 import getImages from "../components/getImages"
 import getTags from "../components/getTags"
 import Tags from "../components/Tags"
-import listePhotos from "../components/catalogue.json"
-
 import Gallery from "../components/album/Gallery"
 
 import styles from '../page.module.css'; // Importez votre fichier CSS
 
 async function Page() {
-
 
 
   const page = Pages["catalogue"];
@@ -60,12 +56,13 @@ async function Page() {
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
+
       <div className="grid flexflex-row grid-cols-12 justify-center items-start"
       style={{scrollbarWidth: 'thin', scrollbarColor: 'brown black'}} >  
         <div className="col-span-2 pt-16 px-16 sticky  text-white bg-yellow-200  top-0 h-screen max-h-full overflow-y-auto"> <Tags className="text-center " tags={listeTags}/>  </div>
 
-        <div className="col-span-10 ">
-          <Gallery photos={photos} mysize={400}/>
+        <div className="col-span-10  mt-28">
+          <Gallery photos={photos} />
         </div>
       </div>
 

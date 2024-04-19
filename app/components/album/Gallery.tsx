@@ -19,13 +19,13 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 const Gallery = ({ photos, mysize }) => {
   const [index, setIndex] = useState(-1);
   return (
-    <div className="-mt-96">
+    <div className="">
       
       <PhotoAlbum 
        
         photos={photos}
         spacing={50}
-        padding={20}
+        // padding={20}
         layout="rows"
         targetRowHeight={350}
         onClick={({ index }) => setIndex(index)} />
