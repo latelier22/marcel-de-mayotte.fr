@@ -25,16 +25,6 @@
     "height": 768
   },
   {
-    "src": "/images/livre-1.png",
-    "width": 425,
-    "height": 567
-  },
-  {
-    "src": "/images/livre-3.png",
-    "width": 708,
-    "height": 708
-  },
-  {
     "src": "/images/galerie-01-2.jpg",
     "width": 768,
     "height": 931
@@ -63,11 +53,6 @@
     "src": "/images/galerie-01-55.jpg",
     "width": 1210,
     "height": 768
-  },
-  {
-    "src": "/images/livre-2.png",
-    "width": 425,
-    "height": 551
   },
   {
     "src": "/images/galerie-01-51.jpg",
@@ -100,11 +85,6 @@
     "height": 1366
   },
   {
-    "src": "/images/livre-5.png",
-    "width": 425,
-    "height": 551
-  },
-  {
     "src": "/images/galerie-01-46.jpg",
     "width": 768,
     "height": 1007
@@ -135,19 +115,9 @@
     "height": 932
   },
   {
-    "src": "/images/livre-4.png",
-    "width": 472,
-    "height": 600
-  },
-  {
     "src": "/images/galerie-01-20.jpg",
     "width": 977,
     "height": 768
-  },
-  {
-    "src": "/images/video-5.png",
-    "width": 600,
-    "height": 338
   },
   {
     "src": "/images/galerie-01-34.jpg",
@@ -245,11 +215,6 @@
     "height": 1176
   },
   {
-    "src": "/images/video-1.png",
-    "width": 600,
-    "height": 338
-  },
-  {
     "src": "/images/galerie-01-24.jpg",
     "width": 768,
     "height": 770
@@ -268,11 +233,6 @@
     "src": "/images/galerie-01-29.jpg",
     "width": 768,
     "height": 997
-  },
-  {
-    "src": "/images/logo-barre-du-haut.png",
-    "width": 130,
-    "height": 146
   },
   {
     "src": "/images/galerie-01-28.jpg",
@@ -325,19 +285,9 @@
     "height": 1366
   },
   {
-    "src": "/images/video-8.png",
-    "width": 640,
-    "height": 360
-  },
-  {
     "src": "/images/galerie-01-39.jpg",
     "width": 768,
     "height": 1009
-  },
-  {
-    "src": "/images/voule-sur-la-plage-sd.jpg",
-    "width": 1920,
-    "height": 1080
   },
   {
     "src": "/images/galerie-01-62.jpg",
@@ -358,11 +308,6 @@
     "src": "/images/galerie-01-63.jpg",
     "width": 1366,
     "height": 577
-  },
-  {
-    "src": "/images/voule-sur-la-plage.jpg",
-    "width": 2400,
-    "height": 1564
   },
   {
     "src": "/images/galerie-01-61.jpg",
@@ -413,10 +358,5 @@
     "src": "/images/galerie-01-66.jpg",
     "width": 1232,
     "height": 768
-  },
-  {
-    "src": "/images/logo-banniere.png",
-    "width": 260,
-    "height": 292
   }
 ]
