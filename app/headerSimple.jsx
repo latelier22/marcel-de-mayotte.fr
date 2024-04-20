@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { menuItems, site } from "./site";
 import Title from "./TitleLine";
 
-const HeaderSimple = ({ photos, siteTitle ,title }) => {
+const HeaderSimple = ({ photos, siteTitle, title }) => {
   useEffect(() => {
     const init = async () => {
       const { Tooltip, initTE } = await import("tw-elements");
@@ -23,27 +23,27 @@ const HeaderSimple = ({ photos, siteTitle ,title }) => {
               alt=""
             />
             <h3 className=" text-gold-200 text-2xl font-bold">
-            
-              </h3>
-           
+
+            </h3>
+
           </div>
           <div className="flex-col justify-between">
             {/* <h1 className="mb-6 text-gold-600  text-5xl font-bold"> */}
             <h1 className="hidden sm:block font-bold text-transparent py-8 text-5xl bg-clip-text bg-gradient-to-br from-gold-800 via-gold-400 to-gold-800">
-              <br className=""/>
+              <br className="" />
               {siteTitle}
             </h1>
-             <h1 className="sm:hidden font-bold text-transparent py-8 text-5xl bg-clip-text bg-gradient-to-br from-gold-800 via-gold-400 to-gold-800">
-              <br className=""/>
+            <h1 className="sm:hidden font-bold text-transparent py-8 text-5xl bg-clip-text bg-gradient-to-br from-gold-800 via-gold-400 to-gold-800">
+              <br className="" />
               Liberté
-              <br className=""/>
+              <br className="" />
               Egalité
-              <br className=""/> Magnégné !
-              
+              <br className="" /> Magnégné !
+
             </h1>
             <div className="flex flex-col  justify-around items-center">
               <h3 className="my-8 text-gold-200 text-3xl font-bold">
-              <q>Du noir, du blanc, de la couleur</q>
+                <q>Du noir, du blanc, de la couleur</q>
               </h3>
               <a
                 className="font-note md:self-stop rounded-2xl h-16 bg-black dark:bg-gold-900 px-6  py-3 text-2xl font-medium  leading-normal text-gold-200 shadow-[0_4px_9px_-4px_#FFB200] transition duration-150 ease-in-out hover:text-black hover:bg-gold-500 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-gold-200 focus:shadow-[0_8px_9px_-4px_rgba(59,113,0,0.3),0_4px_18px_0_rgba(59,113,0,0.2)] focus:text-gold-500 focus:outline-none focus:ring-0 active:bg-lime-100 active:shadow-[0_8px_9px_-4px_rgba(59,113,0,0.3),0_4px_18px_0_rgba(59,113,0,0.2)]"
@@ -56,12 +56,13 @@ const HeaderSimple = ({ photos, siteTitle ,title }) => {
               </a>
             </div>
           </div>
-          
+
         </div >
-        
+
         <Title title={title} />
+
       </div>
-      
+
     </header>
   );
 };
