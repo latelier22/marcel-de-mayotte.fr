@@ -11,6 +11,7 @@ import getTags from "../components/getTags"
 import Tags from "../components/Tags"
 import Gallery from "../components/album/Gallery"
 
+
 import styles from '../page.module.css'; // Importez votre fichier CSS
 
 async function Page() {
@@ -21,7 +22,13 @@ async function Page() {
   const pageDescription = page.description;
 
   const listePhotos = await getImages();
-  const listeTags = await getTags(listePhotos)
+
+  console.log(listePhotos.slice(0,3))
+  const listeAllTags = await getTags(listePhotos);
+const listeTags = listeTags.filter(tag => tag.name.toLowerCase().startsWith("progression") && tag.name.toLowerCase() !== "progressions");
+
+
+
   console.log(listeTags);
 
   const tagCards = listeTags.map(tag => ({
@@ -53,13 +60,17 @@ async function Page() {
     }
   });
 
+  console.log(photos.slice(0,3))
+
+
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
 
       <div className="grid flexflex-row grid-cols-12 justify-center items-start"
       style={{scrollbarWidth: 'thin', scrollbarColor: 'brown black'}} >  
-        <div className="col-span-2 pt-16 px-16 sticky  text-white bg-yellow-200  top-0 h-screen max-h-full overflow-y-auto"> <Tags className="text-center " tags={listeTags}/>  </div>
+        <div className="col-span-2 pt-16 px-16 sticky  text-white bg-yellow-200  top-0 h-screen max-h-full overflow-y-auto"> 
+        <Tags className="text-center " tags={listeTags} />  </div>
 
         <div className="col-span-10  mt-28">
           <Gallery photos={photos} />

@@ -9,23 +9,16 @@ function chooseRandomPhoto(tableauPhotos, tag) {
   }
   return null; // Retourner null si aucune photo n'est trouvée pour ce tag
 }
-
 async function getTags(tableauPhotos) {
   const tagsCount = {};
+  const mainTags = new Set(["progressions", "tableaux plus anciens", "dessins"]);
 
   // Compter le nombre de photos pour chaque tag
   tableauPhotos.forEach(photo => {
     if (photo.tags) {
       photo.tags.forEach(tag => {
-        // Convertir le tag en minuscules pour éviter les cas de "NU" ou "Nu" ou "nU"
         const lowercaseTag = tag.toLowerCase();
-        // Exclure les tags "nu" ou "NU"
-        // if (lowercaseTag !== "nu") {
-        //   tagsCount[tag] = (tagsCount[tag] || 0) + 1;
-        // }
-      
-          tagsCount[tag] = (tagsCount[tag] || 0) + 1;
-        
+        tagsCount[tag] = (tagsCount[tag] || 0) + 1;
       });
     }
   });
@@ -36,21 +29,20 @@ async function getTags(tableauPhotos) {
     const slug = getSlug(tag);
     const randomPhoto = chooseRandomPhoto(tableauPhotos, tag);
     const url = randomPhoto ? randomPhoto.url : null;
+    const isMainTag = mainTags.has(tag.toLowerCase());
     return {
       name: tag,
       count,
       slug,
-      url
+      url,
+      mainTag: isMainTag
     };
   });  
 
   // Trier le tableau d'objets par ordre décroissant du nombre de photos
   tagsArray.sort((a, b) => b.count - a.count);
 
-  // console.log(tagsArray)
-
   return tagsArray;
 }
 
 export default getTags;
-

@@ -21,9 +21,10 @@ export const site = {
 export const menuItems = [
   { label: "Accueil", route: "/" },
   // { label: "Actualités", route: "/actualites" },
-  { label: "Galerie", route: "/galerie" },
-  { label: "Catalogue complet", route: "/catalogue" },
-  // { label: "Expositions", route: "/expositions" },
+  { label: "Tableaux récents", route: "/galerie" },
+  { label: "Tableaux plus anciens", route: "/catalogue/tableaux-plus-anciens" },
+  { label: "Dessins", route: "/catalogue/dessins" },
+  { label: "Progressions", route: "/catalogue/progressions" },
   // { label: "Produits dérivés", route: "/boutique" },
   { label: "Livres", route: "/livre" },
   { label: "Vidéos", route: "/video" },

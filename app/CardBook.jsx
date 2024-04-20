@@ -19,7 +19,7 @@ const Card = ({ index, card, buttonColor, children, syliusCard, label }) => {
     <header>
       <div className=" md:mx-10 rounded-lg border-4 border-gold-700 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:bg-neutral-700">
         <a
-          href="#!"
+          href={`${card.link}?n=${card.nbPages}&w=${card.bookWidth}&h=${card.bookHeight}`}
           className="relative rounded-t-lg  w-full h-0"
           style={{ paddingTop: "100%" }}
         >
