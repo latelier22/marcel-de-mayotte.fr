@@ -1,0 +1,14 @@
+/* Styles pour la barre de défilement */
+.tagsColumn {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(199, 72, 33) black;
+}
+
+.tagsColumn::-webkit-scrollbar {
+  width: 12px;
+  scrollbar-color: rgb(199, 72, 33) black;
+}
+
+.tagsColumn::-webkit-scrollbar-thumb {
+  background-color: black;
+}

@@ -1,19 +1,14 @@
 // TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com 
 "use client";
-import { useEffect } from "react";
+
 import Image from "next/image";
 
 const MyLightBox = ({ photos }) => {
-  useEffect(() => {
-    const init = async () => {
-      const { Lightbox, initTE } = await import("tw-elements");
-      initTE({ Lightbox });
-    };
-    init();
-  }, []);
+  
+
+  const myServer = "https://marcel-de-mayotte.latelier22.fr"
 
   return (
-
 
 <div className="flex items-center justify-center mx-auto">
   <div
@@ -26,17 +21,14 @@ const MyLightBox = ({ photos }) => {
         className="flex mx-auto w-full h-auto lg:w-1/5 "
       >
         <Image
-          src={`/images/${photo.url}`}
+          src={`${myServer}/images/${photo.url}`}
           alt= {photo.alt}
-          data-te-img={`/images/${photo.url}`}
           className={`mb-5 w-72 h-72  object-cover object-center cursor-zoom-in hover:object-contain data-[te-lightbox-disabled]:cursor-auto`}
           loading="lazy"
           width="300"
           height="300"
         />
 
-         
-    
       
       </div>
     ))}

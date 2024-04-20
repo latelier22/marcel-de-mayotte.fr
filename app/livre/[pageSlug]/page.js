@@ -13,7 +13,7 @@ const Page = ({ params }) => {
   const bookWidth = parseInt(searchParams.get("w"), 10); // Utilisez parseInt pour convertir la largeur en nombre entier
   const bookHeight = parseInt(searchParams.get("h"), 10); // Utilisez parseInt pour convertir la hauteur en nombre entier
 
-  console.log(nbPages);
+  // console.log(nbPages);
   const pageTitle = "Contact";
   const pageDescription =
     "Restons en contact, telephone, email, réseaux sociaux";

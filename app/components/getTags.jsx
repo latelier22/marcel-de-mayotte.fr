@@ -1,20 +1,43 @@
+import getSlug from "./getSlug";
+
+// Fonction pour choisir une photo au hasard dans une catégorie spécifique
+function chooseRandomPhoto(tableauPhotos, tag) {
+  const photosWithTag = tableauPhotos.filter(photo => photo.tags && photo.tags.includes(tag));
+  if (photosWithTag.length > 0) {
+    const randomIndex = Math.floor(Math.random() * photosWithTag.length);
+    return photosWithTag[randomIndex];
+  }
+  return null; // Retourner null si aucune photo n'est trouvée pour ce tag
+}
 async function getTags(tableauPhotos) {
   const tagsCount = {};
+  const mainTags = new Set(["progressions", "tableaux plus anciens", "dessins"]);
 
   // Compter le nombre de photos pour chaque tag
   tableauPhotos.forEach(photo => {
     if (photo.tags) {
       photo.tags.forEach(tag => {
+        const lowercaseTag = tag.toLowerCase();
         tagsCount[tag] = (tagsCount[tag] || 0) + 1;
       });
     }
   });
 
-  // Créer un tableau d'objets avec le nom du tag et le nombre de photos
-  const tagsArray = Object.keys(tagsCount).map(tag => ({
-    name: tag,
-    count: tagsCount[tag]
-  }));
+  // Créer un tableau d'objets avec le nom du tag, le nombre de photos et une URL aléatoire
+  const tagsArray = Object.keys(tagsCount).map(tag => {
+    const count = tagsCount[tag];
+    const slug = getSlug(tag);
+    const randomPhoto = chooseRandomPhoto(tableauPhotos, tag);
+    const url = randomPhoto ? randomPhoto.url : null;
+    const isMainTag = mainTags.has(tag.toLowerCase());
+    return {
+      name: tag,
+      count,
+      slug,
+      url,
+      mainTag: isMainTag
+    };
+  });  
 
   // Trier le tableau d'objets par ordre décroissant du nombre de photos
   tagsArray.sort((a, b) => b.count - a.count);

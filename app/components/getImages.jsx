@@ -1,50 +1,34 @@
-import fs from 'fs';
-import path from 'path';
+import { site } from "../site";
 
-async function getImages() {
-    const dossierImages = path.join(process.cwd(), 'public', 'images', 'catalogue', 'MINI');
-    const fichiers = fs.readdirSync(dossierImages);
-  
-    const tableauPhotos = fichiers.map((fichier) => {
-      const nomFichier = path.basename(fichier, path.extname(fichier));
-      const cheminRelatif = path.join( 'catalogue', 'MINI', fichier);
-  
-      // Extraire le numéro
-      const numeroMatch = nomFichier.match(/-CAT(\d{4})-/);
-      const numero = numeroMatch ? parseInt(numeroMatch[1]) : null;
-  
-      // Extraire les dimensions
-      const dimensionsMatch = nomFichier.match(/DIM(\d+ x \d+)/);
-      const dimensions = dimensionsMatch ? dimensionsMatch[1].split(' x ').map(dim => parseInt(dim)) : null;
-  
-      // Extraire les tags
-      const tagsMatch = nomFichier.match(/TAG(.+)/);
-      const tags = tagsMatch ? tagsMatch[1].split(',').map(tag => tag.trim()) : null;
-  
-      // Extraire le nom d'origine
-    //   const nomOriginalMatch = nomFichier.match(/MINI\/([^/]+)-CAT/);
-    //     const nomOriginal = nomOriginalMatch ? nomOriginalMatch[1] : null;
-  
-// Extraire le nom d'origine
-// Extraire le nom d'origine
-const nomOriginal = nomFichier.split('IMG')[1].split('-CAT')[0];
+async function getImages(limit = Infinity) {
+    try {
+        const url = `${site.vpsServer}/images/catalogue/catalogue.json`;
+
+        // Récupérer les données JSON à partir de l'URL
+        const response = await fetch(url, { cache: 'no-store' });
+
+        // Vérifier si la requête a réussi
+        if (!response.ok) {
+            throw new Error(`Erreur lors de la récupération des données : ${response.status}`);
+        }
+
+        // Extraire les données JSON de la réponse
+        const data = await response.json();
+
+// Remplacer "MINI" par "WEB" dans l'URL de chaque photo
+const images = data.map(photo => ({
+    ...photo,
+    url: photo.url.replace("MINI", "WEB")
+}));
 
 
 
-      return {
-        numero,
-        dimensions: dimensions ? { largeur: dimensions[0], hauteur: dimensions[1] } : null,
-        tags,
-        nomFichierComplet: path.join(dossierImages, fichier),
-        url: cheminRelatif,
-        origin_name: nomOriginal,
-      };
-    });
-  
-    return tableauPhotos;
-  }
-  
-  export default getImages;
-  
-  
-  
+        // Retourner les premières "limit" images du catalogue
+        return images.slice(0, limit);
+    } catch (error) {
+        console.error("Une erreur est survenue lors de la récupération des images :", error);
+        return []; // Retourner un tableau vide en cas d'erreur
+    }
+}
+
+export default getImages;

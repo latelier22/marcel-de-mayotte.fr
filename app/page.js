@@ -14,7 +14,7 @@ const Home = () => {
   const pageDescription = "Bienvenue sur le site de Marcel Séjour";
 
   // DÃ©clarer les photos dans un tableau d&apos;objets
-  console.log(photos);
+  // console.log(photos);
 
   const backgroundColor = "bg-teal-500";
 
