@@ -19,15 +19,12 @@ jobs:
       - name: Build Next.js App
         run: npm run build
 
-      - name: Deploy to Debian Server
-        uses: appleboy/ssh-action@master
+      - name: ls -a via ssh
+        uses: fifsky/ssh-action@master
         with:
+          command: |
+            cd /tmp
+            ls -a
           host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          script: |
-            cd /home/debian/dev
-            git pull origin main
-            yarn install
-            yarn run build
+          user: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY}}
