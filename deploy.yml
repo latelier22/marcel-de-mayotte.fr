@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      # - name: Checkout Repository
+      #   uses: actions/checkout@v2
 
-      - name: Install Dependencies
-        run: yarn install
+      # - name: Install Dependencies
+      #   run: yarn install
 
-      - name: Build Next.js App
-        run: yarn build
+      # - name: Build Next.js App
+      #   run: yarn build
 
       # - name: Deploy to Debian Server
       #   uses: appleboy/ssh-action@v0.1.4
@@ -31,12 +31,17 @@ jobs:
       #       git pull origin dev
       #       yarn install
       #       yarn build
-      - name: ls -a via ssh
-        uses: fifsky/ssh-action@master
-        with:
-          command: |
-            cd /tmp
-            ls -a
-          host: ${{ secrets.SERVER_HOST }}
-          user: ${{ secrets.SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY}}
+      # - name: ls -a via ssh
+      #   uses: fifsky/ssh-action@master
+      #   with:
+      #     command: |
+      #       cd /tmp
+      #       ls -a
+      #     host: ${{ secrets.SERVER_HOST }}
+      #     user: ${{ secrets.SERVER_USERNAME }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY}}
+      - name: Deploy
+        run: |
+          TEMP=$(mktemp)
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $TEMP
+          ssh -o 'StrictHostKeyChecking no' -i $TEMP debian@vps.latelier22.fr 'bash -s' < scripts/deploy.sh
