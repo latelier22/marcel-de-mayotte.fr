@@ -8,6 +8,13 @@ import NextJsImage from "./NextJsImage";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
+import { Photo as BasePhoto } from 'react-photo-album';
+
+interface Photo extends BasePhoto {
+    tags?: string[]; // Ajoutez la propriété tags à l'interface Photo
+}
+
+
 
 // import optional lightbox plugins
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
@@ -30,6 +37,8 @@ const Gallery = ({ photos, mysize }) => {
         targetRowHeight={350}
         onClick={({ index }) => setIndex(index)} 
         renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
+
+          // @ts-ignore
           const hasBlackAndWhiteTag = photo.tags?.includes("NOIR ET BLANC");
       
           // Définir le style de la bordure

@@ -31,7 +31,7 @@ async function Citation() {
         />
       </div>
       <div className="p-8 flex flex-col items-end  justify-end">
-        <p className="italic text-white text-3xl">"{randomCitation.texte}"</p>
+        <p className="italic text-white text-3xl">&quot;{randomCitation.texte}&quot;</p>
         <p className="text-right text-gray-200">{randomCitation.auteur}</p>
       </div>
     </section>
