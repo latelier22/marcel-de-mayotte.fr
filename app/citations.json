@@ -1,23 +1,38 @@
 [
-    {
-      "texte": "La vie est un mystère qu'il faut vivre, et non un problème à résoudre.",
-      "auteur": "Gandhi"
-    },
-    {
-      "texte": "La simplicité est la sophistication suprême.",
-      "auteur": "Leonardo da Vinci"
-    },
-    {
-      "texte": "Le succès, c'est tomber sept fois et se relever huit.",
-      "auteur": "Proverbe japonais"
-    },
-    {
-      "texte": "La seule façon de faire du bon travail est d'aimer ce que vous faites.",
-      "auteur": "Steve Jobs"
-    },
-    {
-      "texte": "La véritable mesure de la réussite est la façon dont vous vous portez lorsque tout va mal.",
-      "auteur": "Lance Armstrong"
-    }
-  ]
+  {
+    "texte": "L'art commence avec la retenue",
+    "auteur": "Michel Serres, philosophe"
+  },
+  {
+    "texte": "L'amour aussi",
+    "auteur": "Marcel Séjour,artiste peintre"
+  },
+  {
+    "texte": "La force principale du dessin c’est qu’il contribue à évacuer la peur du noir.\n Et c’est valable pour tout le monde puisque même les Noirs ont peur du noir.",
+    "auteur": "Marcel Séjour"
+  },
   
+    {
+      "texte": "Travailler en noir et blanc permet, comme ici à Mayotte,\n de représenter le rustique sans tomber dans le sordide.\nLa couleur est là juste pour faire plaisir ; pas pour rendre compte.",
+      "auteur": "Marcel Séjour"
+    
+  },
+  {
+    "texte": "Quand je peins un tableau je veux dire quelque chose qui rassure.",
+    "auteur": "Vincent Van Gogh"
+  },
+  {
+    "texte": "Il faut vingt-cinq ans pour apprendre à dessiner ;\n il faut une semaine pour apprendre à peindre.",
+    "auteur": "Jean Dominique Ingres, peintre français du 19ème siècle"
+  },
+   {
+    "texte": "Pour avoir Mayotte avec soi, il faut ou la forcer, ou la séduire. On souhaite bien du courage à ceux qui veulent la forcer.",
+    "auteur": "Marcel Séjour"
+  }
+  ,
+   {
+    "texte": "Occupe-toi des ombres, et la lumière s’occupera d’elle-même. Voilà un bon précepte de dessinateur.\n Occupe-toi de tes ombres et la lumière s’occupera de toi. Ça doit pouvoir marcher comme ça aussi.",
+    "auteur": "Marcel Séjour"
+  }
+]
+
