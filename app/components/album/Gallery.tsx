@@ -1,57 +1,74 @@
 "use client";
 
 import { useState } from "react";
+
 import PhotoAlbum from "react-photo-album";
+import NextJsImage from "./NextJsImage";
+
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
-// Import optional lightbox plugins
+
+// import optional lightbox plugins
 import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
 import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 
 const Gallery = ({ photos, mysize }) => {
   const [index, setIndex] = useState(-1);
-
   return (
     <div className="">
-      <PhotoAlbum
+      
+      <PhotoAlbum 
+       
         photos={photos}
         spacing={50}
+        // padding={20}
         layout="rows"
         targetRowHeight={350}
+        onClick={({ index }) => setIndex(index)} 
         renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
-          // Vérifier si la photo a le tag "NOIR ET BLANC"
-          const hasBlackAndWhiteTag = photo.tags.includes("NOIR ET BLANC");
-          
+          const hasBlackAndWhiteTag = photo.tags?.includes("NOIR ET BLANC");
+      
           // Définir le style de la bordure
-          const borderStyle = hasBlackAndWhiteTag ? "1px solid white" : "none";
-
-          // Combinez le style existant avec le nouveau style de la bordure
-          const updatedWrapperStyle = {
-            ...wrapperStyle,
-            border: borderStyle
-          };
-
+          const borderStyle = hasBlackAndWhiteTag ? "4px solid white" : "4px solid black";
+      
           return (
-            <div style={updatedWrapperStyle}>
-              {renderDefaultPhoto({})}
+            <div
+              style={{ ...wrapperStyle, border: borderStyle }}
+              rel="noreferrer noopener"
+              title={photo.alt} 
+            >
+              {renderDefaultPhoto({ wrapped: true })}
             </div>
           );
-        }}
-        onClick={({ index }) => setIndex(index)}
-      />
+        }}/>
 
-      <Lightbox
+      {/* <Lightbox
         slides={photos}
         open={index >= 0}
         index={index}
         close={() => setIndex(-1)}
-        plugins={[Fullscreen, Slideshow, Thumbnails]}
-      />
+        // enable optional lightbox plugins
+        // plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
+        plugins={[Fullscreen, Slideshow, Thumbnails
+        ]}
+        
+      /> */}
+
+<Lightbox
+    open={index >= 0}
+    index={index}
+    close={() => setIndex(-1)}
+    slides={photos}
+    render={{ slide: NextJsImage }}
+    plugins={[Fullscreen, Slideshow, Thumbnails]}
+  />
     </div>
+
   );
-};
+}
 
 export default Gallery;

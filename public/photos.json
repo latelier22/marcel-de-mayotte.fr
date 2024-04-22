@@ -15,13 +15,13 @@
     "src": "/images/galerie-01-1.jpg",
     "width": 768,
     "height": 1044,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-56.jpg",
     "width": 942,
     "height": 768,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-42.jpg",
@@ -33,13 +33,13 @@
     "src": "/images/galerie-01-2.jpg",
     "width": 768,
     "height": 931,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-54.jpg",
     "width": 1097,
     "height": 768,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-40.jpg",
@@ -69,13 +69,13 @@
     "src": "/images/galerie-01-51.jpg",
     "width": 726,
     "height": 1366,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-7.jpg",
     "width": 768,
     "height": 935,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-45.jpg",
@@ -111,7 +111,7 @@
     "src": "/images/galerie-01-4.jpg",
     "width": 768,
     "height": 1042,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-52.jpg",
@@ -129,25 +129,13 @@
     "src": "/images/galerie-01-53.jpg",
     "width": 768,
     "height": 775,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-47.jpg",
     "width": 768,
     "height": 932,
-    "tags": []
-  },
-  {
-    "src": "/images/galerie-01-20.jpg",
-    "width": 977,
-    "height": 768,
-    "tags": []
-  },
-  {
-    "src": "/images/galerie-01-34.jpg",
-    "width": 768,
-    "height": 934,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-35.jpg",
@@ -155,12 +143,7 @@
     "height": 831,
     "tags": []
   },
-  {
-    "src": "/images/video-4.png",
-    "width": 1280,
-    "height": 720,
-    "tags": []
-  },
+
   {
     "src": "/images/galerie-01-21.jpg",
     "width": 773,
@@ -171,25 +154,14 @@
     "src": "/images/galerie-01-23.jpg",
     "width": 769,
     "height": 768,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
-  {
-    "src": "/images/video-6.png",
-    "width": 640,
-    "height": 360,
-    "tags": []
-  },
-  {
-    "src": "/images/video-7.png",
-    "width": 848,
-    "height": 480,
-    "tags": []
-  },
+
   {
     "src": "/images/galerie-01-22.jpg",
     "width": 1013,
     "height": 768,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-36.jpg",
@@ -201,26 +173,15 @@
     "src": "/images/galerie-01-32.jpg",
     "width": 768,
     "height": 912,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-26.jpg",
     "width": 768,
     "height": 937,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
-  {
-    "src": "/images/video-3.png",
-    "width": 1280,
-    "height": 720,
-    "tags": []
-  },
-  {
-    "src": "/images/video-2.png",
-    "width": 480,
-    "height": 360,
-    "tags": []
-  },
+
   {
     "src": "/images/galerie-01-27.jpg",
     "width": 960,
@@ -261,7 +222,7 @@
     "src": "/images/galerie-01-24.jpg",
     "width": 768,
     "height": 770,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-18.jpg",
@@ -279,7 +240,7 @@
     "src": "/images/galerie-01-29.jpg",
     "width": 768,
     "height": 997,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-28.jpg",
@@ -317,17 +278,12 @@
     "height": 768,
     "tags": []
   },
-  {
-    "src": "/images/galerie-01-1-sd.jpg",
-    "width": 300,
-    "height": 408,
-    "tags": []
-  },
+  
   {
     "src": "/images/galerie-01-38.jpg",
     "width": 963,
     "height": 768,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-10.jpg",
@@ -345,19 +301,19 @@
     "src": "/images/galerie-01-39.jpg",
     "width": 768,
     "height": 1009,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-62.jpg",
     "width": 775,
     "height": 768,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-8.jpg",
     "width": 768,
     "height": 997,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-9.jpg",
@@ -375,7 +331,7 @@
     "src": "/images/galerie-01-61.jpg",
     "width": 768,
     "height": 772,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-49.jpg",
@@ -387,7 +343,7 @@
     "src": "/images/galerie-01-48.jpg",
     "width": 768,
     "height": 1001,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-60.jpg",
@@ -411,19 +367,19 @@
     "src": "/images/galerie-01-65.jpg",
     "width": 1143,
     "height": 768,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-59.jpg",
     "width": 967,
     "height": 768,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-37a.jpg",
     "width": 966,
     "height": 768,
-    "tags": []
+    "tags": ["NOIR ET BLANC"]
   },
   {
     "src": "/images/galerie-01-66.jpg",
