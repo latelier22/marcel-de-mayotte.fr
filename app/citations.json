@@ -1,12 +1,12 @@
-[
-  {
-    "texte": "L'art commence avec la retenue",
-    "auteur": "Michel Serres, philosophe"
-  },
-  {
-    "texte": "L'amour aussi",
-    "auteur": "Marcel Séjour,artiste peintre"
-  },
+[[{
+  "texte": "L'art commence avec la retenue",
+  "auteur": "Michel Serres, philosophe"
+},
+{
+  "texte": "L'amour aussi",
+  "auteur": "Marcel Séjour,artiste peintre"
+}]
+  ,
   {
     "texte": "La force principale du dessin c’est qu’il contribue à évacuer la peur du noir.\n Et c’est valable pour tout le monde puisque même les Noirs ont peur du noir.",
     "auteur": "Marcel Séjour"
@@ -34,5 +34,35 @@
     "texte": "Occupe-toi des ombres, et la lumière s’occupera d’elle-même. Voilà un bon précepte de dessinateur.\n Occupe-toi de tes ombres et la lumière s’occupera de toi. Ça doit pouvoir marcher comme ça aussi.",
     "auteur": "Marcel Séjour"
   }
+  ,
+   {
+    "texte": "L’art est la belle représentation d’une chose et non la représentation d’une belle chose.",
+    "auteur": "Emmanuel Kant"
+  }
+  ,
+   {
+    "texte": "Les artistes sont des gens qui ont contact avec toutes les classes sociales\n et qui sont par conséquent ex- trêmement dangereux.\n  Je vous recommande donc d’éviter autant que possible de les fréquenter.",
+    "auteur": "Conseil donné aux membres de sa famille par la reineVictoria."
+  }
+  ,
+   {
+    "texte": "Magnégné, mot mahorais connu de toute la région, qualifiant une action, \nune personne ou une chose, dont la réalisation va de l’approximatif au grand n’importe quoi.",
+    "auteur": "Marcel Séjour"
+  }
+  ,
+   {
+    "texte": "Après avoir vécu plus de vingt ans dans les Comores, je suis encore assez souvent surpris par le comportement de leurs habitants,\n et ce qui m’étonne le plus, c’est d’être encore surpris. Je demeure donc un étranger, et c’est très bien comme ça.",
+    "auteur": "Marcel Séjour"
+  }
+  ,
+   [{
+    "texte": "Les œuvres d’art sont les lettres de noblesse de la seule aristocratie, celle qui a ses ancêtres devant elle.",
+    "auteur": "Rainer Maria Rilke"
+  }
+  ,
+   {
+    "texte": "Je n’ai jamais rien lu de Rilke mais je sens que je vais m’y mettre parce qu’une phrase comme celle-là c’est exactement ce que de temps à autre j’ai besoin d’entendre; et de croire.",
+    "auteur": "Marcel Séjour"
+  }]
 ]
 
