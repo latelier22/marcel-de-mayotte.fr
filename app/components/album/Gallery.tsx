@@ -25,25 +25,48 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 
 const Gallery = ({ photos, mysize }) => {
   const [index, setIndex] = useState(-1);
+
+  // Fonction pour générer les URLs des images avec différentes tailles
+  const generateImageURLs = (src, width, height) => {
+    const imageSizes = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
+    const deviceSizes = [640, 750, 828, 1080, 1200, 1920, 2048, 3840];
+    const nextImageUrl = (src, size) => `/_next/image?url=${encodeURIComponent(src)}&w=${size}&q=75`;
+
+    return {
+      src: nextImageUrl(src, width),
+      srcSet: imageSizes
+        .concat(...deviceSizes)
+        .filter((size) => size <= width)
+        .map((size) => ({
+          src: nextImageUrl(src, size),
+          width: size,
+          height: Math.round((height / width) * size),
+        })),
+    };
+  };
+
+  // Mapper les photos pour ajouter les propriétés src et srcSet
+  const mappedPhotos = photos.map(({ src, width, height, ...rest }) => ({
+    ...rest,
+    src,
+    ...generateImageURLs(src, width, height),
+  }));
+
+  mappedPhotos[0].srcSet.map((s)=>console.log(s));
+
   return (
     <div className="">
-      
       <PhotoAlbum 
-       
         photos={photos}
         spacing={50}
-        // padding={20}
         layout="rows"
         targetRowHeight={350}
         onClick={({ index }) => setIndex(index)} 
         renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
 
-          // @ts-ignore
+            // @ts-ignore
           const hasBlackAndWhiteTag = photo.tags?.includes("NOIR ET BLANC");
-      
-          // Définir le style de la bordure
           const borderStyle = hasBlackAndWhiteTag ? "4px solid white" : "4px solid black";
-      
           return (
             <div
               style={{ ...wrapperStyle, border: borderStyle }}
@@ -53,19 +76,18 @@ const Gallery = ({ photos, mysize }) => {
               {renderDefaultPhoto({ wrapped: true })}
             </div>
           );
-        }}/>
+        }}
+      />
 
-
-<Lightbox
-    open={index >= 0}
-    index={index}
-    close={() => setIndex(-1)}
-    slides={photos}
-    render={{ slide: NextJsImage }}
-    plugins={[Fullscreen, Slideshow, Thumbnails]}
-  />
+      <Lightbox
+        open={index >= 0}
+        index={index}
+        close={() => setIndex(-1)}
+        slides={mappedPhotos}
+        render={{ slide: NextJsImage }}
+        plugins={[Fullscreen, Slideshow, Zoom]}
+      />
     </div>
-
   );
 }
 
