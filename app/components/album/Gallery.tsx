@@ -86,6 +86,10 @@ const Gallery = ({ photos, mysize }) => {
         slides={mappedPhotos}
         render={{ slide: NextJsImage }}
         plugins={[Fullscreen, Slideshow, Zoom]}
+        zoom={{
+          scrollToZoom:true,
+          maxZoomPixelRatio:5
+        }}
       />
     </div>
   );
