@@ -39,7 +39,8 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
         width: photo.dimensions[0],
         height: photo.dimensions[1],
         id: photo.numero,
-        tags : photo.tags
+        tags : photo.tags,
+        name: photo.name
       };
     } else {
       // Gérer le cas où photo.dimensions est null ou n'a pas au moins deux éléments
@@ -49,6 +50,7 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
         width: 0, // Valeur par défaut pour la largeur
         height: 0, // Valeur par défaut pour la hauteur
         id: photo.numero,
+        name: photo.name
       };
     }
   });

@@ -48,7 +48,8 @@ const Gallery = ({ photos, mysize }) => {
             <div
               style={{ ...wrapperStyle, border: borderStyle }}
               rel="noreferrer noopener"
-              title={photo.alt} 
+              // @ts-ignore
+              title={photo.name} 
             >
               {renderDefaultPhoto({ wrapped: true })}
             </div>
