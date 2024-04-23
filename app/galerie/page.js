@@ -17,11 +17,17 @@ async function Page() {
   const pageTitle = page.title;
   const pageDescription = page.description;
 
+  const photosWithAlt = photos.map(photo => ({
+    ...photo,
+    alt: photo.src // Utiliser la source de l'image comme valeur pour l'attribut "alt"
+  }));
+
+
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
       <TitleLine titel = {"GALERIE"} />
-          <Gallery className="relative mt-36"  photos={photos} />
+          <Gallery className="relative mt-36"  photos={photosWithAlt} />
          
       <Footer />
     </RootLayout>

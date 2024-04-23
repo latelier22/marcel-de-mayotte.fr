@@ -7,6 +7,7 @@ import Cards from "./Cards";
 import Section from "./Section";
 import Banner from "./Banner";
 import {cards, sections, site, photos} from "./site"
+import Citation from "./Citation";
 
 const Home = () => {
   // Dynamic metadata for the home page
@@ -22,7 +23,9 @@ const Home = () => {
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
       <HeaderSimple photos={photos} siteTitle ={site.title} title={pageTitle}/>
-      {/* <Pictos /> */}
+      {/* <Picto
+      s /> */}
+       <Citation section={sections[0]} />
       <Banner photo = {photos[0]} />
       <Section section={sections[0]} />
 

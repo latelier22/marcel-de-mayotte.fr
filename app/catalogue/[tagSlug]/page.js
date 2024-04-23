@@ -39,6 +39,7 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
         width: photo.dimensions[0],
         height: photo.dimensions[1],
         id: photo.numero,
+        tags : photo.tags
       };
     } else {
       // Gérer le cas où photo.dimensions est null ou n'a pas au moins deux éléments
