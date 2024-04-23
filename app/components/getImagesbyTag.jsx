@@ -4,17 +4,32 @@ import slugify from './getSlug';
 async function getImagesbyTag(tagSlug, limit = Infinity) {
     const allImages = await getImages(); // Obtenir toutes les images
 
-    const filteredImages = allImages.filter(image => {
+    console.log(allImages.slice(0,5))
+
+    const uniqueNames = {}; // Objet pour suivre les noms uniques déjà rencontrés
+    const filteredImages = []; // Tableau pour stocker les images filtrées
+
+    allImages.forEach(image => {
         // Générer le slug pour chaque tag de l'image et vérifier s'il correspond au tagSlug
-        return image.tags && image.tags.some(tag => slugify(tag) === tagSlug);
-    }).slice(0, limit); // Limiter le nombre d'images
+        if (image.tags && image.tags.some(tag => slugify(tag) === tagSlug)) {
+            // Vérifier si le nom de l'image est déjà dans uniqueNames
+            if (!uniqueNames[image.name]) {
+                // Si le nom n'est pas encore rencontré, ajouter l'image au tableau filtré et marquer le nom comme rencontré
+                filteredImages.push(image);
+                uniqueNames[image.name] = true;
+            }
+        }
+    });
+
+    // Limiter le nombre d'images
+    const limitedImages = filteredImages.slice(0, limit);
 
     // Trier les images par ordre croissant basé sur leur .numero
-    filteredImages.sort((a, b) => {
+    limitedImages.sort((a, b) => {
         return a.numero - b.numero;
     });
 
-    return filteredImages;
+    return limitedImages;
 }
 
 export default getImagesbyTag;

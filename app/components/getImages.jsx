@@ -5,8 +5,8 @@ async function getImages(limit = Infinity) {
         const url = `${site.vpsServer}/images/catalogue/catalogue.json`;
 
         // Récupérer les données JSON à partir de l'URL
-        const response = await fetch(url, );
-        // const response = await fetch(url, { cache: 'no-store' });
+        // const response = await fetch(url, );
+        const response = await fetch(url, { cache: 'no-store' });
         
 
         // Vérifier si la requête a réussi

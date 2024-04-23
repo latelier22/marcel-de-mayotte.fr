@@ -63,6 +63,15 @@ const Gallery = ({ photos, mysize }) => {
     slides={photos}
     render={{ slide: NextJsImage }}
     plugins={[Fullscreen, Slideshow, Thumbnails]}
+    zoom={{
+      scrollToZoom:true,
+      maxZoomPixelRatio:5
+    }}
+    thumbnails={{
+      position: "end",
+      showToggle: true,
+      vignette: true
+    }}
   />
     </div>
 
