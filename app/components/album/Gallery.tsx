@@ -49,7 +49,8 @@ const Gallery = ({ photos, mysize }) => {
               style={{ ...wrapperStyle, border: borderStyle }}
               rel="noreferrer noopener"
               // @ts-ignore
-              title={photo.name} 
+              title={`${photo.name} / ${photo.dimensions} / ${photo.tags.map(tag => tag.name).join(', ')}`}
+
             >
               {renderDefaultPhoto({ wrapped: true })}
             </div>

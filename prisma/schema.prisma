@@ -1,0 +1,32 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:Bigtoon221274@localhost:3306/catalogue"
+}
+
+model Photo {
+  id           Int       @id @default(autoincrement())
+  numero       Int       // numéro dans le catalogue -CAT
+  dimensions   String?   // Les dimensions de la photo -DIM
+  createdAt    DateTime  @default(now())
+  tags         Tag[]     // Relation many-to-many avec la table des tags -TAG
+  url          String    // l'url de la photo
+  name         String    // nom original du fichier image -IMG 
+  height       Int       @default(0)
+  width        Int       @default(0)
+}
+
+model Tag {
+  id     Int      @id @default(autoincrement())
+  name   String   @unique
+  photos Photo[]  // Relation many-to-many avec la table des photos
+}
