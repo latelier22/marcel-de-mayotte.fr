@@ -28,7 +28,8 @@ async function Page() {
       id: photo.id,
       tags: photo.tags,
       name: photo.name,
-      dimensions : photo.dimensions
+      dimensions : photo.dimensions,
+      published: photo.published,
     };
 
   });

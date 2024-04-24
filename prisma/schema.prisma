@@ -23,6 +23,7 @@ model Photo {
   name         String    // nom original du fichier image -IMG 
   height       Int       @default(0)
   width        Int       @default(0)
+  published    Boolean   @default(true)
 }
 
 model Tag {

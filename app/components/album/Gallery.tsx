@@ -1,83 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from 'react';
+import { PrismaClient } from '@prisma/client';
 
-import PhotoAlbum from "react-photo-album";
-import NextJsImage from "./NextJsImage";
+const prisma = new PrismaClient();
 
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
-
-import { Photo as BasePhoto } from 'react-photo-album';
-
-interface Photo extends BasePhoto {
-    tags?: string[]; // Ajoutez la propriété tags à l'interface Photo
-}
-
-
-
-// import optional lightbox plugins
-import Fullscreen from "yet-another-react-lightbox/plugins/fullscreen";
-import Slideshow from "yet-another-react-lightbox/plugins/slideshow";
-import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import "yet-another-react-lightbox/plugins/thumbnails.css";
-
-const Gallery = ({ photos, mysize }) => {
+const Gallery = ({ photos }) => {
   const [index, setIndex] = useState(-1);
+  const [publishedPhotos, setPublishedPhotos] = useState(photos);
+
+  const togglePublished = async (photoId) => {
+    try {
+      // Mettre à jour l'état de publication de la photo
+      const updatedPhotos = publishedPhotos.map((photo) =>
+        photo.id === photoId ? { ...photo, published: !photo.published } : photo
+      );
+      setPublishedPhotos(updatedPhotos);
+
+      // Mettre à jour la base de données avec Prisma
+      await prisma.photo.update({
+        where: { id: photoId },
+        data: { published: !updatedPhotos.find((photo) => photo.id === photoId).published },
+      });
+
+      console.log(`Toggle published for photo with ID ${photoId}`);
+    } catch (error) {
+      console.error("Une erreur est survenue lors de la mise à jour de l'état de publication :", error);
+    }
+  };
+
   return (
-    <div className="">
-      
-      <PhotoAlbum 
-       
-        photos={photos}
-        spacing={50}
-        // padding={20}
-        layout="rows"
-        targetRowHeight={350}
-        onClick={({ index }) => setIndex(index)} 
-        renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
+    <div className="pt-32 grid grid-cols-12 gap-4">
+      {publishedPhotos.map((photo) => (
+        <div 
+        key={photo.id} 
+        className="relative"
+         title={`id:${photo.id}/${photo.name}/${photo.dimensions}/${photo.tags.map(tag => tag.name).join(', ')}/${photo.published}`}>
+          {/* Afficher la photo */}
+          <img src={photo.src} alt={photo.name} className="w-300 h-auto" />
 
-          // @ts-ignore
-          const hasBlackAndWhiteTag = photo.tags?.includes("NOIR ET BLANC");
-      
-          // Définir le style de la bordure
-          const borderStyle = hasBlackAndWhiteTag ? "4px solid white" : "4px solid black";
-      
-          return (
-            <div
-              style={{ ...wrapperStyle, border: borderStyle }}
-              rel="noreferrer noopener"
-              // @ts-ignore
-              title={`${photo.name} / ${photo.dimensions} / ${photo.tags.map(tag => tag.name).join(', ')}`}
-
-            >
-              {renderDefaultPhoto({ wrapped: true })}
-            </div>
-          );
-        }}/>
-
-
-<Lightbox
-    open={index >= 0}
-    index={index}
-    close={() => setIndex(-1)}
-    slides={photos}
-    render={{ slide: NextJsImage }}
-    plugins={[Fullscreen, Slideshow, Thumbnails]}
-    zoom={{
-      scrollToZoom:true,
-      maxZoomPixelRatio:5
-    }}
-    thumbnails={{
-      position: "end",
-      showToggle: true,
-      vignette: true
-    }}
-  />
+          {/* Bouton pour basculer l'état de publication */}
+          <button
+            onClick={() => togglePublished(photo.id)}
+            className="absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg"
+          >
+            {photo.published ? 'Publié' : 'Non publié'}
+          </button>
+        </div>
+      ))}
     </div>
-
   );
-}
+};
 
 export default Gallery;

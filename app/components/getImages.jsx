@@ -52,7 +52,7 @@ async function getImages( noSlugTags = []) {
         });
 
         // Afficher les images exclues dans la console
-        console.log("Images exclues :", excludedImages);
+        // console.log("Images exclues :", excludedImages);
 
 
 
