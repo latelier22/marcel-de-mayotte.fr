@@ -18,10 +18,10 @@ const Gallery = ({ photos }) => {
       setPublishedPhotos(updatedPhotos);
 
       // Mettre à jour la base de données avec Prisma
-      await prisma.photo.update({
-        where: { id: photoId },
-        data: { published: !updatedPhotos.find((photo) => photo.id === photoId).published },
-      });
+      // await prisma.photo.update({
+      //   where: { id: photoId },
+      //   data: { published: !updatedPhotos.find((photo) => photo.id === photoId).published },
+      // });
 
       console.log(`Toggle published for photo with ID ${photoId}`);
     } catch (error) {
@@ -35,7 +35,7 @@ const Gallery = ({ photos }) => {
         <div 
         key={photo.id} 
         className="relative"
-         title={`id:${photo.id}/${photo.name}/${photo.dimensions}/${photo.tags.map(tag => tag.name).join(', ')}/${photo.published}`}>
+         title={`id:${photo.id}/${photo.name}/${photo.dimensions}/${photo.published}`}>
           {/* Afficher la photo */}
           <img src={photo.src} alt={photo.name} className="w-300 h-auto" />
 

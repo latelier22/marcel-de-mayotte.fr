@@ -56,7 +56,7 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
   });
 
   const progressionsTags = await getProgressionsTags(listePhotos);
-  console.log(progressionsTags.slice(1,progressionsTags.length));
+  // console.log(progressionsTags.slice(1,progressionsTags.length));
 
   const tagCards = progressionsTags.slice(1,progressionsTags.length).map((tag) => ({
     title: tag.name,

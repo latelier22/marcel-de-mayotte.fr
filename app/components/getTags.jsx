@@ -1,25 +1,39 @@
 import { PrismaClient } from '@prisma/client';
-import getSlug from "./getSlug";
 
 const prisma = new PrismaClient();
 
 async function getTags() {
   try {
-    // Récupérer tous les tags depuis la base de données
-    const allTags = await prisma.tag.findMany();
+  
+    let allTags = await prisma.tag.findMany({
 
-    // Mapper les tags pour les transformer en format souhaité
-    const tagsArray = allTags.map(tag => {
-      const { name } = tag;
-      const slug = getSlug(name); // Utiliser votre fonction getSlug pour créer le slug
+      include: {
+        photos: true // Inclure les photos associées à chaque tag
+      }
+      
+    });
+
+    console.log(allTags.slice(10,12))
+
+    const tagsArray = allTags.map ((tag) => {
+      const { name, slug, photos } = tag;
+      const count = photos.length; // Compter le nombre de photos associées à ce tag
+      let url = null;
+      if (photos.length > 0) {
+        // Sélectionner une photo aléatoire parmi les photos associées à ce tag
+        const randomIndex = Math.floor(Math.random() * photos.length);
+        url = photos[randomIndex].url; // URL de la photo aléatoire
+      }
       return {
         name,
         slug,
-        count: 0, // Remplacer par le vrai nombre de photos associées à ce tag
-        url: null, // Remplacer par l'URL de la photo aléatoire associée à ce tag
+        count,
+        url: url, // Remplacer par l'URL de la photo aléatoire associée à ce tag
         mainTag: false // Remplacer par true/false en fonction de la logique de votre application
-      };
-    });
+      };h
+    })
+
+console.log( tagsArray.slice(0,3))
 
     return tagsArray;
   } catch (error) {

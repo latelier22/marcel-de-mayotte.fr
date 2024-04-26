@@ -1,35 +1,45 @@
-import getImages from './getImages';
-import slugify from './getSlug';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 async function getImagesbyTag(tagSlug, limit = Infinity) {
-    const allImages = await getImages(); // Obtenir toutes les images
-
-    console.log(allImages.slice(0,5))
-
-    const uniqueNames = {}; // Objet pour suivre les noms uniques déjà rencontrés
-    const filteredImages = []; // Tableau pour stocker les images filtrées
-
-    allImages.forEach(image => {
-        // Générer le slug pour chaque tag de l'image et vérifier s'il correspond au tagSlug
-        if (image.tags && image.tags.some(tag => slugify(tag) === tagSlug)) {
-            // Vérifier si le nom de l'image est déjà dans uniqueNames
-            if (!uniqueNames[image.name]) {
-                // Si le nom n'est pas encore rencontré, ajouter l'image au tableau filtré et marquer le nom comme rencontré
-                filteredImages.push(image);
-                uniqueNames[image.name] = true;
+    console.log(tagSlug)
+    try {
+        // Récupérer les informations du tag correspondant au slug donné
+        const tag = await prisma.tag.findFirst({
+            where: {
+                slug: tagSlug,
+            },
+            include: {
+                photos: true // Inclure les photos associées au tag
             }
+        });
+
+        if (!tag) {
+            console.error(`Tag with slug ${tagSlug} not found.`);
+            return [];
         }
-    });
 
-    // Limiter le nombre d'images
-    const limitedImages = filteredImages.slice(0, limit);
+        // Extraire les photos associées au tag
+        const photos = tag.photos;
 
-    // Trier les images par ordre croissant basé sur leur .numero
-    limitedImages.sort((a, b) => {
-        return a.numero - b.numero;
-    });
+        // Trier les photos par ordre croissant basé sur leur .numero
+        photos.sort((a, b) => {
+            return a.numero - b.numero;
+        });
 
-    return limitedImages;
+        // Limiter le nombre de photos
+        const limitedPhotos = photos.slice(0, limit);
+
+        console.log("limitedPhotos",limitedPhotos.slice(0,3))
+
+        return limitedPhotos;
+    } catch (error) {
+        console.error('Une erreur est survenue lors de la récupération des images par tag :', error);
+        return [];
+    } finally {
+        await prisma.$disconnect();
+    }
 }
 
 export default getImagesbyTag;

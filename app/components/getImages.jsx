@@ -24,16 +24,16 @@ async function getImages( noSlugTags = []) {
             }
         });
 
-        images.slice(0, 3).forEach(image => {
-            // Assurez-vous que l'objet tags existe et est un tableau
-            if (image.tags && Array.isArray(image.tags)) {
-                // Utilisez la méthode map pour transformer chaque objet tag en son nom
-                const tagNames = image.tags.map(tag => tag.name);
-                console.log("Noms des tags pour l'image", image.id, ":", tagNames);
-            } else {
-                console.log("Pas de tags associés à l'image", image.id);
-            }
-        });
+        // images.slice(0, 3).forEach(image => {
+        //     // Assurez-vous que l'objet tags existe et est un tableau
+        //     if (image.tags && Array.isArray(image.tags)) {
+        //         // Utilisez la méthode map pour transformer chaque objet tag en son nom
+        //         const tagNames = image.tags.map(tag => tag.name);
+        //         console.log("Noms des tags pour l'image", image.id, ":", tagNames);
+        //     } else {
+        //         console.log("Pas de tags associés à l'image", image.id);
+        //     }
+        // });
 
          // Récupérer les images exclues
          const excludedImages = await prisma.photo.findMany({
