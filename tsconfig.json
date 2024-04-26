@@ -1,5 +1,14 @@
 {
   "compilerOptions": {
+    "baseUrl": "app", // Définit la base des chemins relatifs au dossier app
+    "paths": {
+      "@/toto/*": [
+        "toto/*"
+      ], // Alias pour tous les fichiers dans le dossier toto sous app
+      "@/utils/*": [
+        "utils/*"
+      ] // Alias pour tous les fichiers dans le dossier utils sous app
+    },
     "lib": [
       "dom",
       "dom.iterable",
@@ -26,8 +35,9 @@
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "app/components/media-items/media-items-list.jsx"  ],
+    "**/*.tsx",
+    "app/components/media-items/media-items-list.jsx"
+  ],
   "exclude": [
     "node_modules"
   ]

@@ -35,3 +35,10 @@ model Tag {
   parentId   Int?     @map("parent_id")
   childTags  Tag[]    @relation("ChildTags")
 }
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+  role     String
+}
