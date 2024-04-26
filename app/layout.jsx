@@ -4,11 +4,16 @@ import './globals.css';
 import './page.module.css';
 import { site } from './site';
 
+import { getServerSession } from 'next-auth';
+import Logout from './logout';
+
+import Link from 'next/link';
+
 const inter = Inter({ subsets: ['latin'] });
 
 const siteMetadata = site;
 
-export default function RootLayout({
+export default async function RootLayout({
   children
 }) 
 {
@@ -19,6 +24,8 @@ export default function RootLayout({
   const description = `${siteDescription}`;
   // const title = `${siteTitle} | ${pageTitle || ''}`;
   // const description = `${siteDescription} | ${pageDescription || ''}`;
+
+  const session = await getServerSession();
 
   return (
     <html lang="en" className="dark">
@@ -33,6 +40,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=BioRhyme:wght@200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet"/>
       </head>
       <body className=" font-texte bg-white dark:bg-neutral-900">
+      <nav>
+          {!!session && <Logout />}
+          {!session && <Link href="/login">Login</Link>}
+        </nav>
         {children}
       </body>
     </html>

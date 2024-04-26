@@ -2,6 +2,9 @@
 import { useEffect } from "react";
 import { menuItems, site } from "./site";
 
+import { getServerSession } from 'next-auth';
+
+
 const Navbar = () => {
   useEffect(() => {
     const init = async () => {

@@ -37,7 +37,7 @@
     "**/*.ts",
     "**/*.tsx",
     "app/components/media-items/media-items-list.jsx"
-  ],
+, "app/api/auth/[...nextauth]/pages.js"  ],
   "exclude": [
     "node_modules"
   ]
