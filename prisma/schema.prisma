@@ -9,18 +9,22 @@ datasource db {
 }
 
 model Photo {
-  id         Int         @id @default(autoincrement())
-  numero     Int         // numéro dans le catalogue - CAT
-  dimensions String?     // Les dimensions de la photo - DIM
-  createdAt  DateTime    @default(now())
-  tags       Tag[]       // Relation many-to-many avec la table des tags - TAG
-  url        String      // L'url de la photo
-  name       String      // Nom original du fichier image - IMG
-  height     Int         @default(0)
-  width      Int         @default(0)
-  published  Boolean     @default(true)
-  favorites  Favorite[]  // Ajout pour relation avec les favoris
+  id          Int         @id @default(autoincrement())
+  numero      Int         // numéro dans le catalogue - CAT
+  dimensions  String?     // Les dimensions de la photo - DIM
+  createdAt   DateTime    @default(now())
+  tags        Tag[]       // Relation many-to-many avec la table des tags - TAG
+  url         String      // L'url de la photo
+  name        String      // Nom original du fichier image - IMG
+  height      Int         @default(0)
+  width       Int         @default(0)
+  published   Boolean     @default(true)
+  favorites   Favorite[]  // Ajout pour relation avec les favoris
+  title       String?     // 
+  description String?     // Description de la photo, optionnelle
 }
+
+
 
 model Tag {
   id         Int      @id @default(autoincrement())

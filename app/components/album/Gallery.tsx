@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession } from "next-auth/react";
 import { PrismaClient } from '@prisma/client';
 import PhotoAlbum from "react-photo-album";
@@ -17,11 +17,15 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import Eye from "./icons/eye"
 import Star from "./icons/Star"
-import { tree } from 'next/dist/build/templates/app-page';
 
 import { useSelector, useDispatch } from 'react-redux';
 
 const prisma = new PrismaClient();
+
+
+
+
+
 
 const Gallery = ({ photos }) => {
   const { data: session } = useSession();  // Récupérer les données de session
@@ -29,13 +33,60 @@ const Gallery = ({ photos }) => {
   const [index, setIndex] = useState(-1);
   const [publishedPhotos, setPublishedPhotos] = useState([]);
 
+  const [editingId, setEditingId] = useState(null);
+  const [editedTitle, setEditedTitle] = useState("");
+
+  const [titles, setTitles] = useState({});
+  const inputRef = useRef(null);
+
+
+  const handleKeyDown = (e, photoId, newTitle) => {
+    if (e.which === 'Enter') {
+      e.preventDefault(); // Empêche le comportement par défaut du formulaire
+      updatePhotoTitle(photoId, newTitle);
+      if (inputRef.current) inputRef.current.blur(); // Retire le focus de l'input
+    }
+  };
+
+  useEffect(() => {
+    const initialTitles = {};
+    photos.forEach(photo => {
+      initialTitles[photo.id] = photo.title || photo.name; // S'assurer que photo.title est défini
+    });
+    setTitles(initialTitles);
+    console.log("initialTitles", titles)
+
+  }, [photos]);
+
+
   console.log(session)
 
   // @ts-ignore
   const isVisible = useSelector(state => state.visible.isVisible);
 
+
+  const updatePhotoTitle = async (photoId, title) => {
+    try {
+      const response = await fetch(`/api/updatePhotoTitle`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ photoId, title }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update photo title');
+      toast.success("Titre mis à jour!");
+    } catch (error) {
+      console.error("Erruer lors de la mise à jour", error);
+      toast.error("Failed to update title");
+    }
+  };
+
+
   useEffect(() => {
     let filteredPhotos;
+    // @ts-ignore
     if (session && session.user.role === 'admin') {
       // Si l'utilisateur est admin et isVisible est true, montrez toutes les photos
       // Sinon, montrez seulement les photos publiées
@@ -78,19 +129,19 @@ const Gallery = ({ photos }) => {
   const toggleRecent = async (photoId) => {
     try {
       let isRecent = false; // Définir isRecent en dehors de la boucle map
-  
+
       const updatedPhotos = publishedPhotos.map(photo => {
         if (photo.id === photoId) {
           // Vérifie si la photo est déjà marquée comme récente
           isRecent = recentPhotos.has(photoId);
-  
+
           // Met à jour l'ensemble des photos récentes
           if (isRecent) {
             recentPhotos.delete(photoId); // Retire la photo des photos récentes
           } else {
             recentPhotos.add(photoId); // Ajoute la photo aux photos récentes
           }
-  
+
           // Met à jour les tags de la photo en fonction de son statut récent
           return {
             ...photo,
@@ -101,19 +152,19 @@ const Gallery = ({ photos }) => {
         }
         return photo;
       });
-  
+
       // Met à jour l'état des photos récentes
       setRecentPhotos(new Set(recentPhotos));
-  
+
       // Appel à l'API pour mettre à jour l'état des photos récentes sur le serveur
       await updateRecentPhotosOnServer(photoId, !isRecent);
-  
+
       console.log('Tag "TABLEAUX RECENT" updated successfully');
     } catch (error) {
       console.error('An error occurred while updating tag "TABLEAUX RECENT":', error);
     }
   };
-  
+
   const updateRecentPhotosOnServer = async (photoId, toggleRecent) => {
     try {
       const response = await fetch(`/api/toggleRecentPhotos`, {
@@ -123,7 +174,7 @@ const Gallery = ({ photos }) => {
         },
         body: JSON.stringify({ photoId, toggleRecent }),
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to update the recent photos');
       }
@@ -132,7 +183,7 @@ const Gallery = ({ photos }) => {
       toast.error("Erreur lors de la mise à jour des photos récentes.");
     }
   };
-  
+
   const togglePublished = async (photoId, state) => {
     console.log(photoId, state)
     const newPhotos = publishedPhotos.map(photo => {
@@ -225,6 +276,30 @@ const Gallery = ({ photos }) => {
               position: 'relative',
               opacity: photo.published ? 1 : 0.2 // Appliquer l'opacité selon l'état 'published'
             }} title={photo.src}>
+
+              {/* Editable title displayed here if admin */}
+              {session && session.user.role === 'admin' && (
+              <input className='text-white bg-black text-center w-full absolute -bottom-5'
+                type="text"
+                value={titles[photo.id] || ''}
+                ref={inputRef}
+                onChange={(e) => {
+                  const newTitles = { ...titles, [photo.id]: e.target.value };
+                  setTitles(newTitles);
+                }}
+                onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
+                // onKeyDown={(e) => handleKeyDown(e, photo.id, titles[photo.id])}
+                readOnly={!session || session.user.role !== 'admin'}
+              />
+              )}
+
+              {!session || session.user.role !== 'admin' && (
+                <div className='text-white bg-black text-center w-full absolute -bottom-5'>
+                   {titles[photo.id] || ''}
+                </div>
+              )}
+
+
               {/* Icône de cœur pour marquer comme favori */}
               <button
                 onClick={(e) => {
@@ -244,9 +319,8 @@ const Gallery = ({ photos }) => {
                 )}
               </button>
 
-              
-              {/* @ts-ignore */}
-              {session && session.user.role === 'admin'  && (
+              {/* Autres boutons conditionnels pour l'admin */}
+              {session && session.user.role === 'admin' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -257,9 +331,7 @@ const Gallery = ({ photos }) => {
                   <Eye isOpen={photo.published} />
                 </button>
               )}
-              
-              {/* @ts-ignore */}
-              {session && session.user.role === 'admin'  && (
+              {session && session.user.role === 'admin' && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -270,6 +342,7 @@ const Gallery = ({ photos }) => {
                   <Star isOpen={recentPhotos.has(photo.id)} />
                 </button>
               )}
+
               {renderDefaultPhoto({ wrapped: true })}
             </div>
           );

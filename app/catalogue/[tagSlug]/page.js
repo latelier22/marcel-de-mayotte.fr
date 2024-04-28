@@ -62,7 +62,9 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
         name: photo.name,
         dimensions : photo.dimensions,
         published: photo.published, 
-        isFavorite : photo.isFavorite
+        isFavorite : photo.isFavorite,
+        title : photo.title,
+        description : photo.description
       };
 
     }

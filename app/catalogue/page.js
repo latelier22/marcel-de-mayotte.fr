@@ -45,7 +45,9 @@ const userId = session?.user?.id || null;
         name: photo.name,
         dimensions : photo.dimensions,
         published: photo.published, 
-        isFavorite : photo.isFavorite
+        isFavorite : photo.isFavorite,
+        title : photo.title,
+        description : photo.description
       };
 
   });
