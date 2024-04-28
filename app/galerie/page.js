@@ -6,7 +6,8 @@ import RootLayout from "../layout";
 import { Pages, site } from "../site";
 import photos from "../../public/photos.json"
 
-import Gallery from "../components/album/Gallery"
+import GalleryRecent from "../components/album/GalleryRecent"
+// import Gallery from "../components/album/Gallery"
 import TitleLine from "../TitleLine"
 
 import styles from '../page.module.css'; // Importez votre fichier CSS
@@ -27,7 +28,7 @@ async function Page() {
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
       <TitleLine titel = {"GALERIE"} />
-          <Gallery className="relative mt-36"  photos={photosWithAlt} />
+          <GalleryRecent className="relative mt-36"  photos={photosWithAlt} />
          
       <Footer />
     </RootLayout>

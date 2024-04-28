@@ -2,44 +2,49 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function getImagesbyTag(tagSlug, limit = Infinity) {
-    console.log(tagSlug)
-    try {
-        // Récupérer les informations du tag correspondant au slug donné
-        const tag = await prisma.tag.findFirst({
-            where: {
-                slug: tagSlug,
-            },
-            include: {
-                photos: true // Inclure les photos associées au tag
+async function getImagesbyTag(tagSlug, userId = null) {
+    // Récupérer toutes les photos correspondant au tag
+    const photos = await prisma.photo.findMany({
+        where: {
+            tags: {
+                some: {
+                    slug: tagSlug
+                }
             }
-        });
-
-        if (!tag) {
-            console.error(`Tag with slug ${tagSlug} not found.`);
-            return [];
+        },
+        include: {
+            tags: true  // Inclut les détails des tags si nécessaire
         }
+    });
 
-        // Extraire les photos associées au tag
-        const photos = tag.photos;
-
-        // Trier les photos par ordre croissant basé sur leur .numero
-        photos.sort((a, b) => {
-            return a.numero - b.numero;
-        });
-
-        // Limiter le nombre de photos
-        const limitedPhotos = photos.slice(0, limit);
-
-        console.log("limitedPhotos",limitedPhotos.slice(0,3))
-
-        return limitedPhotos;
-    } catch (error) {
-        console.error('Une erreur est survenue lors de la récupération des images par tag :', error);
-        return [];
-    } finally {
-        await prisma.$disconnect();
+    if (!userId) {
+        // Si aucun utilisateur n'est connecté, renvoyez toutes les photos avec isFavorite défini à false
+        return photos.map(photo => ({
+            ...photo,
+            isFavorite: false
+        }));
     }
+
+    // Si un utilisateur est connecté, déterminez quelles photos sont ses favoris
+    const favoriteIds = new Set();
+    const favorites = await prisma.favorite.findMany({
+        where: {
+            userId: userId
+        }
+    });
+    favorites.forEach(fav => favoriteIds.add(fav.photoId));
+
+    // Ajuster la propriété isFavorite pour chaque photo et trier pour mettre les favoris en premier
+    const photosWithFavorites = photos.map(photo => ({
+        ...photo,
+        isFavorite: favoriteIds.has(photo.id)
+    }));
+
+    // Trier les photos pour que les favorites soient en premier
+    photosWithFavorites.sort((a, b) => (b.isFavorite - a.isFavorite));
+
+    return photosWithFavorites;
 }
+
 
 export default getImagesbyTag;

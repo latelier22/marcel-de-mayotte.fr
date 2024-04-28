@@ -2,11 +2,11 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function getImages( noSlugTags = []) {
+async function getImages( noSlugTags = [],userId=null) {
     try {
         // Récupérer les premières "limit" images de la base de données
         // Récupérer les premières "limit" images de la base de données
-        let images = await prisma.photo.findMany({
+        let photos = await prisma.photo.findMany({
             where: {
                 NOT: {
                     tags: {
@@ -24,44 +24,35 @@ async function getImages( noSlugTags = []) {
             }
         });
 
-        // images.slice(0, 3).forEach(image => {
-        //     // Assurez-vous que l'objet tags existe et est un tableau
-        //     if (image.tags && Array.isArray(image.tags)) {
-        //         // Utilisez la méthode map pour transformer chaque objet tag en son nom
-        //         const tagNames = image.tags.map(tag => tag.name);
-        //         console.log("Noms des tags pour l'image", image.id, ":", tagNames);
-        //     } else {
-        //         console.log("Pas de tags associés à l'image", image.id);
-        //     }
-        // });
-
-         // Récupérer les images exclues
-         const excludedImages = await prisma.photo.findMany({
+        if (!userId) {
+            // Si aucun utilisateur n'est connecté, renvoyez toutes les photos avec isFavorite défini à false
+            return photos.map(photo => ({
+                ...photo,
+                isFavorite: false
+            }));
+        }
+    
+        // Si un utilisateur est connecté, déterminez quelles photos sont ses favoris
+        const favoriteIds = new Set();
+        const favorites = await prisma.favorite.findMany({
             where: {
-                tags: {
-                    some: {
-                        name: {
-                            in: noSlugTags
-                        }
-                    }
-                }
-            },
-            include: {
-                tags: true // Inclure les tags associés à chaque image
+                userId: userId
             }
         });
+        favorites.forEach(fav => favoriteIds.add(fav.photoId));
+    
+        // Ajuster la propriété isFavorite pour chaque photo et trier pour mettre les favoris en premier
+        const photosWithFavorites = photos.map(photo => ({
+            ...photo,
+            isFavorite: favoriteIds.has(photo.id)
+        }));
+    
+        // Trier les photos pour que les favorites soient en premier
+        photosWithFavorites.sort((a, b) => (b.isFavorite - a.isFavorite));
+    
+        return photosWithFavorites;
 
-        // Afficher les images exclues dans la console
-        // console.log("Images exclues :", excludedImages);
-
-
-
-
-        // Log pour vérification
-        // console.log("getImages PRISMA", images);
-
-        // Retourner les images récupérées
-        return images;
+        
     } catch (error) {
         console.error("Une erreur est survenue lors de la récupération des images :", error);
         return []; // Retourner un tableau vide en cas d'erreur

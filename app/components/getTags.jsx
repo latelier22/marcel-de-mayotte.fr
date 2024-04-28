@@ -13,7 +13,6 @@ async function getTags() {
       
     });
 
-    console.log(allTags.slice(10,12))
 
     const tagsArray = allTags.map ((tag) => {
       const { name, slug, photos } = tag;
@@ -32,8 +31,6 @@ async function getTags() {
         mainTag: false // Remplacer par true/false en fonction de la logique de votre application
       };h
     })
-
-console.log( tagsArray.slice(0,3))
 
     return tagsArray;
   } catch (error) {
