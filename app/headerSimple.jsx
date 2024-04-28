@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import { menuItems, site } from "./site";
+import { site } from "./site";
 import Title from "./TitleLine";
 
 const HeaderSimple = ({ photos, siteTitle, title }) => {

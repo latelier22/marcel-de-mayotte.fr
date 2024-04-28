@@ -27,9 +27,11 @@ const Gallery = ({ photos }) => {
   const [index, setIndex] = useState(-1);
   const [publishedPhotos, setPublishedPhotos] = useState([]);
 
+  console.log(session)
+
   // Filtre les photos en fonction de la session.
   useEffect(() => {
-    if (session) {
+    if (session && session.user.role ==='admin') {
       setPublishedPhotos(photos);
     } else {
       const filteredPublishedPhotos = photos.filter(photo => photo.published);
@@ -235,7 +237,7 @@ const Gallery = ({ photos }) => {
               </button>
 
               {/* Bouton Publier/Non publié, visible seulement si la session existe */}
-              {session && (
+              {session && session.user.role === 'admin'  && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

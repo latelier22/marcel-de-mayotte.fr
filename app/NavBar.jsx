@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { menuItems, site } from "./site";
+import Link from "next/link";
 
 const Navbar = () => {
   const { data: session } = useSession();  // Récupérer les données de session
@@ -93,6 +94,7 @@ const Navbar = () => {
                   </button>
                 </li>
               ) : (
+                <>
                 <li className="lg:mb-0 lg:pr-2">
                   <button
                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
@@ -101,6 +103,15 @@ const Navbar = () => {
                     Sign In
                   </button>
                 </li>
+                <li className="lg:mb-0 lg:pr-2">
+                  <Link
+                     className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                      href={"/inscription"}
+                  >
+                    Sign Up
+                  </Link>
+                </li>
+                </>
               )}
             </ul>
           </div>

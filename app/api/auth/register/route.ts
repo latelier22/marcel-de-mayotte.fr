@@ -3,6 +3,8 @@ import { hash } from 'bcrypt';
 import prisma from "../../../../prisma/prisma";
 
 export async function POST(request: Request) {
+
+
   try {
     const { email, password } = await request.json();
     // validate email and password
@@ -15,7 +17,7 @@ export async function POST(request: Request) {
       data: {
         email,
         password: hashedPassword,
-        role : "admin"
+        role : "visit"
       }
     });
 
