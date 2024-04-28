@@ -31,6 +31,7 @@ const Gallery = ({ photos }) => {
 
   // Filtre les photos en fonction de la session.
   useEffect(() => {
+    // @ts-ignore
     if (session && session.user.role ==='admin') {
       setPublishedPhotos(photos);
     } else {
@@ -236,7 +237,8 @@ const Gallery = ({ photos }) => {
                 )}
               </button>
 
-              {/* Bouton Publier/Non publié, visible seulement si la session existe */}
+              
+              {/* @ts-ignore */}
               {session && session.user.role === 'admin'  && (
                 <button
                   onClick={(e) => {
@@ -248,8 +250,9 @@ const Gallery = ({ photos }) => {
                   <Eye isOpen={photo.published} />
                 </button>
               )}
-              {/* Afficher l'icône d'étoile et gérer le clic */}
-              {session && (
+              
+              {/* @ts-ignore */}
+              {session && session.user.role === 'admin'  && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
