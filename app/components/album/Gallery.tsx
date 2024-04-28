@@ -19,6 +19,8 @@ import Eye from "./icons/eye"
 import Star from "./icons/Star"
 import { tree } from 'next/dist/build/templates/app-page';
 
+import { useSelector, useDispatch } from 'react-redux';
+
 const prisma = new PrismaClient();
 
 const Gallery = ({ photos }) => {
@@ -29,16 +31,21 @@ const Gallery = ({ photos }) => {
 
   console.log(session)
 
-  // Filtre les photos en fonction de la session.
+  // @ts-ignore
+  const isVisible = useSelector(state => state.visible.isVisible);
+
   useEffect(() => {
-    // @ts-ignore
-    if (session && session.user.role ==='admin') {
-      setPublishedPhotos(photos);
+    let filteredPhotos;
+    if (session && session.user.role === 'admin') {
+      // Si l'utilisateur est admin et isVisible est true, montrez toutes les photos
+      // Sinon, montrez seulement les photos publiées
+      filteredPhotos = isVisible ? photos : photos.filter(photo => photo.published);
     } else {
-      const filteredPublishedPhotos = photos.filter(photo => photo.published);
-      setPublishedPhotos(filteredPublishedPhotos);
+      // Pour les non-admins, montrez toujours uniquement les photos publiées
+      filteredPhotos = photos.filter(photo => photo.published);
     }
-  }, [session, photos]);
+    setPublishedPhotos(filteredPhotos);
+  }, [session, photos, isVisible]);  // Ajoutez isVisible comme une dépendance
 
   // Initialiser l'état 'favorites' avec les favoris de l'objet 'photos'
   useEffect(() => {

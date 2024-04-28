@@ -1,3 +1,5 @@
+"use client"
+
 import React from 'react';
 import { Inter } from 'next/font/google';
 import './globals.css';
@@ -5,6 +7,7 @@ import './page.module.css';
 import { site } from './site';
 
 import { NextAuthProvider} from "utils/NextAuthProvider"
+import ReduxProvider, { Providers } from "./ReduxProvider";
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,11 +35,13 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=BioRhyme:wght@200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet"/>
       </head>
       <body className=" font-texte bg-white dark:bg-neutral-900">
+        <ReduxProvider>
       <NextAuthProvider>
       
       {children}
       
     </NextAuthProvider>
+    </ReduxProvider>
       </body>
     </html>
   );

@@ -5,10 +5,18 @@ import { useSession, signIn, signOut } from "next-auth/react";
 import { menuItems, site } from "./site";
 import Link from "next/link";
 
+import VisibilityToggleButton from "./components/album/icons/VisibilityToggleButton"
+import { useSelector, useDispatch } from 'react-redux';
+import { toggleVisibility } from './lib/features/auth/visibleSlice'; // Assurez-vous que le chemin d'importation est correct
+import Eye from './components/album/icons/eye'
+
 const Navbar = () => {
   const { data: session } = useSession();  // Récupérer les données de session
 
-  console.log(session)
+
+  const isVisible = useSelector(state => state.visible.isVisible);
+
+  console.log(session, "isVisible=", isVisible)
 
   useEffect(() => {
     const init = async () => {
@@ -85,6 +93,7 @@ const Navbar = () => {
               ))}
               {/* Ajouter l'option de connexion/déconnexion */}
               {session ? (
+                <>
                 <li className="lg:mb-0 lg:pr-2">
                   <button
                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
@@ -93,6 +102,8 @@ const Navbar = () => {
                     {session.user.email.split("@",1) }   /   Sign Out
                   </button>
                 </li>
+                <VisibilityToggleButton/>
+                </>
               ) : (
                 <>
                 <li className="lg:mb-0 lg:pr-2">
