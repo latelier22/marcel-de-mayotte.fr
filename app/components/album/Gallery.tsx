@@ -23,10 +23,6 @@ import { useSelector, useDispatch } from 'react-redux';
 const prisma = new PrismaClient();
 
 
-
-
-
-
 const Gallery = ({ photos }) => {
   const { data: session } = useSession();  // Récupérer les données de session
   const [favorites, setFavorites] = useState(new Set());
@@ -39,14 +35,6 @@ const Gallery = ({ photos }) => {
   const [titles, setTitles] = useState({});
   const inputRef = useRef(null);
 
-
-  const handleKeyDown = (e, photoId, newTitle) => {
-    if (e.which === 'Enter') {
-      e.preventDefault(); // Empêche le comportement par défaut du formulaire
-      updatePhotoTitle(photoId, newTitle);
-      if (inputRef.current) inputRef.current.blur(); // Retire le focus de l'input
-    }
-  };
 
   useEffect(() => {
     const initialTitles = {};

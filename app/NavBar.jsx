@@ -13,10 +13,11 @@ import Eye from './components/album/icons/eye'
 const Navbar = () => {
   const { data: session } = useSession();  // Récupérer les données de session
 
+  const isAdmin = (session && session.user.role === 'admin')
 
   const isVisible = useSelector(state => state.visible.isVisible);
 
-  console.log(session, "isVisible=", isVisible)
+  console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
 
   useEffect(() => {
     const init = async () => {
@@ -99,10 +100,14 @@ const Navbar = () => {
                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                     onClick={() => signOut()}
                   >
-                    {session.user.email.split("@",1) }   /   Sign Out
+                    {session.user.email.split("@",1) }   /  déconnexion
                   </button>
                 </li>
-                <VisibilityToggleButton/>
+                {isAdmin && (
+                <li className="lg:mb-0 lg:pr-2">
+                  <VisibilityToggleButton />
+                </li>
+              )}
                 </>
               ) : (
                 <>
@@ -111,7 +116,7 @@ const Navbar = () => {
                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                     onClick={() => signIn()}
                   >
-                    Sign In
+                    Se connecter
                   </button>
                 </li>
                 <li className="lg:mb-0 lg:pr-2">
@@ -119,7 +124,7 @@ const Navbar = () => {
                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                       href={"/inscription"}
                   >
-                    Sign Up
+                    S'inscrire
                   </Link>
                 </li>
                 </>
