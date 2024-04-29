@@ -51,6 +51,10 @@ const Gallery = ({ photos }) => {
 
   // @ts-ignore
   const isVisible = useSelector(state => state.visible.isVisible);
+// @ts-ignore
+  const isReadOnly = !session || session.user.role !== 'admin';
+// @ts-ignore
+  const isAdmin = (session && session.user.role === 'admin')
 
 
   const updatePhotoTitle = async (photoId, title) => {
@@ -75,7 +79,7 @@ const Gallery = ({ photos }) => {
   useEffect(() => {
     let filteredPhotos;
     // @ts-ignore
-    if (session && session.user.role === 'admin') {
+    if (isAdmin) {
       // Si l'utilisateur est admin et isVisible est true, montrez toutes les photos
       // Sinon, montrez seulement les photos publiées
       filteredPhotos = isVisible ? photos : photos.filter(photo => photo.published);
@@ -246,7 +250,7 @@ const Gallery = ({ photos }) => {
   };
 
   return (
-    <div>
+    <>
       <PhotoAlbum
         photos={publishedPhotos}
         spacing={50}
@@ -258,15 +262,16 @@ const Gallery = ({ photos }) => {
           const borderStyle = hasBlackAndWhiteTag ? "4px solid white" : "4px solid black";
 
           return (
+            <>
             <div style={{
               ...wrapperStyle,
               border: borderStyle,
               position: 'relative',
-              opacity: photo.published ? 1 : 0.2 // Appliquer l'opacité selon l'état 'published'
+              opacity: photo.published ? 1 : 0.2
             }} title={photo.src}>
 
-              {/* Editable title displayed here if admin */}
-              {session && session.user.role === 'admin' && (
+              {/* @ts-ignore*/}
+              {isAdmin && (
               <input className='text-white bg-black text-center w-full absolute -bottom-5'
                 type="text"
                 value={titles[photo.id] || ''}
@@ -276,12 +281,11 @@ const Gallery = ({ photos }) => {
                   setTitles(newTitles);
                 }}
                 onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
-                // onKeyDown={(e) => handleKeyDown(e, photo.id, titles[photo.id])}
-                readOnly={!session || session.user.role !== 'admin'}
+                readOnly={isReadOnly}
               />
               )}
-
-              {!session || session.user.role !== 'admin' && (
+              {/* @ts-ignore*/}
+              {isReadOnly && (
                 <div className='text-white bg-black text-center w-full absolute -bottom-5'>
                    {titles[photo.id] || ''}
                 </div>
@@ -307,8 +311,8 @@ const Gallery = ({ photos }) => {
                 )}
               </button>
 
-              {/* Autres boutons conditionnels pour l'admin */}
-              {session && session.user.role === 'admin' && (
+              {/* @ts-ignore*/}
+              {isAdmin && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -319,7 +323,8 @@ const Gallery = ({ photos }) => {
                   <Eye isOpen={photo.published} />
                 </button>
               )}
-              {session && session.user.role === 'admin' && (
+              {/* @ts-ignore*/}
+              {isAdmin && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -333,6 +338,7 @@ const Gallery = ({ photos }) => {
 
               {renderDefaultPhoto({ wrapped: true })}
             </div>
+              </>
           );
         }}
       />
@@ -345,7 +351,7 @@ const Gallery = ({ photos }) => {
         plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
       />
       <ToastContainer />
-    </div>
+    </>
   );
 };
 

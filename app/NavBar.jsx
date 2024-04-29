@@ -116,7 +116,7 @@ const Navbar = () => {
                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                     onClick={() => signIn()}
                   >
-                    Se connecter
+                    Connexion
                   </button>
                 </li>
                 <li className="lg:mb-0 lg:pr-2">
@@ -124,7 +124,7 @@ const Navbar = () => {
                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                       href={"/inscription"}
                   >
-                    S'inscrire
+                    Inscription
                   </Link>
                 </li>
                 </>
