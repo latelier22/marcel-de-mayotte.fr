@@ -21,7 +21,7 @@ export const site = {
 export const menuItems = [
   { label: "Accueil", route: "/" },
   // { label: "Actualités", route: "/actualites" },
-  { label: "Tableaux récents", route: "/galerie" },
+  { "label": "Tableaux récents \u2605", "route": "/catalogue/tableaux-recents" },
   { label: "Tableaux plus anciens", route: "/catalogue/tableaux-plus-anciens" },
   { label: "Dessins", route: "/catalogue/dessins" },
   { label: "Progressions", route: "/catalogue/progressions" },

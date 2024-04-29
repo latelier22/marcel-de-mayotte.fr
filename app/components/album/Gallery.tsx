@@ -36,17 +36,6 @@ const Gallery = ({ photos }) => {
   const inputRef = useRef(null);
 
 
-  useEffect(() => {
-    const initialTitles = {};
-    photos.forEach(photo => {
-      initialTitles[photo.id] = photo.title || photo.name; // S'assurer que photo.title est défini
-    });
-    setTitles(initialTitles);
-    console.log("initialTitles", titles)
-
-  }, [photos]);
-
-
   console.log(session)
 
   // @ts-ignore
@@ -55,6 +44,26 @@ const Gallery = ({ photos }) => {
   const isReadOnly = !session || session.user.role !== 'admin';
 // @ts-ignore
   const isAdmin = (session && session.user.role === 'admin')
+
+
+  useEffect(() => {
+    const initialTitles = {};
+    photos.forEach(photo => {
+
+      if (isAdmin){
+      initialTitles[photo.id] = photo.title || photo.name;  }
+      else
+      {
+        initialTitles[photo.id] = photo.title || ''; }
+      }
+    );
+    setTitles(initialTitles);
+    console.log("initialTitles", titles)
+
+  }, [photos]);
+
+
+
 
 
   const updatePhotoTitle = async (photoId, title) => {
