@@ -21,7 +21,7 @@ function Citation() {
 
       // Changer la direction de l'animation
       setGauche(Math.random() >= 0.5);
-    }, 10000);
+    }, 20000);
 
     // Nettoyer l'intervalle lors du démontage du composant
     return () => clearInterval(interval);
