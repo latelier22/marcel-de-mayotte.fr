@@ -8,7 +8,7 @@ import Link from "next/link";
 import VisibilityToggleButton from "./components/album/icons/VisibilityToggleButton"
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleVisibility } from './lib/features/auth/visibleSlice'; // Assurez-vous que le chemin d'importation est correct
-import Eye from './components/album/icons/eye'
+import Eye from './components/album/icons/Eye'
 
 const Navbar = () => {
   const { data: session } = useSession();  // Récupérer les données de session

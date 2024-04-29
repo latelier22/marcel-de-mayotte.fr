@@ -3,7 +3,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleVisibility } from '../../../lib/features/auth/visibleSlice'; // Assurez-vous que le chemin d'importation est correct
-import Eye from './eye';
+import Eye from './Eye';
 
 function VisibilityToggleButton( {isAmin}) {
   const isVisible = useSelector((state) => state.visible.isVisible);

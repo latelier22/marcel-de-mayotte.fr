@@ -31,6 +31,7 @@ export default function NextJsImage({ slide, offset, rect , edit=false}) {
   const borderStyle = hasBlackAndWhiteTag ? "10px solid white" : "none";
 
   return (
+    <>
     <div style={{ position: "relative", border: borderStyle }}>
       { edit ? <div className="text-white">Salut</div> : ""}
       <Image
@@ -50,5 +51,6 @@ export default function NextJsImage({ slide, offset, rect , edit=false}) {
         }
       />
     </div>
+    </>
   );
 }
