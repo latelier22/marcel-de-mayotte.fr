@@ -31,7 +31,7 @@ const Gallery = ({ photos }) => {
   const [titles, setTitles] = useState({});
   const inputRef = useRef(null);
 
-  console.log(session);
+  
 
   // @ts-ignore
   const isVisible = useSelector((state) => state.visible.isVisible);
@@ -50,7 +50,7 @@ const Gallery = ({ photos }) => {
       }
     });
     setTitles(initialTitles);
-    console.log("initialTitles", titles);
+    
   }, [photos]);
 
 
@@ -184,7 +184,6 @@ console.log('Selected Photo IDs:', selectedPhotoIds);
       // Appel à l'API pour mettre à jour l'état des photos récentes sur le serveur
       await updateRecentPhotosOnServer(photoId, !isRecent);
 
-      console.log('Tag "TABLEAUX RECENT" updated successfully');
     } catch (error) {
       console.error(
         'An error occurred while updating tag "TABLEAUX RECENT":',
@@ -213,7 +212,7 @@ console.log('Selected Photo IDs:', selectedPhotoIds);
   };
 
   const togglePublished = async (photoId, state) => {
-    console.log(photoId, state);
+    
     const newPhotos = publishedPhotos.map((photo) => {
       if (photo.id === photoId) {
         return { ...photo, published: !photo.published };

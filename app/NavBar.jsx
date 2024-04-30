@@ -7,8 +7,6 @@ import Link from "next/link";
 
 import VisibilityToggleButton from "./components/album/icons/VisibilityToggleButton"
 import { useSelector, useDispatch } from 'react-redux';
-import { toggleVisibility } from './lib/features/auth/visibleSlice'; // Assurez-vous que le chemin d'importation est correct
-import Eye from './components/album/icons/Eye'
 
 const Navbar = () => {
   const { data: session } = useSession();  // Récupérer les données de session
@@ -17,7 +15,7 @@ const Navbar = () => {
 
   const isVisible = useSelector(state => state.visible.isVisible);
 
-  console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
+  // console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
 
   useEffect(() => {
     const init = async () => {
@@ -104,9 +102,9 @@ const Navbar = () => {
                   </button>
                 </li>
                 {isAdmin && (
-                <li className="lg:mb-0 lg:pr-2">
+                
                   <VisibilityToggleButton />
-                </li>
+              
               )}
                 </>
               ) : (
