@@ -1,9 +1,10 @@
 "use client";
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, Children } from "react";
 import { useSession } from "next-auth/react";
 
+import FavoriteModal from "../Modals/Modal";
+import TagModal from "../Modals/Modal";
 
-import Modal from "../Modals/Modal"
 
 import {
   toggleFavorites,
@@ -46,6 +47,33 @@ const Gallery = ({ photos }) => {
 
   //
   const [allSelected, setAllSelected] = useState(false);
+  const [lastSelection, setLastSelection] = useState([]);
+  const [photosState, setPhotosState] = useState(photos);
+
+ 
+
+  const [selectedTag, setSelectedTag] = useState('');
+
+
+// MODALS
+const [showTagModal, setShowTagModal] = useState(false);
+const [showFavoriteModal, setShowFavoriteModal] = useState(false);
+const [modalContent, setModalContent] = useState("");
+
+    // const [modalType, setModalType] = useState('');
+
+    const handleTagModal = () => {
+        setModalContent('Contenu pour la modification des tags');
+        setModalType('tag');
+        setShowTagModal(true);
+    };
+
+    const handleFavoriteModal = () => {
+        setModalContent('Contenu pour la modification des favoris');
+        setModalType('favorite');
+        setShowFavoriteModal(true);
+    };
+
 
   // @ts-ignore
   const isVisible = useSelector((state) => state.visible.isVisible);
@@ -53,6 +81,11 @@ const Gallery = ({ photos }) => {
   const isReadOnly = !session || session.user.role !== "admin";
   // @ts-ignore
   const isAdmin = session && session.user.role === "admin";
+
+  const handleRestoreSelection = () => {
+    setSelectedPhotoIds(lastSelection); // Restaure la dernière sélection sauvegardée
+    setAllSelected(lastSelection.length === photos.length); // Met à jour si toutes les photos sont sélectionnées
+  };
 
   const handleSelectAll = () => {
     const allPhotoIds = photos
@@ -63,8 +96,9 @@ const Gallery = ({ photos }) => {
   };
 
   const handleDeselectAll = () => {
+    setLastSelection(selectedPhotoIds); // Sauvegarde la sélection actuelle avant de tout désélectionner
     setSelectedPhotoIds([]);
-    setAllSelected(false); // Met à jour l'état pour refléter qu'aucune photo n'est sélectionnée
+    setAllSelected(false);
   };
 
   // Toggle entre sélectionner/désélectionner tous
@@ -76,6 +110,11 @@ const Gallery = ({ photos }) => {
     }
   };
   //
+
+  // Calcul du nombre de photos publiées
+const numberOfPublishedPhotos = useMemo(() => {
+  return photos.filter(photo => photo.published).length;
+}, [photos]);
 
   // useMemo pour calculer localTags en fonction de la visibilité et des photos publiées
   const localTags = useMemo(() => {
@@ -89,6 +128,37 @@ const Gallery = ({ photos }) => {
     });
     return Array.from(tags);
   }, [photos, isVisible]);
+
+  const tagCounts = useMemo(() => {
+    const counts = {};
+    const selectedCounts = {};
+
+    // Compter tous les tags
+    photos.forEach((photo) => {
+      photo.tags.forEach((tag) => {
+        if (typeof tag === "object") {
+          tag = tag.name; // Si le tag est un objet, utilisez tag.name
+        }
+        counts[tag] = counts[tag] ? counts[tag] + 1 : 1;
+      });
+    });
+
+    // Compter les tags pour les photos sélectionnées
+    photos.forEach((photo) => {
+      if (selectedPhotoIds.includes(photo.id)) {
+        photo.tags.forEach((tag) => {
+          if (typeof tag === "object") {
+            tag = tag.name; // Assurez-vous de manipuler les objets tag correctement
+          }
+          selectedCounts[tag] = selectedCounts[tag]
+            ? selectedCounts[tag] + 1
+            : 1;
+        });
+      }
+    });
+
+    return { counts, selectedCounts };
+  }, [photos, selectedPhotoIds]);
 
   useEffect(() => {
     const newTagStatus = {};
@@ -121,44 +191,82 @@ const Gallery = ({ photos }) => {
   }, [selectedPhotoIds, photos, localTags]);
 
   const handleTagClick = (tag) => {
+    setSelectedTag(tag);
+    console.log(selectedTag);
     if (selectedPhotoIds.length === 0) {
-      // Sélectionner toutes les photos qui ont ce tag
-      const taggedPhotoIds = photos
-        .filter((photo) => photo.tags.some((t) => t.name === tag))
-        .map((photo) => photo.id);
-      setSelectedPhotoIds(taggedPhotoIds);
+        // Sélectionner toutes les photos qui ont ce tag
+        const taggedPhotoIds = photos
+            .filter((photo) => photo.tags.some((t) => t.name === tag))
+            .map((photo) => photo.id);
+        setSelectedPhotoIds(taggedPhotoIds);
     } else {
-      const isTagInAll = selectedPhotoIds.every((id) =>
-        photos
-          .find((photo) => photo.id === id)
-          ?.tags.some((t) => t.name === tag)
-      );
-      const isTagInSome = selectedPhotoIds.some((id) =>
-        photos
-          .find((photo) => photo.id === id)
-          ?.tags.some((t) => t.name === tag)
-      );
+        const isTagInAll = selectedPhotoIds.every((id) =>
+            photos
+                .find((photo) => photo.id === id)
+                ?.tags.some((t) => t.name === tag)
+        );
+        const isTagInSome = selectedPhotoIds.some((id) =>
+            photos
+                .find((photo) => photo.id === id)
+                ?.tags.some((t) => t.name === tag)
+        );
 
-      // Dialog or modal logic to confirm action based on tag color status
-      let message = "";
-      if (isTagInAll) {
-        message =
-          "Voulez-vous supprimer ce tag de toutes les photos sélectionnées ?";
-      } else if (isTagInSome) {
-        message =
-          "Ce tag est présent sur certaines des photos sélectionnées. Voulez-vous l'ajouter à toutes ou le retirer de celles qui l'ont ?";
-      } else {
-        // isTagInNone
-        message =
-          "Voulez-vous ajouter ce tag à toutes les photos sélectionnées ?";
-      }
+        // Préparation du contenu de la modal en fonction de la présence du tag
+        let modalTagContent;
+        if (isTagInAll) {
+            modalTagContent = "Voulez-vous supprimer ce tag de toutes les photos sélectionnées ?";
+        } else if (isTagInSome) {
+            modalTagContent = "Ce tag est présent sur certaines des photos sélectionnées. Voulez-vous l'ajouter à toutes ou le retirer de celles qui l'ont ?";
+        } else {
+            modalTagContent = "Voulez-vous ajouter ce tag à toutes les photos sélectionnées ?";
+        }
 
-      if (window.confirm(message)) {
-        // Apply or remove tags based on the user's choice
-        updateTagsForSelectedPhotos(tag, isTagInAll, isTagInSome);
-      }
+        setModalContent(modalTagContent);
+        setShowTagModal(true);
+        // setModalAction(() => () => applyTagChange(tag, !isTagInAll));
     }
-  };
+};
+
+
+
+
+
+const updateTagInBulk = async (addTag) => {
+  // Mise à jour de l'état local
+  const updatedPhotos = photosState.map(photo => {
+    if (selectedPhotoIds.includes(photo.id) && !photo.tags.find(t => t.name === selectedTag)) {
+      return { ...photo, tags: [...photo.tags, { name: selectedTag, id: Date.now() }] };
+    }
+    return photo;
+  });
+
+  setPhotosState(updatedPhotos); // Met à jour les photos dans l'état local
+
+  // Appel API pour synchroniser les changements
+  try {
+    const response = await fetch(`/api/updateTagInBulk`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ selectedPhotoIds, selectedTag, addTag }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update tags on the server");
+    }
+    toast.success("Tags updated successfully!");
+  } catch (error) {
+    console.error("Failed to update tags:", error);
+    toast.error("Error updating tags.");
+  }
+};
+
+
+const applyTagChange = (addTag, tag) => {  // Accept tag as a parameter
+  updateTagInBulk(addTag, tag);  // Pass tag to the function
+  setShowTagModal(false);
+};
 
   const updateTagsForSelectedPhotos = (tag, isTagInAll, isTagInSome) => {
     const updatedPhotos = photos.map((photo) => {
@@ -183,7 +291,7 @@ const Gallery = ({ photos }) => {
       return photo;
     });
 
-    setPhotos(updatedPhotos); // Mettez à jour l'état global des photos si nécessaire
+    setPhotosState(updatedPhotos); // Mettez à jour l'état global des photos si nécessaire
   };
 
   useEffect(() => {
@@ -416,40 +524,82 @@ const Gallery = ({ photos }) => {
   };
 
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalContent, setModalContent] = useState('');
+
+
+
+
+  
+
+  
+
+
 
 
   const handleToggleFavorites = () => {
-    const selectedPhotos = photos.filter(photo => selectedPhotoIds.includes(photo.id));
-    const allAreFavorites = selectedPhotos.every(photo => photo.isFavorite);
-    const noneAreFavorites = selectedPhotos.every(photo => !photo.isFavorite);
+    const selectedPhotos = photos.filter((photo) =>
+      selectedPhotoIds.includes(photo.id)
+    );
 
-console.log("allAreFavorites",allAreFavorites)
+    selectedPhotos.map((photo) => console.log(photo.id, photo.isFavorite));
+
+    setShowFavoriteModal(true);
+    setModalContent("Que voulez-vous faire? :");
+  };
+  const applyFavoritesChange = (makeFavorites) => {
+    updateFavoritesInBulk(selectedPhotoIds, makeFavorites);
+    setShowFavoriteModal(false);
+  };
 
 
-    if (allAreFavorites || noneAreFavorites) {
-      // Si toutes sont favorites ou non favorites, toggle toutes
-      updateFavoritesOnServer(selectedPhotoIds, !allAreFavorites, user.id);
-    } else {
-      // Sinon, afficher la modale pour demander ce que l'utilisateur veut faire
-      setShowModal(true);
-      setModalContent('Certaines photos sont des favoris tandis que d’autres ne le sont pas. Voulez-vous :');
+
+  const updateFavoritesInBulk = async (selectedPhotoIds, makeFavorite) => {
+    try {
+      const response = await fetch(`/api/updateFavoritesBulk`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          selectedPhotoIds,
+          makeFavorite,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update favorites in bulk");
+      }
+      toast.success("Favorites updated successfully in bulk!");
+
+      // Mettre à jour l'état local des photos et des favoris
+      const newPhotos = photosState.map((photo) => {
+        if (selectedPhotoIds.includes(photo.id)) {
+          return { ...photo, isFavorite: makeFavorite };
+        }
+        return photo;
+      });
+      setPhotosState(newPhotos);
+
+      // Mise à jour de l'état des favoris
+      const newFavorites = new Set(favorites);
+      selectedPhotoIds.forEach((photoId) => {
+        if (makeFavorite) {
+          newFavorites.add(photoId);
+        } else {
+          newFavorites.delete(photoId);
+        }
+      });
+      setFavorites(newFavorites);
+    } catch (error) {
+      console.error(
+        "An error occurred while updating favorites in bulk:",
+        error
+      );
+      toast.error("Erreur lors de la mise à jour des favoris en masse.");
     }
   };
 
-  const applyFavoritesChange = (makeFavorites) => {
-    updateFavoritesOnServer(selectedPhotoIds, makeFavorites, user.id);
-    setShowModal(false);
-  };
-
-
-
-
-
-
-
-
+  // UN SEUL FAVORI
 
   const toggleFavorite = async (photoId) => {
     if (!session) {
@@ -468,7 +618,7 @@ console.log("allAreFavorites",allAreFavorites)
     }
 
     setFavorites(newFavorites);
-    updateFavoritesOnServer(photoId, !isFavorited, session.user.id);
+    updateFavoriteOnServer(photoId, !isFavorited, session.user.id);
 
     const newPhotos = publishedPhotos.map((photo) => {
       if (photo.id === photoId) {
@@ -479,9 +629,10 @@ console.log("allAreFavorites",allAreFavorites)
     setPublishedPhotos(newPhotos);
   };
 
-  const updateFavoritesOnServer = async (photoId, toggleFavorite, userId) => {
+  const updateFavoriteOnServer = async (photoId, toggleFavorite, userId) => {
+    console.log("updateFavoritesOnServer", photoId, toggleFavorite, userId);
     try {
-      const response = await fetch(`/api/updateFavorites`, {
+      const response = await fetch(`/api/updateFavorite`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -497,9 +648,6 @@ console.log("allAreFavorites",allAreFavorites)
       toast.error("Erreur lors de la mise à jour des favoris.");
     }
   };
-
-
-
 
   // Tri des photos pour mettre les sélectionnées en haut
   const sortedPhotos = useMemo(() => {
@@ -520,47 +668,100 @@ console.log("allAreFavorites",allAreFavorites)
     <>
       <div style={{ display: "flex" }}>
         <div
-          className="flex flex-col"
-          style={{ width: "20%", padding: "10px" }}
+          className="flex  flex-col"
+          style={{ width: "20%", padding: "64px" }}
         >
           <div className="flex flex-row justify-around ">
             <button
               className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
               onClick={handleSelectAll}
             >
-              Select All
+              Select All ({numberOfPublishedPhotos})
             </button>
             <button
               className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
               onClick={handleDeselectAll}
             >
-              Deselect All
+              Deselect All ({selectedPhotoIds.length})
+            </button>
+            <button
+              onClick={handleRestoreSelection}
+              className={`rounded-md text-white font-bold py-2 px-4 m-2 ${
+                !lastSelection.length
+                  ? "bg-neutral-200 hover:bg-neutral-200"
+                  : "bg-green-700 hover:bg-green-500 text-black"
+              }`}
+              disabled={!lastSelection.length}
+            >
+              Restaurer la sélection ({lastSelection.length})
             </button>
           </div>
           {Object.entries(tagStatus).map(([tag, color]) => (
             <button
-              className={`${color}`}
+              className={`${color} `}
               key={tag}
               style={{ margin: "5px" }}
               onClick={() => handleTagClick(tag)}
             >
-              {tag}
+              <div className="flex items-center justify-between w-full py-2 px-4">
+                <div className="flex-grow text-center">{tag}</div>
+                <div className="flex-none">
+                  {tagCounts.selectedCounts[tag] || 0} /{" "}
+                  {tagCounts.counts[tag] || 0}
+                </div>
+              </div>
             </button>
           ))}
           <div className="flex flex-row justify-around ">
-            <button 
-            className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-            onClick={handleToggleFavorites}><Heart isOpen={true} /></button>
-{showModal && (
-        <Modal onClose={() => setShowModal(false)} title="Confirmer l'action">
-          <p>{modalContent}</p>
-          <button onClick={() => applyFavoritesChange(true)}>Tout mettre en favoris</button>
-          <button onClick={() => applyFavoritesChange(false)}>Tout retirer des favoris</button>
-          <button onClick={() => applyFavoritesChange(null)}>Toggle</button>
-          <button onClick={() => setShowModal(false)}>Annuler</button>
-        </Modal>
-      )}
-            
+            <button
+              className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+              onClick={handleToggleFavorites}
+            >
+              <Heart isOpen={true} />
+            </button>
+
+            <div>
+            <button onClick={handleTagModal}>Open Tag Modal</button>
+            <button onClick={handleFavoriteModal}>Open Favorite Modal</button>
+        </div>
+        <FavoriteModal
+              isOpen={showFavoriteModal}
+              onClose={() => setShowFavoriteModal(false)}
+              title="Modification des Favoris"
+            >
+              <p>{modalContent}</p>
+              <button
+                className="bg-neutral-300 rounded-md p-4 m-2"
+                onClick={() => applyFavoritesChange(true)}
+              >
+                Ajouter la sélection aux favoris
+              </button>
+              <button
+                className="bg-neutral-300 rounded-md p-4 m-2"
+                onClick={() => applyFavoritesChange(false)}
+              >
+                Retirer la sélection des favoris
+              </button>
+            </FavoriteModal>
+            <TagModal
+              isOpen={showTagModal}
+              onClose={() => setShowTagModal(false)}
+              title="Modification des Tags"
+            >
+              <p>{modalContent}</p>
+              <button
+                className="bg-neutral-300 rounded-md p-4 m-2"
+                onClick={() => applyTagChange(true)}
+              >
+                Ajouter ce tag à la sélection
+              </button>
+              <button
+                className="bg-neutral-300 rounded-md p-4 m-2"
+                onClick={() => applyTagChange(false)}
+              >
+                Retirer ce tag de la sélection
+              </button>
+            </TagModal>
           </div>
         </div>
         <div style={{ width: "80%", padding: "10px" }}>
@@ -620,8 +821,7 @@ console.log("allAreFavorites",allAreFavorites)
                       }}
                       className={`absolute top-2 left-2`}
                     >
-                        <Heart isOpen={favorites.has(photo.id)}/>
-                     
+                      <Heart isOpen={favorites.has(photo.id)} />
                     </button>
                     {/* @ts-ignore*/}
                     {isAdmin && (

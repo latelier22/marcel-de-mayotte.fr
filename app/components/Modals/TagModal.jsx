@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, title, textClose="Fremer", children }) => {
+const TagModal = ({ isOpen, onClose, title, textClose="Fermer", children }) => {
     if (!isOpen) return null;
 
     return (
@@ -36,5 +36,5 @@ const Modal = ({ isOpen, onClose, title, textClose="Fremer", children }) => {
     );
 };
 
-export default Modal;
+export default TagModal;
 

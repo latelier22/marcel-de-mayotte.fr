@@ -30,7 +30,6 @@ export async function POST(request) {
                   }
               });
               const response = NextResponse.json({ success: true, action: "added" });
-              console.log(response)
               return response;
           } else {
               return NextResponse.json({  success: false, error: "Favorite already exists" });

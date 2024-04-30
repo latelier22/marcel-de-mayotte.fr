@@ -10,7 +10,7 @@ function EditableButton({ text, onChange, onBlur, isEditable, inputRef }) {
       isEditable ? (
         <>
         <input
-          className="text-white bg-black text-center w-full absolute -bottom-5"
+          className="text-white bg-transparent text-center w-full absolute -bottom-7"
           type="text"
           value={text}
           ref={inputRef}
@@ -20,7 +20,7 @@ function EditableButton({ text, onChange, onBlur, isEditable, inputRef }) {
       
         </>
       ) : (
-        <div className="text-white bg-black text-center w-full absolute -bottom-5">
+        <div className="text-white bg-transparent text-center w-full absolute -bottom-5">
           {text}
         </div>
       )

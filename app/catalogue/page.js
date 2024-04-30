@@ -57,7 +57,7 @@ const userId = session?.user?.id || null;
       <Navbar />
       {/* <GalleryPrivate photos={photos} />
        */}
-        <Gallery photos={photos} />
+        <Gallery className="mt-32" photos={photos} />
       <Footer />
     </RootLayout>
   );

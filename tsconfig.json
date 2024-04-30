@@ -39,7 +39,7 @@
     "**/*.tsx",
     "types/**/*.d.ts",
     "app/components/media-items/media-items-list.jsx"
-, "app/api/auth/[...nextauth]/pages.js"  ],
+, "app/api/auth/[...nextauth]/pages.js", "app/api/updateTagInBulk/route.js"  ],
   "exclude": [
     "node_modules"
   ]
