@@ -107,7 +107,7 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
             <Cards cards={tagCards} syliusCard={true} label={"Voir les étapes..."}/>
           ) : (
             // Sinon, afficher allTags
-            <Gallery photos={photos} />
+            <Gallery photos={photos} allTags={allTags} />
           )}
         </div>
       </div>

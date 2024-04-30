@@ -16,6 +16,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { Eye, Star, Htag } from "./icons";
+import EditableButton from "./buttons/EditableButton"
 
 import { useSelector, useDispatch } from "react-redux";
 
@@ -31,7 +32,54 @@ const Gallery = ({ photos }) => {
   const [titles, setTitles] = useState({});
   const inputRef = useRef(null);
 
-  
+  const [tagStatus, setTagStatus] = useState({});
+
+  // Fonction pour récupérer tous les tags uniques
+  const getAllTags = () => {
+    const allTags = new Set();
+    photos.forEach(photo => {
+      photo.tags.forEach(tag => {
+        allTags.add(tag.name);
+      });
+    });
+    return Array.from(allTags);
+  };
+
+  // Fonction pour gérer les clics sur les boutons de tag
+  const handleTagClick = (tag) => {
+    if (selectedPhotoIds.length === 0) {
+      // Sélectionner toutes les photos qui ont ce tag
+      const taggedPhotoIds = photos.filter(photo =>
+        photo.tags.some(t => t.name === tag)
+      ).map(photo => photo.id);
+      setSelectedPhotoIds(taggedPhotoIds);
+    }
+  };
+
+  // Mettre à jour les états de tag
+  useEffect(() => {
+    const allTags = getAllTags();
+    const newTagStatus = {};
+
+    allTags.forEach(tag => {
+      const isTagInAll = selectedPhotoIds.every(id =>
+        photos.find(photo => photo.id === id)?.tags.some(t => t.name === tag)
+      );
+      const isTagInSome = selectedPhotoIds.some(id =>
+        photos.find(photo => photo.id === id)?.tags.some(t => t.name === tag)
+      );
+
+      newTagStatus[tag] = isTagInAll ? 'green' : isTagInSome ? 'orange' : 'red';
+    });
+
+    setTagStatus(newTagStatus);
+  }, [selectedPhotoIds, photos]);
+
+
+
+
+
+
 
   // @ts-ignore
   const isVisible = useSelector((state) => state.visible.isVisible);
@@ -50,28 +98,33 @@ const Gallery = ({ photos }) => {
       }
     });
     setTitles(initialTitles);
-    
+
   }, [photos]);
 
 
   const handleTagButtonClick = (photoId) => {
     // Vérifier si la photo est déjà sélectionnée
-    console.log(`Button clicked for photo with id ${photoId}`);
     const isSelected = selectedPhotoIds.includes(photoId);
+
+    // Crée une copie de l'état actuel
+    let newSelectedPhotoIds = selectedPhotoIds.slice();
 
     if (isSelected) {
       // Retirer la photo de la liste des photos sélectionnées
-      console.log("UnSeleted");
-      setSelectedPhotoIds(selectedPhotoIds.filter(id => id !== photoId));
+      newSelectedPhotoIds = newSelectedPhotoIds.filter(id => id !== photoId);
     } else {
       // Ajouter la photo à la liste des photos sélectionnées
-      console.log("UnSeleted");
-      setSelectedPhotoIds([...selectedPhotoIds, photoId]);
+      newSelectedPhotoIds = [...newSelectedPhotoIds, photoId];
     }
-// Afficher les identifiants des photos sélectionnées dans la console
-console.log('Selected Photo IDs:', selectedPhotoIds);
-    
+
+    // Mettre à jour l'état avec la nouvelle liste
+    setSelectedPhotoIds(newSelectedPhotoIds);
   };
+
+  useEffect(() => {
+    // Afficher les identifiants des photos sélectionnées dans la console après mise à jour
+    console.log('Selected Photo IDs:', selectedPhotoIds);
+  }, [selectedPhotoIds]); // Ajouter selectedPhotoIds comme dépendance pour réagir à ses changements
 
 
 
@@ -212,7 +265,7 @@ console.log('Selected Photo IDs:', selectedPhotoIds);
   };
 
   const togglePublished = async (photoId, state) => {
-    
+
     const newPhotos = publishedPhotos.map((photo) => {
       if (photo.id === photoId) {
         return { ...photo, published: !photo.published };
@@ -293,147 +346,153 @@ console.log('Selected Photo IDs:', selectedPhotoIds);
   };
 
   return (
+
     <>
-      <PhotoAlbum
-        photos={publishedPhotos}
-        spacing={50}
-        layout="rows"
-        targetRowHeight={350}
-        onClick={({ index }) => setIndex(index)}
-        renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
-        
-          const hasBlackAndWhiteTag = photo.tags?.some(tag => tag.name === "NOIR ET BLANC");
+      <div style={{ display: 'flex' }}>
+        <div style={{ width: '20%', padding: '10px' }}>
+          {Object.entries(tagStatus).map(([tag, color]) => (
+            <button key={tag} style={{ backgroundColor: color, margin: '5px' }}
+              onClick={() => handleTagClick(tag)}>
+              {tag}
+            </button>
+          ))}
+        </div>
+        <div style={{ width: '80%', padding: '10px' }}>
+          {/* Votre contenu principal de la galerie ici */}
 
-          console.log(hasBlackAndWhiteTag)
-          const borderStyle = hasBlackAndWhiteTag
-            ? "4px solid white"
-            : "4px solid black";
+          <PhotoAlbum
+            photos={publishedPhotos}
+            spacing={50}
+            layout="rows"
+            targetRowHeight={350}
+            onClick={({ index }) => setIndex(index)}
+            renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
 
-          return (
-            <>
-              <div
-                style={{
-                  ...wrapperStyle,
-                  border: borderStyle,
-                  position: "relative",
-                  opacity: photo.published ? 1 : 0.2,
-                }}
-                title={photo.src}
-              >
-                {/* @ts-ignore*/}
-                {isAdmin && (
-                  <input
-                    className="text-white bg-black text-center w-full absolute -bottom-5"
-                    type="text"
-                    value={titles[photo.id] || ""}
-                    ref={inputRef}
-                    onChange={(e) => {
-                      const newTitles = {
-                        ...titles,
-                        [photo.id]: e.target.value,
-                      };
-                      setTitles(newTitles);
+              // Fonction pour déterminer le style de bordure basé sur les tags et l'état de sélection
+              const getBorderStyle = (photo) => {
+                if (selectedPhotoIds.includes(photo.id)) {
+                  return '8px solid green'; // Vert pour les photos sélectionnées
+                } else {
+                  // Retourner blanc ou noir basé sur la présence du tag "NOIR ET BLANC"
+                  return photo.tags?.some(tag => tag.name === "NOIR ET BLANC") ? '4px solid white' : '4px solid black';
+                }
+              };
+
+
+
+
+              return (
+                <>
+                  <div
+                    style={{
+                      ...wrapperStyle,
+                      border: getBorderStyle(photo), // Appliquer le style de bordure ici
+                      position: "relative",
+                      opacity: photo.published ? 1 : 0.2,
                     }}
-                    onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
-                    readOnly={isReadOnly}
-                  />
-                )}
-                {/* @ts-ignore*/}
-                {isReadOnly && (
-                  <div className="text-white bg-black text-center w-full absolute -bottom-5">
-                    {titles[photo.id] || ""}
+                    title={photo.src}
+                  >
+                    <EditableButton
+                      text={titles[photo.id] || ""}
+                      onChange={(e) => {
+                        const newTitles = { ...titles, [photo.id]: e.target.value };
+                        setTitles(newTitles);
+                      }}
+                      onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
+                      isEditable={!isReadOnly}
+                      inputRef={inputRef}
+                    />
+
+
+                    {/* Icône de cœur pour marquer comme favori */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(photo.id);
+                      }}
+                      className={`absolute top-2 left-2`}
+                    >
+                      {favorites.has(photo.id) ? (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="red"
+                          stroke="black"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-8.118-10-8.999-12-3.568z" />
+                        </svg>
+                      ) : (
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          fill="grey"
+                          stroke="red"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-8.118-10-8.999-12-3.568z" />
+                        </svg>
+                      )}
+                    </button>
+                    {/* @ts-ignore*/}
+                    {isAdmin && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTagButtonClick(photo.id);
+                        }}
+                        className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+                      >
+                        <Htag isOpen={true} />
+                      </button>
+                    )}
+
+                    {/* @ts-ignore*/}
+                    {isAdmin && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePublished(photo.id, photo.published);
+                        }}
+                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+                          }`}
+                      >
+                        <Eye isOpen={photo.published} />
+                      </button>
+                    )}
+                    {/* @ts-ignore*/}
+                    {isAdmin && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleRecent(photo.id);
+                        }}
+                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+                          }`}
+                      >
+                        <Star isOpen={recentPhotos.has(photo.id)} />
+                      </button>
+                    )}
+
+                    {renderDefaultPhoto({ wrapped: true })}
                   </div>
-                )}
-
-                {/* Icône de cœur pour marquer comme favori */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(photo.id);
-                  }}
-                  className={`absolute top-2 left-2`}
-                >
-                  {favorites.has(photo.id) ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      fill="red"
-                      stroke="black"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-8.118-10-8.999-12-3.568z" />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      fill="grey"
-                      stroke="red"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M12 4.435c-1.989-5.399-12-4.597-12 3.568 0 4.068 3.06 9.481 12 14.997 8.94-5.516 12-10.929 12-14.997 0-8.118-10-8.999-12-3.568z" />
-                    </svg>
-                  )}
-                </button>
-                {/* @ts-ignore*/}
-                {isAdmin && (
-                  <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTagButtonClick(photo.id);
-                  }}
-                    className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
-                  >
-                    <Htag isOpen={true} />
-                  </button>
-                )}
-
-                {/* @ts-ignore*/}
-                {isAdmin && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      togglePublished(photo.id, photo.published);
-                    }}
-                    className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
-                      photo.published ? "" : "text-red-700 font-extrabold"
-                    }`}
-                  >
-                    <Eye isOpen={photo.published} />
-                  </button>
-                )}
-                {/* @ts-ignore*/}
-                {isAdmin && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleRecent(photo.id);
-                    }}
-                    className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
-                      photo.published ? "" : "text-red-700 font-extrabold"
-                    }`}
-                  >
-                    <Star isOpen={recentPhotos.has(photo.id)} />
-                  </button>
-                )}
-
-                {renderDefaultPhoto({ wrapped: true })}
-              </div>
-            </>
-          );
-        }}
-      />
-      <Lightbox
-        open={index >= 0}
-        index={index}
-        close={() => setIndex(-1)}
-        slides={publishedPhotos}
-        render={{ slide: NextJsImage }}
-        plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
-      />
-      <ToastContainer />
+                </>
+              );
+            }}
+          />
+          <Lightbox
+            open={index >= 0}
+            index={index}
+            close={() => setIndex(-1)}
+            slides={publishedPhotos}
+            render={{ slide: NextJsImage }}
+            plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
+          />
+          <ToastContainer />
+        </div>
+      </div>
     </>
   );
 };

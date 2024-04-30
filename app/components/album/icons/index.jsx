@@ -2,4 +2,6 @@ import Eye from "./Eye";
 import Star from "./Star";
 import Htag from "./Htag";
 
-export { Eye, Star, Htag} 
+import Pen from "./Pen";
+
+export { Eye, Star, Htag, Pen} 
