@@ -301,7 +301,10 @@ console.log('Selected Photo IDs:', selectedPhotoIds);
         targetRowHeight={350}
         onClick={({ index }) => setIndex(index)}
         renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
-          const hasBlackAndWhiteTag = photo.tags?.includes("NOIR ET BLANC");
+        
+          const hasBlackAndWhiteTag = photo.tags?.some(tag => tag.name === "NOIR ET BLANC");
+
+          console.log(hasBlackAndWhiteTag)
           const borderStyle = hasBlackAndWhiteTag
             ? "4px solid white"
             : "4px solid black";
