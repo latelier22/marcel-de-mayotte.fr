@@ -1,0 +1,58 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("TADATABASE_URL")
+}
+
+model Photo {
+  id          Int         @id @default(autoincrement())
+  numero      Int         // numéro dans le catalogue - CAT
+  dimensions  String?     // Les dimensions de la photo - DIM
+  createdAt   DateTime    @default(now())
+  tags        Tag[]       // Relation many-to-many avec la table des tags - TAG
+  url         String      // L'url de la photo
+  name        String      // Nom original du fichier image - IMG
+  height      Int         @default(0)
+  width       Int         @default(0)
+  published   Boolean     @default(true)
+  favorites   Favorite[]  // Ajout pour relation avec les favoris
+  title       String?     // 
+  description String?     // Description de la photo, optionnelle
+}
+
+
+
+model Tag {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  photos     Photo[]  // Relation many-to-many avec la table des photos
+  slug       String
+  mainTag    Boolean  @default(false)
+  parentTag  Tag?     @relation("ChildTags", fields: [parentId], references: [id])
+  parentId   Int?     @map("parent_id")
+  childTags  Tag[]    @relation("ChildTags")
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  email      String     @unique
+  password   String
+  role       String
+  favorites  Favorite[] // Ajout pour relation avec les favoris
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  photoId   Int
+  userId    Int
+  createdAt DateTime @default(now())
+
+  photo  Photo @relation(fields: [photoId], references: [id])
+  user   User  @relation(fields: [userId], references: [id])
+
+  @@unique([userId, photoId], name: "userId_photoId")
+}

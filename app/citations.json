@@ -1,23 +1,116 @@
 [
+  [
     {
-      "texte": "La vie est un mystère qu&apos;il faut vivre, et non un problème à résoudre.",
-      "auteur": "Gandhi"
+      "texte": "L'art commence avec la retenue",
+      "auteur": "Michel Serres, philosophe"
     },
     {
-      "texte": "La simplicité est la sophistication suprême.",
-      "auteur": "Leonardo da Vinci"
-    },
-    {
-      "texte": "Le succès, c&apos;est tomber sept fois et se relever huit.",
-      "auteur": "Proverbe japonais"
-    },
-    {
-      "texte": "La seule façon de faire du bon travail est d&apos;aimer ce que vous faites.",
-      "auteur": "Steve Jobs"
-    },
-    {
-      "texte": "La véritable mesure de la réussite est la façon dont vous vous portez lorsque tout va mal.",
-      "auteur": "Lance Armstrong"
+      "texte": "L'amour aussi",
+      "auteur": "Marcel Séjour,artiste peintre"
     }
-  ]
-  
+  ],
+  {
+    "texte": "La force principale du dessin c’est qu’il contribue à évacuer la peur du noir.\n Et c’est valable pour tout le monde puisque même les Noirs ont peur du noir.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Travailler en noir et blanc permet, comme ici à Mayotte,\n de représenter le rustique sans tomber dans le sordide.\nLa couleur est là juste pour faire plaisir ; pas pour rendre compte.",
+    "auteur": "Marcel Séjour"
+  },
+  [
+    {
+      "texte": "Quand je peins un tableau je veux dire quelque chose qui rassure.",
+      "auteur": "Vincent Van Gogh"
+    },
+    {
+      "texte": "Cette phrase-là, je la prends à mon compte. \n Si je parlais comme je peins, j’aurais plein de femmes et plein d’enfants. \n Denam’neyo",
+      "auteur": "Marcel Séjour"
+    }
+  ],
+  {
+    "texte": "Il faut vingt-cinq ans pour apprendre à dessiner ;\n il faut une semaine pour apprendre à peindre.",
+    "auteur": "Jean Dominique Ingres, peintre français du 19ème siècle"
+  },
+  {
+    "texte": "Pour avoir Mayotte avec soi, il faut ou la forcer, ou la séduire. On souhaite bien du courage à ceux qui veulent la forcer.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Occupe-toi des ombres, et la lumière s’occupera d’elle-même. Voilà un bon précepte de dessinateur.\n Occupe-toi de tes ombres et la lumière s’occupera de toi. Ça doit pouvoir marcher comme ça aussi.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "L’art est la belle représentation d’une chose et non la représentation d’une belle chose.",
+    "auteur": "Emmanuel Kant"
+  },
+  {
+    "texte": "Les artistes sont des gens qui ont contact avec toutes les classes sociales\n et qui sont par conséquent ex- trêmement dangereux.\n  Je vous recommande donc d’éviter autant que possible de les fréquenter.",
+    "auteur": "Conseil donné aux membres de sa famille par la reineVictoria."
+  },
+  {
+    "texte": "Magnégné, mot mahorais connu de toute la région, qualifiant une action, \nune personne ou une chose, dont la réalisation va de l’approximatif au grand n’importe quoi.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Après avoir vécu plus de vingt ans dans les Comores, je suis encore assez souvent surpris par le comportement de leurs habitants,\n et ce qui m’étonne le plus, c’est d’être encore surpris. Je demeure donc un étranger, et c’est très bien comme ça.",
+    "auteur": "Marcel Séjour"
+  },
+  [
+    {
+      "texte": "Les œuvres d’art sont les lettres de noblesse de la seule aristocratie, celle qui a ses ancêtres devant elle.",
+      "auteur": "Rainer Maria Rilke"
+    },
+    {
+      "texte": "Je n’ai jamais rien lu de Rilke mais je sens que je vais m’y mettre parce qu’une phrase comme celle-là c’est exactement ce que de temps à autre j’ai besoin d’entendre; et de croire.",
+      "auteur": "Marcel Séjour"
+    }
+  ],
+  {
+    "texte": "Ce n’est pas de la beauté, mais c’est de la laideur du monde que nait l’énergie de l’artiste.\n Aux massacres, aux humiliations, aux décompositions, il opposera des harmonies.\n Dérisoires, au regard du vivant, mais indispensables tout de même.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Partager ou protéger. C’est le choix auquel l’humanité va de plus en plus être confrontée.\n Jamais choix de survie n’aura été aussi simple.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Ici le foyer commence là où se trouve l’enfant ; celle qui le fait, et celle(s) qui l’alimente(nt). \nEn Europe le foyer commence avec le feu ; celui qui le protège et celui qui l’alimente.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Faire quelque chose bien, une fois, c’est facile. Faire quelque chose bien deux fois demande une technique considérable.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Le style c’est une élégante façon d’arranger ses erreurs.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Quand j’étais jeune, j’aurais aimé être riche et ne rien faire d’autre que suivre mon plaisir. \nJe n’ai jamais été riche et c’est ce qui m’a sauvé. \n \n Aujourd’hui je ne veux, ni ne peux, sans doute, rien faire d’autre que peindre. \n Là, maintenant, ce que j’aurais aimé c’est être un meilleur peintre ; mais pas autre chose que peintre.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Le plus difficile dans le dessin ? Ne pas se répéter.",
+    "auteur": "Léonard de Vinci"
+  },
+  {
+    "texte": "On commence au fusain, on continue à la peinture noire (à l'huile), et on finit avec la couleur.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Qu’on en juge ! \nEmpalé sur son roc au cœur du Mozambique, \nL’alizée le menant d’espoirs en désespoirs\n Sisyphe prophétique ou Léviathan lubrique,\nMarcel sur son rocher geint et croque ses Noirs.\n C’est pas du Baudelaire ça ? En tout cas ça y ressemble.\n On aurait ainsi retrouvé à Mayotte le quatrain manquant\nce qui prouverait que le poète a bien séjourné sur l’île.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Démarrer est un vrai bonheur. On joue avec l’idée et on est mû par le désir.\nC’est la saison de l’enthousiasme, le printemps en quelque sorte.\nJe passerais volontiers mon temps à démarrer. Après, c’est du boulot, de la recherche, avec ici et là des mini joies, lorsqu’on a trouvé une harmonie satisfaisante.\nFinir, par contre, « demande un cœur d’acier ». ",
+    "auteur": "C’est Ingres qui le dit, et il a bien raison."
+  },
+  {
+    "texte": "Quand un sujet m’intéresse il m’arrive de le reprendre, en variant les compositions.",
+    "auteur": "Marcel Séjour"
+  },
+  {
+    "texte": "Le matriarcat est LA force constitutive de Mayotte ; pas la République.",
+    "auteur": "Marcel Séjour"
+  }
+]

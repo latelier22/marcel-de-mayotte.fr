@@ -1,20 +1,50 @@
-import getImages from './getImages';
-import slugify from './getSlug';
+import { PrismaClient } from '@prisma/client';
 
-async function getImagesbyTag(tagSlug, limit = Infinity) {
-    const allImages = await getImages(); // Obtenir toutes les images
+const prisma = new PrismaClient();
 
-    const filteredImages = allImages.filter(image => {
-        // Générer le slug pour chaque tag de l'image et vérifier s'il correspond au tagSlug
-        return image.tags && image.tags.some(tag => slugify(tag) === tagSlug);
-    }).slice(0, limit); // Limiter le nombre d'images
-
-    // Trier les images par ordre croissant basé sur leur .numero
-    filteredImages.sort((a, b) => {
-        return a.numero - b.numero;
+async function getImagesbyTag(tagSlug, userId = null) {
+    // Récupérer toutes les photos correspondant au tag
+    const photos = await prisma.photo.findMany({
+        where: {
+            tags: {
+                some: {
+                    slug: tagSlug
+                }
+            }
+        },
+        include: {
+            tags: true  // Inclut les détails des tags si nécessaire
+        }
     });
 
-    return filteredImages;
+    if (!userId) {
+        // Si aucun utilisateur n'est connecté, renvoyez toutes les photos avec isFavorite défini à false
+        return photos.map(photo => ({
+            ...photo,
+            isFavorite: false
+        }));
+    }
+
+    // Si un utilisateur est connecté, déterminez quelles photos sont ses favoris
+    const favoriteIds = new Set();
+    const favorites = await prisma.favorite.findMany({
+        where: {
+            userId: userId
+        }
+    });
+    favorites.forEach(fav => favoriteIds.add(fav.photoId));
+
+    // Ajuster la propriété isFavorite pour chaque photo et trier pour mettre les favoris en premier
+    const photosWithFavorites = photos.map(photo => ({
+        ...photo,
+        isFavorite: favoriteIds.has(photo.id)
+    }));
+
+    // Trier les photos pour que les favorites soient en premier
+    photosWithFavorites.sort((a, b) => (b.isFavorite - a.isFavorite));
+
+    return photosWithFavorites;
 }
+
 
 export default getImagesbyTag;

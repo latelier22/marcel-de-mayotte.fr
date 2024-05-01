@@ -1,48 +1,44 @@
-import getSlug from "./getSlug";
+import { PrismaClient } from '@prisma/client';
 
-// Fonction pour choisir une photo au hasard dans une catégorie spécifique
-function chooseRandomPhoto(tableauPhotos, tag) {
-  const photosWithTag = tableauPhotos.filter(photo => photo.tags && photo.tags.includes(tag));
-  if (photosWithTag.length > 0) {
-    const randomIndex = Math.floor(Math.random() * photosWithTag.length);
-    return photosWithTag[randomIndex];
+const prisma = new PrismaClient();
+
+async function getTags() {
+  try {
+  
+    let allTags = await prisma.tag.findMany({
+
+      include: {
+        photos: true // Inclure les photos associées à chaque tag
+      }
+      
+    });
+
+
+    const tagsArray = allTags.map ((tag) => {
+      const { name, slug, photos } = tag;
+      const count = photos.length; // Compter le nombre de photos associées à ce tag
+      let url = null;
+      if (photos.length > 0) {
+        // Sélectionner une photo aléatoire parmi les photos associées à ce tag
+        const randomIndex = Math.floor(Math.random() * photos.length);
+        url = photos[randomIndex].url; // URL de la photo aléatoire
+      }
+      return {
+        name,
+        slug,
+        count,
+        url: url, // Remplacer par l'URL de la photo aléatoire associée à ce tag
+        mainTag: false // Remplacer par true/false en fonction de la logique de votre application
+      };h
+    })
+
+    return tagsArray;
+  } catch (error) {
+    console.error('Une erreur est survenue lors de la récupération des tags :', error);
+    return []; // Retourner un tableau vide en cas d'erreur
+  } finally {
+    await prisma.$disconnect();
   }
-  return null; // Retourner null si aucune photo n'est trouvée pour ce tag
-}
-async function getTags(tableauPhotos) {
-  const tagsCount = {};
-  const mainTags = new Set(["progressions", "tableaux plus anciens", "dessins"]);
-
-  // Compter le nombre de photos pour chaque tag
-  tableauPhotos.forEach(photo => {
-    if (photo.tags) {
-      photo.tags.forEach(tag => {
-        const lowercaseTag = tag.toLowerCase();
-        tagsCount[tag] = (tagsCount[tag] || 0) + 1;
-      });
-    }
-  });
-
-  // Créer un tableau d'objets avec le nom du tag, le nombre de photos et une URL aléatoire
-  const tagsArray = Object.keys(tagsCount).map(tag => {
-    const count = tagsCount[tag];
-    const slug = getSlug(tag);
-    const randomPhoto = chooseRandomPhoto(tableauPhotos, tag);
-    const url = randomPhoto ? randomPhoto.url : null;
-    const isMainTag = mainTags.has(tag.toLowerCase());
-    return {
-      name: tag,
-      count,
-      slug,
-      url,
-      mainTag: isMainTag
-    };
-  });  
-
-  // Trier le tableau d'objets par ordre décroissant du nombre de photos
-  tagsArray.sort((a, b) => b.count - a.count);
-
-  return tagsArray;
 }
 
 export default getTags;
