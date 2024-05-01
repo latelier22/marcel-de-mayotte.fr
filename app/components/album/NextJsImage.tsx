@@ -1,3 +1,5 @@
+
+
 import Image from "next/image";
 import {
   isImageFitCover,
@@ -36,14 +38,14 @@ export default function NextJsImage({ slide, offset, rect , edit=false}) {
       <Image
         alt=""
         src={slide}
+        width={slide.width}
+        height={slide.height}
         loading="eager"
         draggable={false}
         placeholder={slide.blurDataURL ? "blur" : undefined}
         style={{
           objectFit: cover ? "contain" : "none", // Si l'image est une image de couverture, utilisez "contain" pour s'assurer qu'elle s'adapte à la boîte sans déformation
           cursor: click ? "pointer" : undefined,
-          width: "auto", // Définir la largeur de l'image sur automatique pour qu'elle s'adapte à sa taille naturelle
-          height: "auto", // Définir la hauteur de l'image sur automatique pour qu'elle s'adapte à sa taille naturelle
         }}
         onClick={
           offset === 0 ? () => click?.({ index: currentIndex }) : undefined

@@ -1,4 +1,5 @@
 "use client"
+
 import React, { useState, useEffect } from "react";
 import citations from "./citations.json"; // Assurez-vous que votre fichier JSON existe dans le dossier data
 
