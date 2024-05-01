@@ -668,25 +668,25 @@ const applyTagChange = (addTag, tag) => {  // Accept tag as a parameter
     <>
       <div style={{ display: "flex" }}>
         <div
-          className="flex  flex-col"
-          style={{ width: "20%", padding: "64px" }}
+          className="flex  flex-col p-2"
+          style={{ width: "20%" }}
         >
-          <div className="flex flex-row justify-around ">
+          <div className="flex flex-col ">
             <button
-              className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+              className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-1 m-1"
               onClick={handleSelectAll}
             >
               Select All ({numberOfPublishedPhotos})
             </button>
             <button
-              className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
+              className="rounded-md bg-red-500 hover:bg-red-700  text-white font-bold py-1 px-1 m-1"
               onClick={handleDeselectAll}
             >
               Deselect All ({selectedPhotoIds.length})
             </button>
             <button
               onClick={handleRestoreSelection}
-              className={`rounded-md text-white font-bold py-2 px-4 m-2 ${
+              className={`rounded-md text-white ffont-bold py-1 px-1 m-1 ${
                 !lastSelection.length
                   ? "bg-neutral-200 hover:bg-neutral-200"
                   : "bg-green-700 hover:bg-green-500 text-black"
