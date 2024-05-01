@@ -7,12 +7,30 @@ import getTags from "../../components/getTags";
 import Tags from "../../components/Tags";
 import getImagesbyTag from "../../components/getImagesbyTag";
 import Gallery from "../../components/album/Gallery";
-import TitleLine from "../../TitleLine";
 import getProgressionsTags from "../../components/getProgressionsTags";
 import Cards from "../../Cards";
+import {authOptions} from "../../Auth"
+
+
+import { getServerSession } from 'next-auth';
 
 async function Page({ params }) {
   // const searchParams = useSearchParams();
+
+  const session = await getServerSession(authOptions);
+
+  if (session) {
+    // La session existe, vous pouvez accéder à `session.user`, `session.expires`, etc.
+    console.log("connecté", session);
+   
+    
+} else {
+  
+  console.log("non connecté");
+}
+  
+const userId = session?.user?.id || null;
+
   const page = Pages["catalogue"];
   const pageTitle = page.title;
   const pageDescription = page.description;
@@ -21,7 +39,7 @@ async function Page({ params }) {
 
   const allPhotos = await getImages();
   const allTags = await getTags(allPhotos);
-  const listePhotos = await getImagesbyTag(tagSlug);
+  const listePhotos = await getImagesbyTag(tagSlug,userId);
   const listeAllTags = await getTags(listePhotos);
 
 const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith("progression") && tag.name.toLowerCase() !== "progressions");
@@ -31,30 +49,29 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
     tag.present = listeTags.some((listeTag) => listeTag.name === tag.name);
   });
 
+
   const photos = listePhotos.map((photo) => {
     // Vérifier si photo.dimensions est défini et n'est pas null
-    if (photo.dimensions && photo.dimensions.length >= 2) {
+  
       return {
         src: `${site.vpsServer}/images/${photo.url}`,
-        width: photo.dimensions[0],
-        height: photo.dimensions[1],
-        id: photo.numero,
-        tags : photo.tags
+        width: photo.width,
+        height: photo.height,
+        id: photo.id,
+        tags: photo.tags,
+        name: photo.name,
+        dimensions : photo.dimensions,
+        published: photo.published, 
+        isFavorite : photo.isFavorite,
+        title : photo.title,
+        description : photo.description
       };
-    } else {
-      // Gérer le cas où photo.dimensions est null ou n'a pas au moins deux éléments
-      // Par exemple, vous pouvez retourner un objet par défaut ou ignorer cette photo
-      return {
-        src: `${site.vpsServer}/images/${photo.url}`,
-        width: 0, // Valeur par défaut pour la largeur
-        height: 0, // Valeur par défaut pour la hauteur
-        id: photo.numero,
-      };
+
     }
-  });
+  );
 
   const progressionsTags = await getProgressionsTags(listePhotos);
-  console.log(progressionsTags.slice(1,progressionsTags.length));
+
 
   const tagCards = progressionsTags.slice(1,progressionsTags.length).map((tag) => ({
     title: tag.name,

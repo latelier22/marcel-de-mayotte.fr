@@ -26,6 +26,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+
+.env
 .env*.local
 
 # vercel
@@ -37,3 +39,5 @@ next-env.d.ts
 node_modules
 
 /public/images/catalogue
+app.zip
+app/Archive.zip

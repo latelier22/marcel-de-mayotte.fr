@@ -16,7 +16,7 @@ function isNextJsImage(slide) {
   );
 }
 
-export default function NextJsImage({ slide, offset, rect }) {
+export default function NextJsImage({ slide, offset, rect , edit=false}) {
   const {
     on: { click },
   } = useLightboxProps();
@@ -34,6 +34,7 @@ export default function NextJsImage({ slide, offset, rect }) {
 
   return (
     <div style={{ position: "relative", border: borderStyle }}>
+      { edit ? <div className="text-white">Salut</div> : ""}
       <Image
         alt=""
         src={slide}

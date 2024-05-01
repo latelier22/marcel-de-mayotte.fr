@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE `Tag` ADD COLUMN `mainTag` BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN `parent_id` INTEGER NULL;
+
+-- AddForeignKey
+ALTER TABLE `Tag` ADD CONSTRAINT `Tag_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `Tag`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
