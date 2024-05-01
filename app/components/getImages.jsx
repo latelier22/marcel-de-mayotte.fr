@@ -50,6 +50,7 @@ async function getImages( noSlugTags = [],userId=null) {
         // Trier les photos pour que les favorites soient en premier
         photosWithFavorites.sort((a, b) => (b.isFavorite - a.isFavorite));
     
+        console.log(photosWithFavorites)
         return photosWithFavorites;
 
         
