@@ -38,15 +38,3 @@ node_modules
 /public/images/catalogue
 app.zip
 app/Archive.zip
-prisma/migrations/20240423163337_init/migration.sql
-prisma/migrations/20240423163935_ajout_url/migration.sql
-prisma/migrations/20240423164447_ajout_numero_cat/migration.sql
-prisma/migrations/20240423172054_dimensions/migration.sql
-prisma/migrations/20240424041436_published/migration.sql
-prisma/migrations/20240425034842_tag_slug/migration.sql
-prisma/migrations/20240425042530_slug_pb/migration.sql
-prisma/migrations/20240425044826_tags_parent_enfant/migration.sql
-prisma/migrations/20240426035118_next_auth/migration.sql
-prisma/migrations/20240427064721_favorite/migration.sql
-prisma/migrations/20240427102105_favorite_unique_name_unique_user_id_photo_id_name_user_id_photo_id/migration.sql
-prisma/migrations/20240501090231_clear_numero_big_int/migration.sql
