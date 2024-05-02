@@ -22,19 +22,6 @@ async function addPhotosToDatabase() {
         }
       });
 
-      // Insérer les tags de la photo
-      for (const tagName of photoData.tags) {
-        let tag = await prisma.tag.findUnique({ where: { name: tagName } });
-        if (!tag) {
-          tag = await prisma.tag.create({ data: { name: tagName, slug: tagName.toLowerCase().replace(/ /g, '-'), mainTag: false } });
-        }
-        await prisma.photoTag.create({
-          data: {
-            photoId: createdPhoto.id,
-            tagId: tag.id,
-          },
-        });
-      }
     }
 
     console.log('Photos ajoutées à la base de données avec succès.');
