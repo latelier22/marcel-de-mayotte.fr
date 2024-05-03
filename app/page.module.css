@@ -12,3 +12,36 @@
 .tagsColumn::-webkit-scrollbar-thumb {
   background-color: black;
 }
+
+
+
+
+@keyframes explodeAnimation {
+  to {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+}
+
+
+.tag {
+  cursor: pointer;
+  margin: 5px;
+  padding: 5px;
+  border-radius: 5px;
+  background-color: #eee;
+  transition: background-color 0.3s;
+}
+
+.tag:hover {
+  background-color: #ddd; 
+}
+
+.tag-container {
+  pointer-events: none; /* Désactive les clics sur le conteneur */
+}
+
+.tag-text {
+  pointer-events: auto; /* Active les clics sur le texte */
+  cursor: pointer; /* Change le curseur pour indiquer la possibilité de cliquer */
+}
