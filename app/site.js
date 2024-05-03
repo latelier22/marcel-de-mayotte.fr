@@ -25,7 +25,7 @@ export const menuItems = [
   { label: "Tableaux plus anciens", route: "/catalogue/tableaux-plus-anciens" },
   { label: "Dessins", route: "/catalogue/dessins" },
   { label: "Progressions", route: "/catalogue/progressions" },
-  { label: "CATALOGUE COMPLET", route: "/catalogue" },
+  // { label: "CATALOGUE COMPLET", route: "/catalogue" },
   // { label: "Produits dérivés", route: "/boutique" },
   { label: "Livres", route: "/livre" },
   { label: "Vidéos", route: "/video" },

@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+export const dynamic = 'force-dynamic'
+
 async function getImages( noSlugTags = [],userId=null) {
     try {
         // Récupérer les premières "limit" images de la base de données
