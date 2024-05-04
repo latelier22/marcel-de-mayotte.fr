@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from "react"; 
 import { useSession } from "next-auth/react";
 import { PrismaClient } from '@prisma/client';
 import PhotoAlbum from "react-photo-album";
@@ -46,6 +46,41 @@ const Gallery = ({ photos }) => {
   const isAdmin = (session && session.user.role === 'admin')
 
 
+// PAGINATION
+
+
+  // PAGINATION
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [photosPerPage, setPhotosPerPage] = useState(25);
+
+  // Calculer les photos paginées
+  const paginatedPhotos = useMemo(() => {
+    const startIndex = (currentPage - 1) * photosPerPage;
+    const endIndex = startIndex + photosPerPage;
+    return photos.slice(startIndex, endIndex);
+  }, [currentPage, photosPerPage, publishedPhotos]);
+
+  // Calculer le nombre total de pages
+  const totalPages = useMemo(() => {
+    return Math.ceil(publishedPhotos.length / photosPerPage);
+  }, [photosPerPage, publishedPhotos]);
+
+  // Handlers pour la navigation de pagination
+  const goToNextPage = () => {
+    setCurrentPage(currentPage + 1);
+  };
+
+  const goToPreviousPage = () => {
+    setCurrentPage(currentPage - 1);
+  };
+
+  const changePhotosPerPage = (number) => {
+    setPhotosPerPage(number);
+    setCurrentPage(1); // Réinitialiser à la première page avec le nouveau nombre de photos par page
+  };
+
+
   useEffect(() => {
     const initialTitles = {};
     photos.forEach(photo => {
@@ -61,10 +96,6 @@ const Gallery = ({ photos }) => {
     console.log("initialTitles", titles)
 
   }, [photos]);
-
-
-
-
 
   const updatePhotoTitle = async (photoId, title) => {
     try {
@@ -83,7 +114,6 @@ const Gallery = ({ photos }) => {
       toast.error("Failed to update title");
     }
   };
-
 
   useEffect(() => {
     let filteredPhotos;
@@ -260,8 +290,38 @@ const Gallery = ({ photos }) => {
 
   return (
     <>
+      {/* Pagination and settings above the photo album */}
+      <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+            <button
+              className={`p-2 rounded-sm ${currentPage === 1 ? 'text-neutral-700' : 'bg-neutral-700 text-white'}`}
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+            >
+              Page Précédente
+            </button>
+            <span>Page {currentPage} / {totalPages}</span>
+            <span>
+              <label className="mr-2 text-white">Photos per page:</label>
+              <select
+                className="p-1 text-xl font-bold text-black bg-white"
+                onChange={(e) => changePhotosPerPage(Number(e.target.value))}
+                value={photosPerPage}
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </span>
+            <button
+              className="p-2 rounded-sm bg-neutral-700 text-white"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Page Suivante
+            </button>
+          </div>
       <PhotoAlbum
-        photos={publishedPhotos}
+        photos={paginatedPhotos}
         spacing={50}
         layout="rows"
         targetRowHeight={350}
@@ -295,7 +355,7 @@ const Gallery = ({ photos }) => {
               )}
               {/* @ts-ignore*/}
               {isReadOnly && (
-                <div className='text-white bg-black text-center w-full absolute -bottom-5'>
+                <div className='text-white text-center w-full absolute -bottom-8'>
                    {titles[photo.id] || ''}
                 </div>
               )}
@@ -351,11 +411,42 @@ const Gallery = ({ photos }) => {
           );
         }}
       />
+ {/* Pagination and settings above the photo album */}
+ <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+            <button
+              className={`p-2 rounded-sm ${currentPage === 1 ? 'text-neutral-700' : 'bg-neutral-700 text-white'}`}
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+            >
+              Page Précédente
+            </button>
+            <span>Page {currentPage} / {totalPages}</span>
+            <span>
+              <label className="mr-2 text-white">Photos per page:</label>
+              <select
+                className="p-1 text-xl font-bold text-black bg-white"
+                onChange={(e) => changePhotosPerPage(Number(e.target.value))}
+                value={photosPerPage}
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </span>
+            <button
+              className="p-2 rounded-sm bg-neutral-700 text-white"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Page Suivante
+            </button>
+          </div>
+
       <Lightbox
         open={index >= 0}
         index={index}
         close={() => setIndex(-1)}
-        slides={publishedPhotos}
+        slides={paginatedPhotos}
         render={{ slide: NextJsImage }}
         plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
       />
