@@ -717,7 +717,7 @@ const Gallery = ({ photos, allTags }) => {
               <Heart isOpen={true} />
             </button>
 
-            <div style={{ marginTop: "20px" }}>
+            {/* <div style={{ marginTop: "20px" }}>
         <h4>Unused Tags:</h4>
         {unusedTags.map(tagName => (
           <button
@@ -728,7 +728,7 @@ const Gallery = ({ photos, allTags }) => {
             {tagName}
           </button>
         ))}
-      </div>
+      </div> */}
 
 
             <div>
