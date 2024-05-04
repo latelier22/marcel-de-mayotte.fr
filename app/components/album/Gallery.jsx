@@ -291,7 +291,7 @@ const Gallery = ({ photos }) => {
   return (
     <>
       {/* Pagination and settings above the photo album */}
-      <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+      <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
               className={`p-2 rounded-sm ${currentPage === 1 ? 'text-neutral-700' : 'bg-neutral-700 text-white'}`}
               onClick={goToPreviousPage}

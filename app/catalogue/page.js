@@ -6,7 +6,7 @@ import { Pages, site } from "../site";
 
 import getImages from "../components/getImages";
 // import GalleryPrivate from "../components/album/GalleryPrivate";
-import Gallery from "../components/album/Gallery";
+import Gallery from "../components/album//Gallery";
 
 import {authOptions} from "../Auth"
 import { getServerSession } from 'next-auth';
