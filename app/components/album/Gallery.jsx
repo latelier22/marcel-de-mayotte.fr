@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import FavoriteModal from "../Modals/Modal";
 import TagModal from "../Modals/Modal";
 import RecentsModal from "../Modals/Modal";
-import PublisedModal from "../Modals/Modal";
+import PublishedModal from "../Modals/Modal";
 
 
 
@@ -609,6 +609,89 @@ const changePhotosPerPage = (number) => {
 };
 
 
+// applyPublishedChange
+
+
+const handleTogglePublisheds = () => {
+  const selectedPhotos = photos.filter((photo) =>
+    selectedPhotoIds.includes(photo.id)
+  );
+
+  selectedPhotos.map((photo) => console.log(photo.id));
+
+  setShowPublishedModal(true);
+  setModalContent("Que voulez-vous faire? :");
+};
+const applyPublishedsChange = (makePublished) => {
+  const tagName = "TABLEAUX RECENTS";
+  // console.log(selectedPhotoIds, makeRecents, tagName);
+  updatePublishedsInBulk(selectedPhotoIds, makePublished);
+  setShowPublishedModal(false);
+};
+
+
+const updatePublishedsInBulk = async (selectedPhotoIds, makePublished) => {
+  try {
+    const response = await fetch(`/api/updatePublishedsBulk`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        selectedPhotoIds,
+        makePublished,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update Published in bulk");
+    }
+    toast.success("Published updated successfully in bulk!");
+
+    // Mettre à jour l'état local des photos et des favoris
+    const newPhotos = photosState.map((photo) => {
+      if (selectedPhotoIds.includes(photo.id)) {
+        return { ...photo, isPublished: makePublished };
+      }
+      return photo;
+    });
+    setPhotosState(newPhotos);
+
+    // Mise à jour de l'état des favoris
+    const newPublished = new Set(publishedPhotos);
+    selectedPhotoIds.forEach((photoId) => {
+      if (makePublished) {
+        newPublished.add(photoId);
+      } else {
+        newPublished.delete(photoId);
+      }
+    });
+    setPublishedPhotos(newPublished);
+  } catch (error) {
+    console.error(
+      "An error occurred while updating Published in bulk:",
+      error
+    );
+    toast.error("Erreur lors de la mise à jour des Images publiées en masse.");
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const handleToggleRecents = () => {
   const selectedPhotos = photos.filter((photo) =>
     selectedPhotoIds.includes(photo.id)
@@ -667,21 +750,7 @@ try {
   toast.error("Error updating tags.");
 }
 
-
-
 };
-
-
-
-
-
-
-
-
-
-
-
-
 
   const handleToggleFavorites = () => {
     const selectedPhotos = photos.filter((photo) =>
@@ -874,12 +943,12 @@ try {
             >
               <Star isOpen={true} />
             </button>
-            {/* <button
+            <button
               className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-              onClick={handleTogglePublished}
+              onClick={handleTogglePublisheds}
             >
               <Eye isOpen={true} />
-            </button> */}
+            </button>
               </div>
 
              {/* Display unused tags */}
@@ -894,6 +963,25 @@ try {
             </div>
 
             </div>
+            <PublishedModal
+              isOpen={showPublishedModal}
+              onClose={() => setShowPublishedModal(false)}
+              title="Modification des Images publiées"
+            >
+              <p>{modalContent}</p>
+              <button
+                className="bg-neutral-300 rounded-md p-4 m-2"
+                onClick={() => applyPublishedsChange(true)}
+              >
+                Ajouter la sélection aux Images publiées
+              </button>
+              <button
+                className="bg-neutral-300 rounded-md p-4 m-2"
+                onClick={() => applyPublishedsChange(false)}
+              >
+                Retirer la sélection des Images publiées
+              </button>
+            </PublishedModal>
             <RecentsModal
               isOpen={showRecentsModal}
               onClose={() => setShowRecentsModal(false)}
