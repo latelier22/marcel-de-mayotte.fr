@@ -123,30 +123,6 @@ const Gallery = ({ photos, allTags }) => {
       handleSelectAll();
     }
   };
-  //
-
-  // const unusedTags = useMemo(() => {
-  //   const usedTags = new Set();
-  //   photos.forEach((photo) => {
-  //     photo.tags.forEach((tag) => {
-  //       usedTags.add(tag.name);
-  //     });
-  //   });
-
-  //   return allMyTags.filter((tag) => !usedTags.has(tag)).sort();
-  // }, [photos, allMyTags]);
-
-// const unusedTags = useMemo(() => {
-  //   const usedTags = new Set();
-
-  //   photos.forEach((photo) => {
-  //     photo.tags.forEach((tag) => {
-  //       usedTags.add(tag.name);
-  //     });
-  //   });
-
-  //   return allMyTags.filter((tag) => !usedTags.has(tag)).sort();
-  // }, [photos, allMyTags]);
 
   // Utiliser useMemo pour déterminer les tags non utilisés basés sur les objets de tag
   const unusedTags = useMemo(() => {
@@ -644,15 +620,54 @@ const handleToggleRecents = () => {
   setModalContent("Que voulez-vous faire? :");
 };
 const applyRecentsChange = (makeRecents) => {
-  updateRecentsInBulk(selectedPhotoIds, makeRecents);
-  setShowFavoriteModal(false);
+  const tagName = "TABLEAUX RECENTS";
+  updateRecentsInBulk(selectedPhotoIds, makeRecents, tagName);
+  setShowRecentsModal(false);
 };
 
 
-const updateRecentsInBulk = async (selectedPhotoIds, makeRecents) => {
+const updateRecentsInBulk = async (selectedPhotoIds, addTag, tagName) => {
 
 
-console.log(selectedPhotoIds, makeRecents)
+// const tagName = "TABLEAUX RECENTS";
+
+ // Mise à jour de l'état local
+ console.log("tagName",tagName);
+ const updatedPhotos = photosState.map((photo) => {
+  if (
+    selectedPhotoIds.includes(photo.id) &&
+    !photo.tags.find((t) => t.name === tagName)
+  ) {
+    return {
+      ...photo,
+      tags: [...photo.tags, { name: tagName, id: Date.now() }],
+    };
+  }
+  return photo;
+});
+
+setPhotosState(updatedPhotos); // Met à jour les photos dans l'état local
+
+// Appel API pour synchroniser les changements
+try {
+  const response = await fetch(`/api/updateTagInBulk`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ selectedPhotoIds, selectedTag : tagName, addTag }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update tags on the server");
+  }
+  toast.success("Tags updated successfully!");
+} catch (error) {
+  console.error("Failed to update tags:", error);
+  toast.error("Error updating tags.");
+}
+
+
 
 };
 
