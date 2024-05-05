@@ -7,7 +7,8 @@ import TagModal from "../Modals/Modal";
 import RecentsModal from "../Modals/Modal";
 import PublishedModal from "../Modals/Modal";
 
-
+import TagCrudModal from "../Modals/Modal";
+import getSlug from "../getSlug";
 
 import {
   toggleFavorites,
@@ -53,13 +54,13 @@ const Gallery = ({ photos, allTags }) => {
   const [lastSelection, setLastSelection] = useState([]);
   const [photosState, setPhotosState] = useState(photos);
 
+
+
+
+
   const [allMyTags, setAllMyTags] = useState(allTags);
 
   const [selectedTag, setSelectedTag] = useState("");
-
-
-
-
 
   // MODALS
   const [showTagModal, setShowTagModal] = useState(false);
@@ -67,35 +68,22 @@ const Gallery = ({ photos, allTags }) => {
   const [showPublishedModal, setShowPublishedModal] = useState(false);
   const [showFavoriteModal, setShowFavoriteModal] = useState(false);
   const [modalContent, setModalContent] = useState("");
-  
+  const [showTagCrudModal, setShowTagCrudModal] = useState(false);
 
-  // const [modalType, setModalType] = useState('');
-
-  const handleTagModal = () => {
-    setModalContent("Contenu pour la modification des tags");
-    setModalType("tag");
-    setShowTagModal(true);
-  };
-
-  const handleFavoriteModal = () => {
-    setModalContent("Contenu pour la modification des favoris");
-    setModalType("favorite");
-    setShowFavoriteModal(true);
-  };
 
   // @ts-ignore
   const isVisible = useSelector((state) => state.visible.isVisible);
 
   const isShowAdmin = useSelector((state) => state.showAdmin.isShowAdmin);
 
-  console.log("isShowAdmin",isShowAdmin)
-
-
   // @ts-ignore
   const isReadOnly = !session || session.user.role !== "admin";
   // @ts-ignore
   const isAdmin = session && session.user.role === "admin";
 
+
+
+  
   const handleRestoreSelection = () => {
     setSelectedPhotoIds(lastSelection); // Restaure la dernière sélection sauvegardée
     setAllSelected(lastSelection.length === photos.length); // Met à jour si toutes les photos sont sélectionnées
@@ -124,55 +112,184 @@ const Gallery = ({ photos, allTags }) => {
     }
   };
 
+  useEffect(() => {
+    if (!isShowAdmin) {
+      setIndex(-1); // Réinitialiser l'index si on n'est pas en mode admin
+      handleDeselectAll();
+    }
+    else
+    {handleRestoreSelection();}
+
+  }, [isShowAdmin]);
+
+
+
+  
+
   // Utiliser useMemo pour déterminer les tags non utilisés basés sur les objets de tag
-  const unusedTags = useMemo(() => {
+  // const unusedTags = useMemo(() => {
+  //   const usedTags = new Set();
+  //   photos.forEach(photo => {
+  //     photo.tags.forEach(tag => {
+  //       usedTags.add(tag.name); // Collecter les noms de tags utilisés
+  //     });
+  //   });
+
+  //   // Filtrer les allTags pour trouver ceux dont le nom n'est pas dans usedTagNames
+  //   return allTags
+  //     .filter(tag => !usedTags.has(tag.name) &&
+  //       !(tag.name.startsWith('Progression') && tag.name !== 'PROGRESSIONS'))
+
+  //     .map(tag => tag.name) // Extraire seulement les noms pour l'affichage
+  //     .sort(); // Trier les noms de tags pour l'affichage
+  // }, [photos, allTags]);
+
+
+
+
+
+
+
+  const [tagName, setTagName] = useState('');
+  const [tagAction, setTagAction] = useState('');
+  const [newTagName, setNewTagName] = useState('');
+  const [unusedTags, setUnusedTags] = useState([]);
+
+
+
+  // useEffect(() => {
+  //   // Debugging the content of all tags and unused tags
+  //   const unusedTags = allMyTags.filter(tag => !tag.present);
+  //   console.log('All Tags:', allMyTags);
+  //   console.log('Unused Tags:', unusedTags);
+  // }, [allMyTags]);  // Dependency on allMyTags to ensure re-computation when tags update
+
+
+  useEffect(() => {
     const usedTags = new Set();
     photos.forEach(photo => {
       photo.tags.forEach(tag => {
-        usedTags.add(tag.name); // Collecter les noms de tags utilisés
+        usedTags.add(tag.name);
       });
     });
-
-    // Filtrer les allTags pour trouver ceux dont le nom n'est pas dans usedTagNames
-    return allTags
+  
+    const newUnusedTags = allMyTags
       .filter(tag => !usedTags.has(tag.name) &&
         !(tag.name.startsWith('Progression') && tag.name !== 'PROGRESSIONS'))
+      .map(tag => tag.name)
+      .sort();
+  
+    setUnusedTags(newUnusedTags);
 
-      .map(tag => tag.name) // Extraire seulement les noms pour l'affichage
-      .sort(); // Trier les noms de tags pour l'affichage
-  }, [photos, allTags]);
-
-
-
-
-
+    console.log('All Tags:', allMyTags);
+    console.log('Unused Tags:', unusedTags);
 
 
+  }, [allMyTags, photos, isShowAdmin]); // Écouter les changements dans allMyTags
 
+
+  // CRUD TAG
+
+  // Fonction pour vérifier si un tag existe
+  const isTagNameExist = (tagName) => {
+    return allMyTags.some(tag => tag.name === tagName.trim());
+  };
 
 
   // Ajouter un tag
-  const addTag = (tagName) => {
-    if (!allMyTags.includes(tagName)) {
-      setTags([...allMyTags, tagName]);
-      toast.success(`Tag "${tagName}" added successfully!`);
+  // const handleAddTag = (tagName) => {
+  //   if (tagName.trim() && !allMyTags.some(tag => tag.name === tagName)) {
+  //     const newTag = { name: tagName, count: 0, mainTag: false, present: false }; // Définir d'autres propriétés si nécessaire
+  //     const newTags = [...allMyTags, newTag];
+  //     console.log(newTag)
+  //     setAllMyTags(newTags);
+  //     console.log(allMyTags)
+  //     // console.log(allMyTags)
+  //     // toast.success(`Tag "${tagName}" added successfully!`);
+  //   }
+  // };
+
+  // Ajouter un tag
+  const handleAddTag = tagName => {
+    if (tagName.trim() && !isTagNameExist(tagName)) {
+      const newTag = {
+        name: tagName,
+        count: 0,
+        mainTag: false,
+        present: false,
+        url: `generated-url-for-${tagName}`,  // Generate or specify URL if needed
+        slug: getSlug(tagName)
+      }
+      setAllMyTags(prevTags => [...prevTags, newTag]);
+      // toast.success(`Tag "${tagName}" added successfully!`);
+    } else {
+      toast.error("This tag already exists or invalid tag name!");
     }
   };
 
+
+
+
   // Supprimer un tag
-  const removeTag = (tagName) => {
-    setTags(allMyTags.filter((tag) => tag !== tagName));
-    toast.success(`Tag "${tagName}" removed successfully!`);
+  const handleDeleteTag = (tagName) => {
+    if (allMyTags.some(tag => tag.name === tagName)) {
+      const newTags = allMyTags.filter(tag => tag.name !== tagName);
+      setAllMyTags(newTags);
+      console.log(allMyTags)
+      // toast.success(`Tag "${tagName}" removed successfully!`);
+    }
   };
 
   // Éditer un tag existant
-  const editTag = (oldTagName, newTagName) => {
-    const updatedTags = allMyTags.map((tag) =>
-      tag === oldTagName ? newTagName : tag
+  // Handler to edit an existing tag
+  const handleEditTag = (oldTagName, newTagName) => {
+    oldTagName = oldTagName.trim();
+    newTagName = newTagName.trim();
+    if (!isTagNameExist(oldTagName) || isTagNameExist(newTagName)) {
+      toast.error(`Edit failed: ${!isTagNameExist(oldTagName) ? "original tag does not exist." : "new tag name already exists."}`);
+      return;
+    }
+    const newTags = allMyTags.map(tag =>
+      tag.name.toLowerCase() === oldTagName.toLowerCase() ? { ...tag, name: newTagName } : tag
     );
-    setTags(updatedTags);
+    setAllMyTags(newTags);
     toast.success(`Tag "${oldTagName}" updated to "${newTagName}"!`);
   };
+
+
+
+
+
+
+
+
+  // Gestion des modales pour les confirmations
+  const openModal = (action) => {
+    setTagAction(action);
+    setShowTagCrudModal(true);
+  };
+
+  const closeModal = () => {
+    setShowTagCrudModal(false);
+  };
+
+
+  //   const handleAddTag = () => {
+  //     console.log("Adding a new tag...");
+  //     // Logique pour ajouter un tag
+  // };
+
+  // const handleDeleteTag = () => {
+  //     console.log("Deleting a tag...");
+  //     // Logique pour supprimer un tag
+  // };
+
+  // const handleEditTag = () => {
+  //     console.log("Editing a tag...");
+  //     // Logique pour éditer un tag
+  // };
+
+
 
   // Calcul du nombre de photos publiées
   const numberOfPublishedPhotos = useMemo(() => {
@@ -245,8 +362,8 @@ const Gallery = ({ photos, allTags }) => {
         newTagStatus[tag] = isTagInAll
           ? "bg-green-500"
           : isTagInSome
-          ? "bg-orange-500"
-          : "bg-red-500";
+            ? "bg-orange-500"
+            : "bg-red-500";
       });
     }
     setTagStatus(newTagStatus);
@@ -348,6 +465,15 @@ const Gallery = ({ photos, allTags }) => {
     setTitles(initialTitles);
   }, [photos, isAdmin]);
 
+
+  const handlePhotoClick = (e, photoId) => {
+    if (isShowAdmin) {
+      e.stopPropagation();
+      handleTagButtonClick(photoId);
+    }
+    // Vous pouvez ajouter d'autres logiques ici si nécessaire
+  };
+
   const handleTagButtonClick = (photoId) => {
     // Vérifier si la photo est déjà sélectionnée
     const isSelected = selectedPhotoIds.includes(photoId);
@@ -403,6 +529,48 @@ const Gallery = ({ photos, allTags }) => {
     }
   };
 
+  // const sortedAndFilteredPhotos = useMemo(() => {
+  //   // Filtrer les photos selon les critères d'administration et de visibilité
+  //   let filteredPhotos = photos;
+  //   if (!isAdmin || !isVisible) {
+  //     filteredPhotos = filteredPhotos.filter((photo) => photo.published);
+  //   }
+
+  //   // Trier les photos pour favoriser les favorites et les sélectionnées
+  //   return filteredPhotos.sort((a, b) => {
+  //     const aSelected = selectedPhotoIds.includes(a.id);
+  //     const bSelected = selectedPhotoIds.includes(b.id);
+  //     const aFavorite = favorites.has(a.id);
+  //     const bFavorite = favorites.has(b.id);
+
+  //     // Priorité aux favorites sélectionnées
+  //     if (aFavorite && aSelected && !(bFavorite && bSelected)) {
+  //       return -1;
+  //     }
+  //     if (bFavorite && bSelected && !(aFavorite && aSelected)) {
+  //       return 1;
+  //     }
+
+  //     // Ensuite, autres photos sélectionnées
+  //     if (aSelected && !bSelected) {
+  //       return -1;
+  //     }
+  //     if (bSelected && !aSelected) {
+  //       return 1;
+  //     }
+
+  //     // Ensuite, favorites non sélectionnées
+  //     if (aFavorite && !aSelected && !(bFavorite && !bSelected)) {
+  //       return -1;
+  //     }
+  //     if (bFavorite && !bSelected && !(aFavorite && !bSelected)) {
+  //       return 1;
+  //     }
+
+  //     return 0; // Conserver l'ordre initial si toutes les conditions sont égales
+  //   });
+  // }, [photos, selectedPhotoIds, favorites, isAdmin, isVisible]);
+
   const sortedAndFilteredPhotos = useMemo(() => {
     // Filtrer les photos selon les critères d'administration et de visibilité
     let filteredPhotos = photos;
@@ -410,40 +578,23 @@ const Gallery = ({ photos, allTags }) => {
       filteredPhotos = filteredPhotos.filter((photo) => photo.published);
     }
 
-    // Trier les photos pour favoriser les favorites et les sélectionnées
+    // Trier les photos pour favoriser les favorites
     return filteredPhotos.sort((a, b) => {
-      const aSelected = selectedPhotoIds.includes(a.id);
-      const bSelected = selectedPhotoIds.includes(b.id);
       const aFavorite = favorites.has(a.id);
       const bFavorite = favorites.has(b.id);
 
-      // Priorité aux favorites sélectionnées
-      if (aFavorite && aSelected && !(bFavorite && bSelected)) {
+      // Favoriser les photos favorites
+      if (aFavorite && !bFavorite) {
         return -1;
-      }
-      if (bFavorite && bSelected && !(aFavorite && aSelected)) {
+      } else if (!aFavorite && bFavorite) {
         return 1;
+      } else {
+        return 0; // Conserver l'ordre initial si toutes les conditions sont égales
       }
-
-      // Ensuite, autres photos sélectionnées
-      if (aSelected && !bSelected) {
-        return -1;
-      }
-      if (bSelected && !aSelected) {
-        return 1;
-      }
-
-      // Ensuite, favorites non sélectionnées
-      if (aFavorite && !aSelected && !(bFavorite && !bSelected)) {
-        return -1;
-      }
-      if (bFavorite && !bSelected && !(aFavorite && !bSelected)) {
-        return 1;
-      }
-
-      return 0; // Conserver l'ordre initial si toutes les conditions sont égales
     });
-  }, [photos, selectedPhotoIds, favorites, isAdmin, isVisible]);
+  }, [photos, favorites, isAdmin, isVisible]);
+
+
 
   // Initialiser l'état 'favorites' avec les favoris de l'objet 'photos'
   useEffect(() => {
@@ -458,36 +609,36 @@ const Gallery = ({ photos, allTags }) => {
   }, [photos]);
 
   // Dans votre composant Gallery
-// PAGINATION
+  // PAGINATION
 
-const [currentPage, setCurrentPage] = useState(1);
-const [photosPerPage, setPhotosPerPage] = useState(25);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [photosPerPage, setPhotosPerPage] = useState(25);
 
-// Calculer les photos paginées
-const paginatedPhotos = useMemo(() => {
-  const startIndex = (currentPage - 1) * photosPerPage;
-  const endIndex = startIndex + photosPerPage;
-  return sortedAndFilteredPhotos.slice(startIndex, endIndex);
-}, [currentPage, photosPerPage, sortedAndFilteredPhotos]);
+  // Calculer les photos paginées
+  const paginatedPhotos = useMemo(() => {
+    const startIndex = (currentPage - 1) * photosPerPage;
+    const endIndex = startIndex + photosPerPage;
+    return sortedAndFilteredPhotos.slice(startIndex, endIndex);
+  }, [currentPage, photosPerPage, sortedAndFilteredPhotos]);
 
-// Calculer le nombre total de pages
-const totalPages = useMemo(() => {
-  return Math.ceil(sortedAndFilteredPhotos.length / photosPerPage);
-}, [photosPerPage, sortedAndFilteredPhotos]);
+  // Calculer le nombre total de pages
+  const totalPages = useMemo(() => {
+    return Math.ceil(sortedAndFilteredPhotos.length / photosPerPage);
+  }, [photosPerPage, sortedAndFilteredPhotos]);
 
-// Handlers pour la navigation de pagination
-const goToNextPage = () => {
-  setCurrentPage(currentPage + 1);
-};
+  // Handlers pour la navigation de pagination
+  const goToNextPage = () => {
+    setCurrentPage(currentPage + 1);
+  };
 
-const goToPreviousPage = () => {
-  setCurrentPage(currentPage - 1);
-};
+  const goToPreviousPage = () => {
+    setCurrentPage(currentPage - 1);
+  };
 
-const changePhotosPerPage = (number) => {
-  setPhotosPerPage(number);
-  setCurrentPage(1); // Réinitialiser à la première page avec le nouveau nombre de photos par page
-};
+  const changePhotosPerPage = (number) => {
+    setPhotosPerPage(number);
+    setCurrentPage(1); // Réinitialiser à la première page avec le nouveau nombre de photos par page
+  };
 
 
 
@@ -503,53 +654,48 @@ const changePhotosPerPage = (number) => {
       }
       return recentPhotosSet;
     }, new Set());
+    
+    console.log("recentPhotos",recentPhotos)
 
     setRecentPhotos(initialRecentPhotos);
   }, [photos]);
 
   const toggleRecent = async (photoId) => {
     try {
-      let isRecent = false; // Définir isRecent en dehors de la boucle map
-
+      let isRecent = recentPhotos.has(photoId); // Vérifie si la photo est déjà marquée comme récente
+  
+      // Met à jour l'ensemble des photos récentes
+      if (isRecent) {
+        recentPhotos.delete(photoId); // Retire la photo des photos récentes
+      } else {
+        recentPhotos.add(photoId); // Ajoute la photo aux photos récentes
+      }
+  
+      // Met à jour les photos pour changer le tag 'RECENT'
       const updatedPhotos = publishedPhotos.map((photo) => {
         if (photo.id === photoId) {
-          // Vérifie si la photo est déjà marquée comme récente
-          isRecent = recentPhotos.has(photoId);
-
-          // Met à jour l'ensemble des photos récentes
-          if (isRecent) {
-            recentPhotos.delete(photoId); // Retire la photo des photos récentes
-          } else {
-            recentPhotos.add(photoId); // Ajoute la photo aux photos récentes
-          }
-
-          // Met à jour les tags de la photo en fonction de son statut récent
           return {
             ...photo,
             tags: isRecent
               ? photo.tags.filter((tag) => tag.id !== 70) // Retire le tag "TABLEAUX RECENT" si la photo était récente
-              : [...photo.tags, { id: 70 }], // Ajoute le tag "TABLEAUX RECENT" si la photo n'était pas récente
+              : [...photo.tags, { id: 70 }] // Ajoute le tag "TABLEAUX RECENT" si la photo n'était pas récente
           };
         }
         return photo;
       });
-
-      // Met à jour l'état des photos récentes
-      setRecentPhotos(new Set(recentPhotos));
-
+  
+      setPublishedPhotos(updatedPhotos);
+      setRecentPhotos(new Set(recentPhotos)); // Mettre à jour l'état des photos récentes
+  
       // Appel à l'API pour mettre à jour l'état des photos récentes sur le serveur
       await updateRecentPhotosOnServer(photoId, !isRecent);
     } catch (error) {
-      console.error(
-        'An error occurred while updating tag "TABLEAUX RECENT":',
-        error
-      );
+      console.error('An error occurred while updating tag "TABLEAUX RECENT":', error);
     }
   };
-
+  
   const updateRecentPhotosOnServer = async (photoId, toggleRecent) => {
-
-    console.log("PUPHISED?", photoId, toggleRecent)
+    console.log("RECENT?", photoId, toggleRecent);
     try {
       const response = await fetch(`/api/toggleRecentPhotos`, {
         method: "POST",
@@ -558,7 +704,7 @@ const changePhotosPerPage = (number) => {
         },
         body: JSON.stringify({ photoId, toggleRecent }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to update the recent photos");
       }
@@ -567,16 +713,15 @@ const changePhotosPerPage = (number) => {
       toast.error("Erreur lors de la mise à jour des photos récentes.");
     }
   };
-
-  const togglePublished = async (photoId) => {
-    event.stopPropagation();  // Stop event propagation if not handled elsewhere
-    console.log("publishedPhotos",publishedPhotos)
+  const togglePublished = async ( photoId, published) => {
+    
+    console.log("publishedPhotos", publishedPhotos , photoId, published)
 
     const newPhotos = publishedPhotos.map((photo) => {
-        if (photo.id === photoId) {
-            return { ...photo, published: !photo.published };
-        }
-        return photo;
+      if (photo.id === photoId) {
+        return { ...photo, published: !photo.published };
+      }
+      return photo;
     });
 
     setPublishedPhotos(newPhotos);
@@ -584,173 +729,173 @@ const changePhotosPerPage = (number) => {
     // Safely access the published property
     const targetPhoto = newPhotos.find(p => p.id === photoId);
     if (!targetPhoto) {
-        console.error("No photo found with the ID:", photoId);
-        return; // Exit if no photo found
+      console.error("No photo found with the ID:", photoId);
+      return; // Exit if no photo found
     }
 
     try {
-        const response = await fetch("/api/togglePublished", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                photoId,
-                published: newPhotos.find((p) => p.id === photoId).published,
-            }),
-        });
+      const response = await fetch("/api/togglePublished", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          photoId,
+          published: newPhotos.find((p) => p.id === photoId).published,
+        }),
+      });
 
-        if (!response.ok) {
-            throw new Error("Failed to update the photo");
-        }
+      if (!response.ok) {
+        throw new Error("Failed to update the photo");
+      }
     } catch (error) {
-        console.error("Error updating publication state:", error);
+      console.error("Error updating publication state:", error);
     }
-};
+  };
 
 
-// applyPublishedChange
+  // applyPublishedChange
 
 
-const handleTogglePublisheds = () => {
-  const selectedPhotos = photos.filter((photo) =>
-    selectedPhotoIds.includes(photo.id)
-  );
+  const handleTogglePublisheds = () => {
+    const selectedPhotos = photos.filter((photo) =>
+      selectedPhotoIds.includes(photo.id)
+    );
 
-  selectedPhotos.map((photo) => console.log(photo.id));
+    selectedPhotos.map((photo) => console.log(photo.id));
 
-  setShowPublishedModal(true);
-  setModalContent("Que voulez-vous faire? :");
-};
-const applyPublishedsChange = (makePublished) => {
-  const tagName = "TABLEAUX RECENTS";
-  // console.log(selectedPhotoIds, makeRecents, tagName);
-  updatePublishedsInBulk(selectedPhotoIds, makePublished);
-  setShowPublishedModal(false);
-};
+    setShowPublishedModal(true);
+    setModalContent("Que voulez-vous faire? :");
+  };
+  const applyPublishedsChange = (makePublished) => {
+    const tagName = "TABLEAUX RECENTS";
+    // console.log(selectedPhotoIds, makeRecents, tagName);
+    updatePublishedsInBulk(selectedPhotoIds, makePublished);
+    setShowPublishedModal(false);
+  };
 
 
-const updatePublishedsInBulk = async (selectedPhotoIds, makePublished) => {
-  try {
-    const response = await fetch(`/api/updatePublishedsBulk`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        selectedPhotoIds,
-        makePublished,
-      }),
-    });
+  const updatePublishedsInBulk = async (selectedPhotoIds, makePublished) => {
+    try {
+      const response = await fetch(`/api/updatePublishedsBulk`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          selectedPhotoIds,
+          makePublished,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to update Published in bulk");
+      if (!response.ok) {
+        throw new Error("Failed to update Published in bulk");
+      }
+      toast.success("Published updated successfully in bulk!");
+
+      // Mettre à jour l'état local des photos et des favoris
+      const newPhotos = photosState.map((photo) => {
+        if (selectedPhotoIds.includes(photo.id)) {
+          return { ...photo, isPublished: makePublished };
+        }
+        return photo;
+      });
+      setPhotosState(newPhotos);
+
+      // Mise à jour de l'état des favoris
+      const newPublished = new Set(publishedPhotos);
+      selectedPhotoIds.forEach((photoId) => {
+        if (makePublished) {
+          newPublished.add(photoId);
+        } else {
+          newPublished.delete(photoId);
+        }
+      });
+      setPublishedPhotos(newPublished);
+    } catch (error) {
+      console.error(
+        "An error occurred while updating Published in bulk:",
+        error
+      );
+      toast.error("Erreur lors de la mise à jour des Images publiées en masse.");
     }
-    toast.success("Published updated successfully in bulk!");
+  };
 
-    // Mettre à jour l'état local des photos et des favoris
-    const newPhotos = photosState.map((photo) => {
-      if (selectedPhotoIds.includes(photo.id)) {
-        return { ...photo, isPublished: makePublished };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const handleToggleRecents = () => {
+    const selectedPhotos = photos.filter((photo) =>
+      selectedPhotoIds.includes(photo.id)
+    );
+
+    selectedPhotos.map((photo) => console.log(photo.id));
+
+    setShowRecentsModal(true);
+    setModalContent("Que voulez-vous faire? :");
+  };
+  const applyRecentsChange = (makeRecents) => {
+    const tagName = "TABLEAUX RECENTS";
+    updateRecentsInBulk(selectedPhotoIds, makeRecents, tagName);
+    setShowRecentsModal(false);
+  };
+
+
+  const updateRecentsInBulk = async (selectedPhotoIds, addTag, tagName) => {
+
+
+    // const tagName = "TABLEAUX RECENTS";
+
+    // Mise à jour de l'état local
+    console.log("tagName", tagName);
+    const updatedPhotos = photosState.map((photo) => {
+      if (
+        selectedPhotoIds.includes(photo.id) &&
+        !photo.tags.find((t) => t.name === tagName)
+      ) {
+        return {
+          ...photo,
+          tags: [...photo.tags, { name: tagName, id: Date.now() }],
+        };
       }
       return photo;
     });
-    setPhotosState(newPhotos);
 
-    // Mise à jour de l'état des favoris
-    const newPublished = new Set(publishedPhotos);
-    selectedPhotoIds.forEach((photoId) => {
-      if (makePublished) {
-        newPublished.add(photoId);
-      } else {
-        newPublished.delete(photoId);
+    setPhotosState(updatedPhotos); // Met à jour les photos dans l'état local
+
+    // Appel API pour synchroniser les changements
+    try {
+      const response = await fetch(`/api/updateTagInBulk`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ selectedPhotoIds, selectedTag: tagName, addTag }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update tags on the server");
       }
-    });
-    setPublishedPhotos(newPublished);
-  } catch (error) {
-    console.error(
-      "An error occurred while updating Published in bulk:",
-      error
-    );
-    toast.error("Erreur lors de la mise à jour des Images publiées en masse.");
-  }
-};
+      toast.success("Tags updated successfully!");
+    } catch (error) {
+      console.error("Failed to update tags:", error);
+      toast.error("Error updating tags.");
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const handleToggleRecents = () => {
-  const selectedPhotos = photos.filter((photo) =>
-    selectedPhotoIds.includes(photo.id)
-  );
-
-  selectedPhotos.map((photo) => console.log(photo.id));
-
-  setShowRecentsModal(true);
-  setModalContent("Que voulez-vous faire? :");
-};
-const applyRecentsChange = (makeRecents) => {
-  const tagName = "TABLEAUX RECENTS";
-  updateRecentsInBulk(selectedPhotoIds, makeRecents, tagName);
-  setShowRecentsModal(false);
-};
-
-
-const updateRecentsInBulk = async (selectedPhotoIds, addTag, tagName) => {
-
-
-// const tagName = "TABLEAUX RECENTS";
-
- // Mise à jour de l'état local
- console.log("tagName",tagName);
- const updatedPhotos = photosState.map((photo) => {
-  if (
-    selectedPhotoIds.includes(photo.id) &&
-    !photo.tags.find((t) => t.name === tagName)
-  ) {
-    return {
-      ...photo,
-      tags: [...photo.tags, { name: tagName, id: Date.now() }],
-    };
-  }
-  return photo;
-});
-
-setPhotosState(updatedPhotos); // Met à jour les photos dans l'état local
-
-// Appel API pour synchroniser les changements
-try {
-  const response = await fetch(`/api/updateTagInBulk`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ selectedPhotoIds, selectedTag : tagName, addTag }),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to update tags on the server");
-  }
-  toast.success("Tags updated successfully!");
-} catch (error) {
-  console.error("Failed to update tags:", error);
-  toast.error("Error updating tags.");
-}
-
-};
+  };
 
   const handleToggleFavorites = () => {
     const selectedPhotos = photos.filter((photo) =>
@@ -883,175 +1028,297 @@ try {
     <>
       <div style={{ display: "flex" }}>
         {isAdmin && isShowAdmin && (
-          <div className="flex flex-col" style={{ width: "20%", padding: "64px" }}>
+          <div className="flex flex-col pt-16 px-16   text-white bg-neutral-600 top-0 h-screen max-h-full overflow-y-auto" style={{ width: "20%" }}>
             {/* Admin-specific buttons and tag display logic here */}
-   
-          <div className="flex flex-row justify-around ">
-            <button
-              className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-              onClick={handleSelectAll}
-            >
-              Select All ({numberOfPublishedPhotos})
-            </button>
-            <button
-              className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
-              onClick={handleDeselectAll}
-            >
-              Deselect All ({selectedPhotoIds.length})
-            </button>
-            <button
-              onClick={handleRestoreSelection}
-              className={`rounded-md text-white font-bold py-2 px-4 m-2 ${
-                !lastSelection.length
+
+            <div className="flex flex-row justify-around ">
+              <button
+                className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                onClick={handleSelectAll}
+              >
+                Select All ({numberOfPublishedPhotos})
+              </button>
+              <button
+                className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
+                onClick={handleDeselectAll}
+              >
+                Deselect All ({selectedPhotoIds.length})
+              </button>
+              <button
+                onClick={handleRestoreSelection}
+                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${!lastSelection.length
                   ? "bg-neutral-200 hover:bg-neutral-200"
                   : "bg-green-700 hover:bg-green-500 text-black"
-              }`}
-              disabled={!lastSelection.length}
-            >
-              Restaurer la sélection ({lastSelection.length})
-            </button>
-          </div>
-          {Object.entries(tagStatus).map(([tag, color]) => (
-            <button
-              className={`${color} `}
-              key={tag}
-              style={{ margin: "5px" }}
-              onClick={() => handleTagClick(tag)}
-            >
-              <div className="flex items-center justify-between w-full py-2 px-4">
-                <div className="flex-grow text-center">{tag}</div>
-                <div className="flex-none">
-                  {tagCounts.selectedCounts[tag] || 0} /{" "}
-                  {tagCounts.counts[tag] || 0}
+                  }`}
+                disabled={!lastSelection.length}
+              >
+                Restaurer la sélection ({lastSelection.length})
+              </button>
+            </div>
+            {Object.entries(tagStatus).map(([tag, color]) => (
+              <button
+                className={`${color} `}
+                key={tag}
+                style={{ margin: "5px" }}
+                onClick={() => handleTagClick(tag)}
+              >
+                <div className="flex items-center justify-between w-full py-2 px-4">
+                  <div className="flex-grow text-center">{tag}</div>
+                  <div className="flex-none">
+                    {tagCounts.selectedCounts[tag] || 0} /{" "}
+                    {tagCounts.counts[tag] || 0}
+                  </div>
                 </div>
-              </div>
-            </button>
-          ))}
-
-          <div className="flex flex-row justify-around ">
-            <div>
-            <div className="flex-flex-row">
-            <button
-              className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-              onClick={handleToggleFavorites}
-            >
-              <Heart isOpen={true} />
-            </button>
-            <button
-              className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-              onClick={handleToggleRecents}
-            >
-              <Star isOpen={true} />
-            </button>
-            <button
-              className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-              onClick={handleTogglePublisheds}
-            >
-              <Eye isOpen={true} />
-            </button>
-              </div>
-
-             {/* Display unused tags */}
-          <div className="mt-4 flex flex-wrap">
-            <h4 className="text-lg w-1/2 text-center font-semibold">Taags non utilsés dans la page</h4>
-            {unusedTags.map(tagName => (
-              <button className="flex items-center flex-wrap  py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2" key={tagName}
-                onClick={() => handleTagClick(tagName)}>
-                {tagName}
               </button>
             ))}
-            </div>
 
-            </div>
-            <PublishedModal
-              isOpen={showPublishedModal}
-              onClose={() => setShowPublishedModal(false)}
-              title="Modification des Images publiées"
-            >
-              <p>{modalContent}</p>
-              <button
-                className="bg-neutral-300 rounded-md p-4 m-2"
-                onClick={() => applyPublishedsChange(true)}
-              >
-                Ajouter la sélection aux Images publiées
-              </button>
-              <button
-                className="bg-neutral-300 rounded-md p-4 m-2"
-                onClick={() => applyPublishedsChange(false)}
-              >
-                Retirer la sélection des Images publiées
-              </button>
-            </PublishedModal>
-            <RecentsModal
-              isOpen={showRecentsModal}
-              onClose={() => setShowRecentsModal(false)}
-              title="Modification des Récents"
-            >
-              <p>{modalContent}</p>
-              <button
-                className="bg-neutral-300 rounded-md p-4 m-2"
-                onClick={() => applyRecentsChange(true)}
-              >
-                Ajouter la sélection aux Récents
-              </button>
-              <button
-                className="bg-neutral-300 rounded-md p-4 m-2"
-                onClick={() => applyRecentsChange(false)}
-              >
-                Retirer la sélection des Récents
-              </button>
-            </RecentsModal>
-            <FavoriteModal
-              isOpen={showFavoriteModal}
-              onClose={() => setShowFavoriteModal(false)}
-              title="Modification des Favoris"
-            >
-              <p>{modalContent}</p>
-              <button
-                className="bg-neutral-300 rounded-md p-4 m-2"
-                onClick={() => applyFavoritesChange(true)}
-              >
-                Ajouter la sélection aux favoris
-              </button>
-              <button
-                className="bg-neutral-300 rounded-md p-4 m-2"
-                onClick={() => applyFavoritesChange(false)}
-              >
-                Retirer la sélection des favoris
-              </button>
-            </FavoriteModal>
-            <TagModal
-              isOpen={showTagModal}
-              onClose={() => setShowTagModal(false)}
-              title="Modification des Tags"
-            >
-              <p>{modalContent}</p>
-              <button
-                className="bg-neutral-300 rounded-md p-4 m-2"
-                onClick={() => applyTagChange(true)}
-              >
-                Ajouter ce tag à la sélection
-              </button>
-              <button
-                className="bg-neutral-300 rounded-md p-4 m-2"
-                onClick={() => applyTagChange(false)}
-              >
-                Retirer ce tag de la sélection
-              </button>
-            </TagModal>
+            <div className="flex flex-row justify-around ">
+              <div>
+                <div className="flex-flex-row">
+                  <button
+                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                    onClick={handleToggleFavorites}
+                  >
+                    <Heart isOpen={true} />
+                  </button>
+                  <button
+                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                    onClick={handleToggleRecents}
+                  >
+                    <Star isOpen={true} />
+                  </button>
+                  <button
+                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                    onClick={handleTogglePublisheds}
+                  >
+                    <Eye isOpen={true} />
+                  </button>
+                </div>
 
-            {/* \\ edit <TAgs></TAgs> */}
-            <div>
-              <ToastContainer position="top-center" autoClose={5000} />
+                <div style={{ margin: "20px 0" }}>
+                  {/* <button
+                    onClick={handleAddTag}
+                    className="rounded-md bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 m-2"
+                  >
+                    Add Tag
+                  </button>
+                  <button
+                    onClick={handleDeleteTag}
+                    className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
+                  >
+                    Delete Tag
+                  </button>
+                  <button
+                    onClick={handleEditTag}
+                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                  >
+                    Edit Tag
+                  </button> */}
+
+                  {/* Zone de saisie et boutons pour la gestion des tags */}
+
+                  <input
+                    type="text"
+                    placeholder="Enter tag name"
+                    value={tagName}
+                    onChange={(e) => setTagName(e.target.value)}
+                    className="input-tag-name text-black p-4"
+                  />
+                  <button
+                    onClick={() => openModal('add')}
+                    disabled={!tagName.trim() || isTagNameExist(tagName)}
+                    className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName) ? `bg-green-700` : `bg-green-500  hover:bg-green-300`}  text-white font-bold py-2 px-4 m-2`}
+                    title={!tagName.trim() ? "Entrez un nom pour un nouveau tag." : allMyTags.includes(tagName) ? "Ce tag existe déjà!" : "Ajouter un tag"}
+                  >
+                    Add Tag
+                  </button>
+
+                  <button
+                    onClick={() => openModal('delete')}
+                    disabled={!tagName.trim() || !isTagNameExist(tagName)}
+                    className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
+                    title={!tagName.trim() ? "Entrez le nom du tag à supprimer." : !tagName.trim() || !isTagNameExist(tagName) ? "Ce tag n'existe pas!" : "Supprimer un tag"}
+                  >
+                    Delete Tag
+                  </button>
+
+                  <button
+                    onClick={() => openModal('edit')}
+                    disabled={!tagName.trim() || !isTagNameExist(tagName)}
+                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                    title={!tagName.trim() ? "Entrez le nom du tag à éditer." : !tagName.trim() || !isTagNameExist(tagName) ? "Ce tag n'existe pas!" : "Éditer un tag"}
+                  >
+                    Edit Tag
+                  </button>
+
+
+                </div>
+
+                <TagCrudModal
+                  isOpen={showTagCrudModal}
+                  onClose={() => setShowTagCrudModal(false)}
+                  title={`${tagAction.charAt(0).toUpperCase() + tagAction.slice(1)} Tag`}
+                >
+                  <p className="p-8">Are you sure you want to {tagAction} the tag "{tagName}"?</p>
+                  {tagAction === 'add' &&
+                    <button
+                      className='bg-lime-600 rounded-md p-2 m-4 items-end'
+                      onClick={() => {
+                        closeModal();
+                        handleAddTag(tagName);
+                      }}
+                    >
+                      Confirm Add
+                    </button>}
+
+
+                  {tagAction === 'delete' &&
+                    <button
+                      className='bg-lime-600 rounded-md p-2 m-4 items-end'
+                      onClick={() => {
+                        closeModal();
+                        handleDeleteTag(tagName);
+                      }}>
+                      Confirm Delete
+                    </button>}
+
+                  {tagAction === 'edit' && (
+                    <>
+                      <input
+                        type="text"
+                        placeholder="New tag name"
+                        value={newTagName}
+                        onChange={(e) => setNewTagName(e.target.value)}
+                      />
+                      <button
+                        className='bg-lime-600 rounded-md p-2 m-4 items-end'
+                        onClick={() => {
+                          handleEditTag(tagName, newTagName);  // Utilisez newTagName pour le nouveau nom
+                          closeModal();
+                        }}
+                      >
+                        Confirm Edit
+                      </button>
+                    </>
+                  )}
+                </TagCrudModal>
+
+
+
+
+
+
+
+
+
+
+                {/* Display unused tags */}
+                <div>
+                  <h4 className="text-lg  text-center font-semibold">Autres Tags</h4>
+                  <div className="mt-4 flex flex-wrap">
+
+                  {unusedTags.map(tag => (
+  <button 
+    className="flex items-center flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2"
+    key={tag}
+    onClick={() => handleTagClick(tag.name)} // Supposer que handleTagClick peut prendre un nom de tag
+  >
+    {tag}
+  </button>
+))}
+                  </div>
+
+                </div>
+              </div>
+              <PublishedModal
+                isOpen={showPublishedModal}
+                onClose={() => setShowPublishedModal(false)}
+                title="Modification des Images publiées"
+              >
+                <p>{modalContent}</p>
+                <button
+                  className="bg-neutral-300 rounded-md p-4 m-2"
+                  onClick={() => applyPublishedsChange(true)}
+                >
+                  Ajouter la sélection aux Images publiées
+                </button>
+                <button
+                  className="bg-neutral-300 rounded-md p-4 m-2"
+                  onClick={() => applyPublishedsChange(false)}
+                >
+                  Retirer la sélection des Images publiées
+                </button>
+              </PublishedModal>
+              <RecentsModal
+                isOpen={showRecentsModal}
+                onClose={() => setShowRecentsModal(false)}
+                title="Modification des Récents"
+              >
+                <p>{modalContent}</p>
+                <button
+                  className="bg-neutral-300 rounded-md p-4 m-2"
+                  onClick={() => applyRecentsChange(true)}
+                >
+                  Ajouter la sélection aux Récents
+                </button>
+                <button
+                  className="bg-neutral-300 rounded-md p-4 m-2"
+                  onClick={() => applyRecentsChange(false)}
+                >
+                  Retirer la sélection des Récents
+                </button>
+              </RecentsModal>
+              <FavoriteModal
+                isOpen={showFavoriteModal}
+                onClose={() => setShowFavoriteModal(false)}
+                title="Modification des Favoris"
+              >
+                <p>{modalContent}</p>
+                <button
+                  className="bg-neutral-300 rounded-md p-4 m-2"
+                  onClick={() => applyFavoritesChange(true)}
+                >
+                  Ajouter la sélection aux favoris
+                </button>
+                <button
+                  className="bg-neutral-300 rounded-md p-4 m-2"
+                  onClick={() => applyFavoritesChange(false)}
+                >
+                  Retirer la sélection des favoris
+                </button>
+              </FavoriteModal>
+              <TagModal
+                isOpen={showTagModal}
+                onClose={() => setShowTagModal(false)}
+                title="Modification des Tags"
+              >
+                <p>{modalContent}</p>
+                <button
+                  className="bg-neutral-300 rounded-md p-4 m-2"
+                  onClick={() => applyTagChange(true)}
+                >
+                  Ajouter ce tag à la sélection
+                </button>
+                <button
+                  className="bg-neutral-300 rounded-md p-4 m-2"
+                  onClick={() => applyTagChange(false)}
+                >
+                  Retirer ce tag de la sélection
+                </button>
+              </TagModal>
+
+              {/* \\ edit <TAgs></TAgs> */}
+              <div>
+                <ToastContainer position="top-center" autoClose={5000} />
+              </div>
             </div>
           </div>
-        </div>
         )}
 
-<div style={{ width: isAdmin  && isShowAdmin ? "80%" : "100%", padding: "10px" }}>
+        <div style={{ width: isAdmin && isShowAdmin ? "80%" : "100%", padding: "10px" }}>
           {/* Votre contenu principal de la galerie ici */}
-             {/* Pagination and settings above the photo album */}
-             <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+          {/* Pagination and settings above the photo album */}
+          <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
               className={`p-2 rounded-sm ${currentPage === 1 ? 'bg-neutral-500 text-neutral-700' : 'bg-neutral-700 text-white'}`}
               onClick={goToPreviousPage}
@@ -1105,6 +1372,7 @@ try {
               return (
                 <>
                   <div
+                   onClick={(e) => handlePhotoClick(e, photo.id)}
                     style={{
                       ...wrapperStyle,
                       border: getBorderStyle(photo), // Appliquer le style de bordure ici
@@ -1144,6 +1412,7 @@ try {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
+                          setIndex(-1)
                           handleTagButtonClick(photo.id);
                         }}
                         className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
@@ -1153,15 +1422,14 @@ try {
                     )}
 
                     {/* @ts-ignore*/}
-                    {isAdmin && isShowAdmin &&(
+                    {isAdmin && isShowAdmin && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           togglePublished(photo.id, photo.published);
                         }}
-                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
-                          photo.published ? "" : "text-red-700 font-extrabold"
-                        }`}
+                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+                          }`}
                       >
                         <Eye isOpen={photo.published} />
                       </button>
@@ -1173,9 +1441,8 @@ try {
                           e.stopPropagation();
                           toggleRecent(photo.id);
                         }}
-                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
-                          photo.published ? "" : "text-red-700 font-extrabold"
-                        }`}
+                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+                          }`}
                       >
                         <Star isOpen={recentPhotos.has(photo.id)} />
                       </button>
@@ -1188,7 +1455,7 @@ try {
             }}
           />
           <Lightbox
-            open={index >= 0}
+            open={!isShowAdmin && index >= 0} // DESACTIVER L'ACCES A LIGHTBOX
             index={index}
             close={() => setIndex(-1)}
             slides={paginatedPhotos}
@@ -1196,8 +1463,8 @@ try {
             plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
           />
           <ToastContainer />
-             {/* Pagination and settings above the photo album */}
-             <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+          {/* Pagination and settings above the photo album */}
+          <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
               className={`p-2 rounded-sm ${currentPage === 1 ? 'bg-neutral-500 text-neutral-700' : 'bg-neutral-700 text-white'}`}
               onClick={goToPreviousPage}

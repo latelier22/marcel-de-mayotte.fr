@@ -18,7 +18,7 @@ const Navbar = () => {
 
   const isVisible = useSelector(state => state.visible.isVisible);
 
-  console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
+  // console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
 
   useEffect(() => {
     const init = async () => {

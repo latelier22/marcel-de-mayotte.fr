@@ -4,12 +4,14 @@ import RootLayout from "../../layout";
 import { Pages, site } from "../../site";
 import getImages from "../../components/getImages";
 import getTags from "../../components/getTags";
-import Tags from "../../components/Tags";
+// import Tags from "../../components/Tags";
 import getImagesbyTag from "../../components/getImagesbyTag";
-import Gallery from "../../components/album/Gallery";
+// import Gallery from "../../components/album/Gallery";
 import getProgressionsTags from "../../components/getProgressionsTags";
 import Cards from "../../Cards";
 import {authOptions} from "../../Auth"
+
+import TagsAndGallery from "../../components/album/TagsAndGallery"
 
 
 import { getServerSession } from 'next-auth';
@@ -19,15 +21,15 @@ async function Page({ params }) {
 
   const session = await getServerSession(authOptions);
 
-  if (session) {
-    // La session existe, vous pouvez accéder à `session.user`, `session.expires`, etc.
-    console.log("connecté", session);
+//   if (session) {
+//     // La session existe, vous pouvez accéder à `session.user`, `session.expires`, etc.
+//     console.log("connecté", session);
    
     
-} else {
+// } else {
   
-  console.log("non connecté");
-}
+//   console.log("non connecté");
+// }
   
 const userId = session?.user?.id || null;
 
@@ -87,30 +89,15 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
   return (
     <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
       <Navbar />
+      <TagsAndGallery
+      tagSlug={tagSlug}
+      photos={photos}
+      allTags={allTags}
+      progressionsTags={progressionsTags}
+      listeTags={listeTags}
+      tagCards={tagCards}  />
 
-      <div
-        className="grid flexflex-row grid-cols-12 justify-center items-start"
-        style={{ scrollbarWidth: "thin", scrollbarColor: "brown black" }}
-      >
-        <div className="col-span-2 pt-16 px-16 sticky  text-white bg-yellow-200  top-0 h-screen max-h-full overflow-y-auto">
-          {tagSlug.startsWith("progression") ? (
-            // Si tagSlug commence par "progressions", afficher progressionsTags
-            <Tags className="text-center" tags={[...progressionsTags]} />
-          ) : (
-            // Sinon, afficher allTags
-            <Tags className="text-center" tags={listeTags} />
-          )}
-        </div>
-        <div className="col-span-10  mt-28">
-          {tagSlug === "progressions" ? (
-            // Si tagSlug commence par "progressions", afficher progressionsTags
-            <Cards cards={tagCards} syliusCard={true} label={"Voir les étapes..."}/>
-          ) : (
-            // Sinon, afficher allTags
-            <Gallery photos={photos} allTags={allTags} />
-          )}
-        </div>
-      </div>
+      
 
       <Footer />
     </RootLayout>
