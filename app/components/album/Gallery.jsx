@@ -53,6 +53,10 @@ const Gallery = ({ photos, allTags }) => {
 
   const [selectedTag, setSelectedTag] = useState("");
 
+
+
+
+
   // MODALS
   const [showTagModal, setShowTagModal] = useState(false);
   const [showFavoriteModal, setShowFavoriteModal] = useState(false);
@@ -108,16 +112,55 @@ const Gallery = ({ photos, allTags }) => {
   };
   //
 
+  // const unusedTags = useMemo(() => {
+  //   const usedTags = new Set();
+  //   photos.forEach((photo) => {
+  //     photo.tags.forEach((tag) => {
+  //       usedTags.add(tag.name);
+  //     });
+  //   });
+
+  //   return allMyTags.filter((tag) => !usedTags.has(tag)).sort();
+  // }, [photos, allMyTags]);
+
+// const unusedTags = useMemo(() => {
+  //   const usedTags = new Set();
+
+  //   photos.forEach((photo) => {
+  //     photo.tags.forEach((tag) => {
+  //       usedTags.add(tag.name);
+  //     });
+  //   });
+
+  //   return allMyTags.filter((tag) => !usedTags.has(tag)).sort();
+  // }, [photos, allMyTags]);
+
+  // Utiliser useMemo pour déterminer les tags non utilisés basés sur les objets de tag
   const unusedTags = useMemo(() => {
     const usedTags = new Set();
-    photos.forEach((photo) => {
-      photo.tags.forEach((tag) => {
-        usedTags.add(tag.name);
+    photos.forEach(photo => {
+      photo.tags.forEach(tag => {
+        usedTags.add(tag.name); // Collecter les noms de tags utilisés
       });
     });
 
-    return allMyTags.filter((tag) => !usedTags.has(tag)).sort();
-  }, [photos, allMyTags]);
+    // Filtrer les allTags pour trouver ceux dont le nom n'est pas dans usedTagNames
+    return allTags
+      .filter(tag => !usedTags.has(tag.name) &&
+        !(tag.name.startsWith('Progression') && tag.name !== 'PROGRESSIONS'))
+
+      .map(tag => tag.name) // Extraire seulement les noms pour l'affichage
+      .sort(); // Trier les noms de tags pour l'affichage
+  }, [photos, allTags]);
+
+
+
+
+
+
+
+
+
 
   // Ajouter un tag
   const addTag = (tagName) => {
@@ -426,6 +469,40 @@ const Gallery = ({ photos, allTags }) => {
   }, [photos]);
 
   // Dans votre composant Gallery
+// PAGINATION
+
+const [currentPage, setCurrentPage] = useState(1);
+const [photosPerPage, setPhotosPerPage] = useState(25);
+
+// Calculer les photos paginées
+const paginatedPhotos = useMemo(() => {
+  const startIndex = (currentPage - 1) * photosPerPage;
+  const endIndex = startIndex + photosPerPage;
+  return photos.slice(startIndex, endIndex);
+}, [currentPage, photosPerPage, photos]);
+
+// Calculer le nombre total de pages
+const totalPages = useMemo(() => {
+  return Math.ceil(photos.length / photosPerPage);
+}, [photosPerPage, photos]);
+
+// Handlers pour la navigation de pagination
+const goToNextPage = () => {
+  setCurrentPage(currentPage + 1);
+};
+
+const goToPreviousPage = () => {
+  setCurrentPage(currentPage - 1);
+};
+
+const changePhotosPerPage = (number) => {
+  setPhotosPerPage(number);
+  setCurrentPage(1); // Réinitialiser à la première page avec le nouveau nombre de photos par page
+};
+
+
+
+
 
   const [recentPhotos, setRecentPhotos] = useState(new Set());
 
@@ -710,6 +787,7 @@ const Gallery = ({ photos, allTags }) => {
           ))}
 
           <div className="flex flex-row justify-around ">
+            <div>
             <button
               className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
               onClick={handleToggleFavorites}
@@ -717,21 +795,20 @@ const Gallery = ({ photos, allTags }) => {
               <Heart isOpen={true} />
             </button>
 
-            {/* <div style={{ marginTop: "20px" }}>
-        <h4>Unused Tags:</h4>
-        {unusedTags.map(tagName => (
-          <button
-            key={tagName}
-            style={{ margin: "5px" }}
-            onClick={() => handleTagClick(tagName)}
-          >
-            {tagName}
-          </button>
-        ))}
-      </div> */}
+             {/* Display unused tags */}
+          <div className="mt-4 flex flex-wrap">
+            <h4 className="text-lg w-1/2 text-center font-semibold">Taags non utilsés dans la page</h4>
+            {unusedTags.map(tagName => (
+              <button className="flex items-center flex-wrap  py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2" key={tagName}
+                onClick={() => handleTagClick(tagName)}>
+                {tagName}
+              </button>
+            ))}
+            </div>
 
 
-            <div>
+
+           
               <button onClick={handleTagModal}>Open Tag Modal</button>
               <button onClick={handleFavoriteModal}>Open Favorite Modal</button>
             </div>
@@ -782,9 +859,39 @@ const Gallery = ({ photos, allTags }) => {
         </div>
         <div style={{ width: "80%", padding: "10px" }}>
           {/* Votre contenu principal de la galerie ici */}
+             {/* Pagination and settings above the photo album */}
+             <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+            <button
+              className={`p-2 rounded-sm ${currentPage === 1 ? 'bg-neutral-500 text-neutral-700' : 'bg-neutral-700 text-white'}`}
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+            >
+              Page Précédente
+            </button>
+            <span>Page {currentPage} / {totalPages}</span>
+            <span>
+              <label className="mr-2 text-white">Photos per page:</label>
+              <select
+                className="p-1 text-xl font-bold text-black bg-white"
+                onChange={(e) => changePhotosPerPage(Number(e.target.value))}
+                value={photosPerPage}
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </span>
+            <button
+              className="p-2 rounded-sm bg-neutral-700 text-white"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Page Suivante
+            </button>
+          </div>
 
           <PhotoAlbum
-            photos={sortedAndFilteredPhotos}
+            photos={paginatedPhotos}
             spacing={50}
             layout="rows"
             targetRowHeight={350}
@@ -891,11 +998,41 @@ const Gallery = ({ photos, allTags }) => {
             open={index >= 0}
             index={index}
             close={() => setIndex(-1)}
-            slides={sortedAndFilteredPhotos}
+            slides={paginatedPhotos}
             render={{ slide: NextJsImage }}
             plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
           />
           <ToastContainer />
+             {/* Pagination and settings above the photo album */}
+             <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+            <button
+              className={`p-2 rounded-sm ${currentPage === 1 ? 'bg-neutral-500 text-neutral-700' : 'bg-neutral-700 text-white'}`}
+              onClick={goToPreviousPage}
+              disabled={currentPage === 1}
+            >
+              Page Précédente
+            </button>
+            <span>Page {currentPage} / {totalPages}</span>
+            <span>
+              <label className="mr-2 text-white">Photos per page:</label>
+              <select
+                className="p-1 text-xl font-bold text-black bg-white"
+                onChange={(e) => changePhotosPerPage(Number(e.target.value))}
+                value={photosPerPage}
+              >
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </span>
+            <button
+              className="p-2 rounded-sm bg-neutral-700 text-white"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Page Suivante
+            </button>
+          </div>
         </div>
       </div>
     </>
