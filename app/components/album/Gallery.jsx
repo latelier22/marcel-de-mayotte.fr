@@ -478,13 +478,13 @@ const [photosPerPage, setPhotosPerPage] = useState(25);
 const paginatedPhotos = useMemo(() => {
   const startIndex = (currentPage - 1) * photosPerPage;
   const endIndex = startIndex + photosPerPage;
-  return photos.slice(startIndex, endIndex);
-}, [currentPage, photosPerPage, photos]);
+  return sortedAndFilteredPhotos.slice(startIndex, endIndex);
+}, [currentPage, photosPerPage, sortedAndFilteredPhotos]);
 
 // Calculer le nombre total de pages
 const totalPages = useMemo(() => {
-  return Math.ceil(photos.length / photosPerPage);
-}, [photosPerPage, photos]);
+  return Math.ceil(sortedAndFilteredPhotos.length / photosPerPage);
+}, [photosPerPage, sortedAndFilteredPhotos]);
 
 // Handlers pour la navigation de pagination
 const goToNextPage = () => {
@@ -879,6 +879,8 @@ const changePhotosPerPage = (number) => {
                 <option value={25}>25</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
+                <option value={100}>200</option>
+                <option value={sortedAndFilteredPhotos.length}>TOUS ({sortedAndFilteredPhotos.length})</option>
               </select>
             </span>
             <button
