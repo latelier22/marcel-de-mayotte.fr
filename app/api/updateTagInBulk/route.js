@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../../../prisma/prisma"
 
-const prisma = new PrismaClient();
 
 export async function POST(request) {
   const { addTag, selectedPhotoIds, selectedTag } = await request.json();

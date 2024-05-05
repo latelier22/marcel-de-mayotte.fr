@@ -1,8 +1,6 @@
 // app/api/toggleRecentPhotos/route.ts
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from "../../../prisma/prisma"
 
 export async function POST(request) {
   const { photoId, toggleRecent } = await request.json();

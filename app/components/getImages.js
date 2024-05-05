@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from "../../../prisma/prisma"
 
 async function getImages( noSlugTags = [],userId=null) {
     try {

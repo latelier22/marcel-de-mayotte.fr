@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from "../../../prisma/prisma"
 
 async function getImagesbyTag(tagSlug, userId = null) {
     // Récupérer toutes les photos correspondant au tag
