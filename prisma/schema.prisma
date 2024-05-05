@@ -5,12 +5,12 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = "mysql://root:Bigtoon221274@localhost:3306/catalogue3"
+  url      = env("DATABASE_URL")
 }
 
 model Photo {
   id          Int         @id @default(autoincrement())
-  numero      Int         // numéro dans le catalogue - CAT
+  numero      BigInt         // numéro dans le catalogue - CAT
   dimensions  String?     // Les dimensions de la photo - DIM
   createdAt   DateTime    @default(now())
   tags        Tag[]       // Relation many-to-many avec la table des tags - TAG
