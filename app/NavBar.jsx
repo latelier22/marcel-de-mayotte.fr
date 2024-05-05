@@ -6,6 +6,9 @@ import { menuItems, site } from "./site";
 import Link from "next/link";
 
 import VisibilityToggleButton from "./components/album/icons/VisibilityToggleButton"
+import ShowAdminToggleButton from "./components/album/icons/ShowAdminToggleButton"
+
+
 import { useSelector, useDispatch } from 'react-redux';
 
 const Navbar = () => {
@@ -15,7 +18,7 @@ const Navbar = () => {
 
   const isVisible = useSelector(state => state.visible.isVisible);
 
-  // console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
+  console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
 
   useEffect(() => {
     const init = async () => {
@@ -103,9 +106,15 @@ const Navbar = () => {
                 </li>
                 {isAdmin && (
                 
+                <>
                   <VisibilityToggleButton />
+                  
+                  <ShowAdminToggleButton />
+                </>
+              
               
               )}
+             
                 </>
               ) : (
                 <>

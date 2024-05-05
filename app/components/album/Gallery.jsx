@@ -4,6 +4,10 @@ import { useSession } from "next-auth/react";
 
 import FavoriteModal from "../Modals/Modal";
 import TagModal from "../Modals/Modal";
+import RecentsModal from "../Modals/Modal";
+import PublisedModal from "../Modals/Modal";
+
+
 
 import {
   toggleFavorites,
@@ -59,8 +63,11 @@ const Gallery = ({ photos, allTags }) => {
 
   // MODALS
   const [showTagModal, setShowTagModal] = useState(false);
+  const [showRecentsModal, setShowRecentsModal] = useState(false);
+  const [showPublishedModal, setShowPublishedModal] = useState(false);
   const [showFavoriteModal, setShowFavoriteModal] = useState(false);
   const [modalContent, setModalContent] = useState("");
+  
 
   // const [modalType, setModalType] = useState('');
 
@@ -78,6 +85,12 @@ const Gallery = ({ photos, allTags }) => {
 
   // @ts-ignore
   const isVisible = useSelector((state) => state.visible.isVisible);
+
+  const isShowAdmin = useSelector((state) => state.showAdmin.isShowAdmin);
+
+  console.log("isShowAdmin",isShowAdmin)
+
+
   // @ts-ignore
   const isReadOnly = !session || session.user.role !== "admin";
   // @ts-ignore
@@ -559,6 +572,8 @@ const changePhotosPerPage = (number) => {
   };
 
   const updateRecentPhotosOnServer = async (photoId, toggleRecent) => {
+
+    console.log("PUPHISED?", photoId, toggleRecent)
     try {
       const response = await fetch(`/api/toggleRecentPhotos`, {
         method: "POST",
@@ -577,38 +592,81 @@ const changePhotosPerPage = (number) => {
     }
   };
 
-  const togglePublished = async (photoId, state) => {
+  const togglePublished = async (photoId) => {
+    event.stopPropagation();  // Stop event propagation if not handled elsewhere
+    console.log("publishedPhotos",publishedPhotos)
+
     const newPhotos = publishedPhotos.map((photo) => {
-      if (photo.id === photoId) {
-        return { ...photo, published: !photo.published };
-      }
-      return photo;
+        if (photo.id === photoId) {
+            return { ...photo, published: !photo.published };
+        }
+        return photo;
     });
 
     setPublishedPhotos(newPhotos);
 
-    try {
-      const response = await fetch("/api/togglePublished", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          photoId,
-          published: newPhotos.find((p) => p.id === photoId).published,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update the photo");
-      }
-    } catch (error) {
-      console.error(
-        "Une erreur est survenue lors de la mise à jour de l'état de publication :",
-        error
-      );
+    // Safely access the published property
+    const targetPhoto = newPhotos.find(p => p.id === photoId);
+    if (!targetPhoto) {
+        console.error("No photo found with the ID:", photoId);
+        return; // Exit if no photo found
     }
-  };
+
+    try {
+        const response = await fetch("/api/togglePublished", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                photoId,
+                published: newPhotos.find((p) => p.id === photoId).published,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to update the photo");
+        }
+    } catch (error) {
+        console.error("Error updating publication state:", error);
+    }
+};
+
+
+const handleToggleRecents = () => {
+  const selectedPhotos = photos.filter((photo) =>
+    selectedPhotoIds.includes(photo.id)
+  );
+
+  selectedPhotos.map((photo) => console.log(photo.id));
+
+  setShowRecentsModal(true);
+  setModalContent("Que voulez-vous faire? :");
+};
+const applyRecentsChange = (makeRecents) => {
+  updateRecentsInBulk(selectedPhotoIds, makeRecents);
+  setShowFavoriteModal(false);
+};
+
+
+const updateRecentsInBulk = async (selectedPhotoIds, makeRecents) => {
+
+
+console.log(selectedPhotoIds, makeRecents)
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
   const handleToggleFavorites = () => {
     const selectedPhotos = photos.filter((photo) =>
@@ -740,10 +798,10 @@ const changePhotosPerPage = (number) => {
   return (
     <>
       <div style={{ display: "flex" }}>
-        <div
-          className="flex  flex-col"
-          style={{ width: "20%", padding: "64px" }}
-        >
+        {isAdmin && isShowAdmin && (
+          <div className="flex flex-col" style={{ width: "20%", padding: "64px" }}>
+            {/* Admin-specific buttons and tag display logic here */}
+   
           <div className="flex flex-row justify-around ">
             <button
               className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
@@ -788,12 +846,26 @@ const changePhotosPerPage = (number) => {
 
           <div className="flex flex-row justify-around ">
             <div>
+            <div className="flex-flex-row">
             <button
               className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
               onClick={handleToggleFavorites}
             >
               <Heart isOpen={true} />
             </button>
+            <button
+              className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+              onClick={handleToggleRecents}
+            >
+              <Star isOpen={true} />
+            </button>
+            {/* <button
+              className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+              onClick={handleTogglePublished}
+            >
+              <Eye isOpen={true} />
+            </button> */}
+              </div>
 
              {/* Display unused tags */}
           <div className="mt-4 flex flex-wrap">
@@ -806,12 +878,26 @@ const changePhotosPerPage = (number) => {
             ))}
             </div>
 
-
-
-           
-              <button onClick={handleTagModal}>Open Tag Modal</button>
-              <button onClick={handleFavoriteModal}>Open Favorite Modal</button>
             </div>
+            <RecentsModal
+              isOpen={showRecentsModal}
+              onClose={() => setShowRecentsModal(false)}
+              title="Modification des Récents"
+            >
+              <p>{modalContent}</p>
+              <button
+                className="bg-neutral-300 rounded-md p-4 m-2"
+                onClick={() => applyRecentsChange(true)}
+              >
+                Ajouter la sélection aux Récents
+              </button>
+              <button
+                className="bg-neutral-300 rounded-md p-4 m-2"
+                onClick={() => applyRecentsChange(false)}
+              >
+                Retirer la sélection des Récents
+              </button>
+            </RecentsModal>
             <FavoriteModal
               isOpen={showFavoriteModal}
               onClose={() => setShowFavoriteModal(false)}
@@ -857,7 +943,9 @@ const changePhotosPerPage = (number) => {
             </div>
           </div>
         </div>
-        <div style={{ width: "80%", padding: "10px" }}>
+        )}
+
+<div style={{ width: isAdmin  && isShowAdmin ? "80%" : "100%", padding: "10px" }}>
           {/* Votre contenu principal de la galerie ici */}
              {/* Pagination and settings above the photo album */}
              <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
@@ -949,7 +1037,7 @@ const changePhotosPerPage = (number) => {
                       <Heart isOpen={favorites.has(photo.id)} />
                     </button>
                     {/* @ts-ignore*/}
-                    {isAdmin && (
+                    {isAdmin && isShowAdmin && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -962,7 +1050,7 @@ const changePhotosPerPage = (number) => {
                     )}
 
                     {/* @ts-ignore*/}
-                    {isAdmin && (
+                    {isAdmin && isShowAdmin &&(
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -976,7 +1064,7 @@ const changePhotosPerPage = (number) => {
                       </button>
                     )}
                     {/* @ts-ignore*/}
-                    {isAdmin && (
+                    {isAdmin && isShowAdmin && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

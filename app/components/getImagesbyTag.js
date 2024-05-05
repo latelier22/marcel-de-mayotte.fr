@@ -1,4 +1,4 @@
-import prisma from "../../../prisma/prisma"
+import prisma from "../../prisma/prisma"
 
 async function getImagesbyTag(tagSlug, userId = null) {
     // Récupérer toutes les photos correspondant au tag

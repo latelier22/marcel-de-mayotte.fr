@@ -1,4 +1,4 @@
-import prisma from "../../../prisma/prisma"
+import prisma from "../../prisma/prisma"
 
 async function getImages( noSlugTags = [],userId=null) {
     try {
