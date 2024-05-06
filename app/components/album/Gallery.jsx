@@ -660,59 +660,118 @@ const Gallery = ({ photos, allTags }) => {
     setRecentPhotos(initialRecentPhotos);
   }, [photos]);
 
+
+
   const toggleRecent = async (photoId) => {
     try {
       let isRecent = recentPhotos.has(photoId); // Vérifie si la photo est déjà marquée comme récente
   
-      // Met à jour l'ensemble des photos récentes
-      if (isRecent) {
-        recentPhotos.delete(photoId); // Retire la photo des photos récentes
-      } else {
-        recentPhotos.add(photoId); // Ajoute la photo aux photos récentes
-      }
-  
-      // Met à jour les photos pour changer le tag 'RECENT'
       const updatedPhotos = publishedPhotos.map((photo) => {
         if (photo.id === photoId) {
-          return {
-            ...photo,
-            tags: isRecent
-              ? photo.tags.filter((tag) => tag.id !== 70) // Retire le tag "TABLEAUX RECENT" si la photo était récente
-              : [...photo.tags, { id: 70 }] // Ajoute le tag "TABLEAUX RECENT" si la photo n'était pas récente
-          };
+          // Déterminer si le tag doit être ajouté ou retiré
+          const updatedTags = isRecent
+            ? photo.tags.filter((tag) => tag.id !== 70) // Retirer le tag
+            : [...photo.tags, { id: 70, name: "TABLEAUX RECENTS" }]; // Ajouter le tag
+  
+          return { ...photo, tags: updatedTags };
         }
         return photo;
       });
   
-      setPublishedPhotos(updatedPhotos);
-      setRecentPhotos(new Set(recentPhotos)); // Mettre à jour l'état des photos récentes
+      setPublishedPhotos(updatedPhotos); // Mettre à jour l'état local
   
-      // Appel à l'API pour mettre à jour l'état des photos récentes sur le serveur
-      await updateRecentPhotosOnServer(photoId, !isRecent);
-    } catch (error) {
-      console.error('An error occurred while updating tag "TABLEAUX RECENT":', error);
-    }
-  };
+      // Mettre à jour l'ensemble des photos récentes
+      if (isRecent) {
+        recentPhotos.delete(photoId);
+      } else {
+        recentPhotos.add(photoId);
+      }
+      setRecentPhotos(new Set(recentPhotos));
   
-  const updateRecentPhotosOnServer = async (photoId, toggleRecent) => {
-    console.log("RECENT?", photoId, toggleRecent);
-    try {
+      // Appel API
       const response = await fetch(`/api/toggleRecentPhotos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ photoId, toggleRecent }),
+        body: JSON.stringify({ photoId, toggleRecent: !isRecent }),
       });
   
-      if (!response.ok) {
-        throw new Error("Failed to update the recent photos");
+      if (response.ok) {
+        // Si succès de l'API, filtrer les photos pour les retirer de la vue si nécessaire
+        if (isRecent) { // Si on retirait le tag
+          const remainingPhotos = updatedPhotos.filter(photo => photo.tags.some(tag => tag.id === 70));
+          setPublishedPhotos(remainingPhotos);
+        }
+        toast.success("Mise à jour réussie!");
+      } else {
+        throw new Error("Failed to update the photo tags");
       }
     } catch (error) {
-      console.error("An error occurred while updating recent photos:", error);
+      console.error("Failed to toggle recent tag:", error);
       toast.error("Erreur lors de la mise à jour des photos récentes.");
     }
   };
+  
+
+
+
+
+
+
+  // const toggleRecent = async (photoId) => {
+  //   try {
+  //     let isRecent = recentPhotos.has(photoId); // Vérifie si la photo est déjà marquée comme récente
+  
+  //     // Met à jour l'ensemble des photos récentes
+  //     if (isRecent) {
+  //       recentPhotos.delete(photoId); // Retire la photo des photos récentes
+  //     } else {
+  //       recentPhotos.add(photoId); // Ajoute la photo aux photos récentes
+  //     }
+  
+  //     // Met à jour les photos pour changer le tag 'RECENT'
+  //     const updatedPhotos = publishedPhotos.map((photo) => {
+  //       if (photo.id === photoId) {
+  //         return {
+  //           ...photo,
+  //           tags: isRecent
+  //             ? photo.tags.filter((tag) => tag.id !== 70) // Retire le tag "TABLEAUX RECENT" si la photo était récente
+  //             : [...photo.tags, { id: 70 }] // Ajoute le tag "TABLEAUX RECENT" si la photo n'était pas récente
+  //         };
+  //       }
+  //       return photo;
+  //     });
+  
+  //     setPublishedPhotos(updatedPhotos);
+  //     setRecentPhotos(new Set(recentPhotos)); // Mettre à jour l'état des photos récentes
+  
+  //     // Appel à l'API pour mettre à jour l'état des photos récentes sur le serveur
+  //     await updateRecentPhotosOnServer(photoId, !isRecent);
+  //   } catch (error) {
+  //     console.error('An error occurred while updating tag "TABLEAUX RECENT":', error);
+  //   }
+  // };
+  
+  // const updateRecentPhotosOnServer = async (photoId, toggleRecent) => {
+  //   console.log("RECENT?", photoId, toggleRecent);
+  //   try {
+  //     const response = await fetch(`/api/toggleRecentPhotos`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ photoId, toggleRecent }),
+  //     });
+  
+  //     if (!response.ok) {
+  //       throw new Error("Failed to update the recent photos");
+  //     }
+  //   } catch (error) {
+  //     console.error("An error occurred while updating recent photos:", error);
+  //     toast.error("Erreur lors de la mise à jour des photos récentes.");
+  //   }
+  // };
   const togglePublished = async ( photoId, published) => {
     
     console.log("publishedPhotos", publishedPhotos , photoId, published)
