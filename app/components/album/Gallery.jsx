@@ -210,52 +210,152 @@ const Gallery = ({ photos, allTags }) => {
   // };
 
   // Ajouter un tag
-  const handleAddTag = tagName => {
-    if (tagName.trim() && !isTagNameExist(tagName)) {
-      const newTag = {
-        name: tagName,
+const handleAddTag = async (tagName) => {
+  const trimmedTagName = tagName.trim();
+  if (trimmedTagName && !isTagNameExist(trimmedTagName)) {
+    const tagSlug = getSlug(trimmedTagName); // Ensure slug is generated once and used consistently
+    try {
+      const createdTag = await createTag(trimmedTagName, tagSlug);
+      setAllMyTags(prevTags => [...prevTags, {
+        ...createdTag,
         count: 0,
         mainTag: false,
         present: false,
-        url: `generated-url-for-${tagName}`,  // Generate or specify URL if needed
-        slug: getSlug(tagName)
-      }
-      setAllMyTags(prevTags => [...prevTags, newTag]);
-      // toast.success(`Tag "${tagName}" added successfully!`);
-    } else {
-      toast.error("This tag already exists or invalid tag name!");
+        url: `generated-url-for-${trimmedTagName}`,  // Generate or specify URL if needed
+      }]);
+      toast.success(`Tag "${trimmedTagName}" added successfully!`);
+    } catch (error) {
+      console.error("Failed to create tag:", error);
+      toast.error(`Failed to add tag: ${error.message}`);
     }
-  };
+  } else {
+    toast.error("This tag already exists or invalid tag name!");
+  }
+};
 
+async function createTag(tagName, tagSlug) {
+  try {
+    const response = await fetch('/api/createTag', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ tagName, tagSlug }),
+    });
 
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    return await response.json();  // Ensure you wait for the JSON parsing
+  } catch (error) {
+    console.error("Error creating tag:", error);
+    throw error;  // Rethrow to handle it in the calling function
+  }
+}
 
 
   // Supprimer un tag
-  const handleDeleteTag = (tagName) => {
-    if (allMyTags.some(tag => tag.name === tagName)) {
+  // const handleDeleteTag = (tagName) => {
+  //   if (allMyTags.some(tag => tag.name === tagName)) {
+  //     const newTags = allMyTags.filter(tag => tag.name !== tagName);
+  //     setAllMyTags(newTags);
+  //     console.log(allMyTags)
+  //     // toast.success(`Tag "${tagName}" removed successfully!`);
+  //   }
+  // };
+
+  const deleteTag = async (tagName) => {
+    try {
+      const response = await fetch('/api/deleteTag', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tagName }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      // Mettre à jour l'état local après la confirmation de la suppression
       const newTags = allMyTags.filter(tag => tag.name !== tagName);
       setAllMyTags(newTags);
-      console.log(allMyTags)
-      // toast.success(`Tag "${tagName}" removed successfully!`);
+      toast.success(`Tag "${tagName}" removed successfully!`);
+    } catch (error) {
+      console.error("Error deleting tag:", error);
+      toast.error(`Failed to delete tag: ${error.message}`);
+    }
+  };
+  
+  // Intégrer la fonction de suppression dans handleDeleteTag
+  const handleDeleteTag = (tagName) => {
+    if (allMyTags.some(tag => tag.name === tagName)) {
+      deleteTag(tagName);
+    } else {
+      toast.error("Tag does not exist!");
     }
   };
 
-  // Éditer un tag existant
-  // Handler to edit an existing tag
-  const handleEditTag = (oldTagName, newTagName) => {
-    oldTagName = oldTagName.trim();
-    newTagName = newTagName.trim();
-    if (!isTagNameExist(oldTagName) || isTagNameExist(newTagName)) {
-      toast.error(`Edit failed: ${!isTagNameExist(oldTagName) ? "original tag does not exist." : "new tag name already exists."}`);
-      return;
-    }
-    const newTags = allMyTags.map(tag =>
-      tag.name.toLowerCase() === oldTagName.toLowerCase() ? { ...tag, name: newTagName } : tag
-    );
-    setAllMyTags(newTags);
-    toast.success(`Tag "${oldTagName}" updated to "${newTagName}"!`);
-  };
 
+
+
+
+  // // Éditer un tag existant
+  // // Handler to edit an existing tag
+  // const handleEditTag = (oldTagName, newTagName) => {
+  //   oldTagName = oldTagName.trim();
+  //   newTagName = newTagName.trim();
+  //   if (!isTagNameExist(oldTagName) || isTagNameExist(newTagName)) {
+  //     toast.error(`Edit failed: ${!isTagNameExist(oldTagName) ? "original tag does not exist." : "new tag name already exists."}`);
+  //     return;
+  //   }
+  //   const newTags = allMyTags.map(tag =>
+  //     tag.name.toLowerCase() === oldTagName.toLowerCase() ? { ...tag, name: newTagName } : tag
+  //   );
+  //   setAllMyTags(newTags);
+  //   toast.success(`Tag "${oldTagName}" updated to "${newTagName}"!`);
+  // };
+
+// Éditer un tag existant avec mise à jour serveur
+const handleEditTag = async (oldTagName, newTagName) => {
+  oldTagName = oldTagName.trim();
+  newTagName = newTagName.trim();
+  if (!isTagNameExist(oldTagName) || isTagNameExist(newTagName)) {
+    toast.error(`Edit failed: ${!isTagNameExist(oldTagName) ? "Original tag does not exist." : "New tag name already exists."}`);
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/editTag', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ oldTagName, newTagName }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    if (result.success) {
+      // Mise à jour de l'état local si la mise à jour sur le serveur réussit
+      const newTags = allMyTags.map(tag =>
+        tag.name.toLowerCase() === oldTagName.toLowerCase() ? { ...tag, name: newTagName } : tag
+      );
+      setAllMyTags(newTags);
+      toast.success(`Tag "${oldTagName}" updated to "${newTagName}" successfully!`);
+    } else {
+      toast.error(result.message);
+    }
+  } catch (error) {
+    console.error("Failed to update the tag:", error);
+    toast.error(`Error updating tag: ${error.message}`);
+  }
+};
 
 
 
@@ -372,6 +472,7 @@ const Gallery = ({ photos, allTags }) => {
 
   const handleTagClick = (tag) => {
     setSelectedTag(tag);
+    setTagName(tag);  // Met à jour l'input avec le nom du tag sélectionné
     console.log(selectedTag);
     if (selectedPhotoIds.length === 0) {
       // Sélectionner toutes les photos qui ont ce tag
@@ -1086,7 +1187,7 @@ const Gallery = ({ photos, allTags }) => {
     <>
       <div style={{ display: "flex" }}>
         {isAdmin && isShowAdmin && (
-          <div className="flex flex-col pt-16 px-16   text-white bg-neutral-600 top-0 h-screen max-h-full overflow-y-auto" style={{ width: "20%" }}>
+          <div className="flex flex-col pt-16 px-16 text-white bg-neutral-600 top-0 h-screen max-h-full overflow-y-auto sticky" style={{ width: "20%" }}>
             {/* Admin-specific buttons and tag display logic here */}
 
             <div className="flex flex-row justify-around ">
@@ -1120,8 +1221,8 @@ const Gallery = ({ photos, allTags }) => {
                 style={{ margin: "5px" }}
                 onClick={() => handleTagClick(tag)}
               >
-                <div className="flex items-center justify-between w-full py-2 px-4">
-                  <div className="flex-grow text-center">{tag}</div>
+                <div className="flex items-center justify-between flex-wrap py-2 px-4">
+                  <div className="flex-wrap text-center">{tag}</div>
                   <div className="flex-none">
                     {tagCounts.selectedCounts[tag] || 0} /{" "}
                     {tagCounts.counts[tag] || 0}
@@ -1279,7 +1380,7 @@ const Gallery = ({ photos, allTags }) => {
   <button 
     className="flex items-center flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2"
     key={tag}
-    onClick={() => handleTagClick(tag.name)} // Supposer que handleTagClick peut prendre un nom de tag
+    onClick={() => handleTagClick(tag)} // Supposer que handleTagClick peut prendre un nom de tag
   >
     {tag}
   </button>
