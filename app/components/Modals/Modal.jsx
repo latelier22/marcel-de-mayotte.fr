@@ -4,7 +4,7 @@ const Modal = ({ isOpen, onClose, title, textClose="Fermer", children }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay text-black flex flex-col justify-center z-50">
+        <div className="modal-overlay text-black flex flex-col justify-center z-[2222]">
             <div className="modal-content text-center flex flex-col ">
                 <h2>{title}</h2>
                 <div className=" flex flex-col justify-around">
@@ -23,6 +23,7 @@ const Modal = ({ isOpen, onClose, title, textClose="Fermer", children }) => {
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    z-index : 100000;
                 }
                 .modal-content {
                     background: white;

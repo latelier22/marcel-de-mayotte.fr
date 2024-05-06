@@ -197,19 +197,6 @@ const Gallery = ({ photos, allTags }) => {
 
 
   // Ajouter un tag
-  // const handleAddTag = (tagName) => {
-  //   if (tagName.trim() && !allMyTags.some(tag => tag.name === tagName)) {
-  //     const newTag = { name: tagName, count: 0, mainTag: false, present: false }; // Définir d'autres propriétés si nécessaire
-  //     const newTags = [...allMyTags, newTag];
-  //     console.log(newTag)
-  //     setAllMyTags(newTags);
-  //     console.log(allMyTags)
-  //     // console.log(allMyTags)
-  //     // toast.success(`Tag "${tagName}" added successfully!`);
-  //   }
-  // };
-
-  // Ajouter un tag
 const handleAddTag = async (tagName) => {
   const trimmedTagName = tagName.trim();
   if (trimmedTagName && !isTagNameExist(trimmedTagName)) {
@@ -298,26 +285,6 @@ async function createTag(tagName, tagSlug) {
     }
   };
 
-
-
-
-
-  // // Éditer un tag existant
-  // // Handler to edit an existing tag
-  // const handleEditTag = (oldTagName, newTagName) => {
-  //   oldTagName = oldTagName.trim();
-  //   newTagName = newTagName.trim();
-  //   if (!isTagNameExist(oldTagName) || isTagNameExist(newTagName)) {
-  //     toast.error(`Edit failed: ${!isTagNameExist(oldTagName) ? "original tag does not exist." : "new tag name already exists."}`);
-  //     return;
-  //   }
-  //   const newTags = allMyTags.map(tag =>
-  //     tag.name.toLowerCase() === oldTagName.toLowerCase() ? { ...tag, name: newTagName } : tag
-  //   );
-  //   setAllMyTags(newTags);
-  //   toast.success(`Tag "${oldTagName}" updated to "${newTagName}"!`);
-  // };
-
 // Éditer un tag existant avec mise à jour serveur
 const handleEditTag = async (oldTagName, newTagName) => {
   oldTagName = oldTagName.trim();
@@ -357,12 +324,6 @@ const handleEditTag = async (oldTagName, newTagName) => {
   }
 };
 
-
-
-
-
-
-
   // Gestion des modales pour les confirmations
   const openModal = (action) => {
     setTagAction(action);
@@ -372,24 +333,6 @@ const handleEditTag = async (oldTagName, newTagName) => {
   const closeModal = () => {
     setShowTagCrudModal(false);
   };
-
-
-  //   const handleAddTag = () => {
-  //     console.log("Adding a new tag...");
-  //     // Logique pour ajouter un tag
-  // };
-
-  // const handleDeleteTag = () => {
-  //     console.log("Deleting a tag...");
-  //     // Logique pour supprimer un tag
-  // };
-
-  // const handleEditTag = () => {
-  //     console.log("Editing a tag...");
-  //     // Logique pour éditer un tag
-  // };
-
-
 
   // Calcul du nombre de photos publiées
   const numberOfPublishedPhotos = useMemo(() => {
@@ -630,48 +573,6 @@ const handleEditTag = async (oldTagName, newTagName) => {
     }
   };
 
-  // const sortedAndFilteredPhotos = useMemo(() => {
-  //   // Filtrer les photos selon les critères d'administration et de visibilité
-  //   let filteredPhotos = photos;
-  //   if (!isAdmin || !isVisible) {
-  //     filteredPhotos = filteredPhotos.filter((photo) => photo.published);
-  //   }
-
-  //   // Trier les photos pour favoriser les favorites et les sélectionnées
-  //   return filteredPhotos.sort((a, b) => {
-  //     const aSelected = selectedPhotoIds.includes(a.id);
-  //     const bSelected = selectedPhotoIds.includes(b.id);
-  //     const aFavorite = favorites.has(a.id);
-  //     const bFavorite = favorites.has(b.id);
-
-  //     // Priorité aux favorites sélectionnées
-  //     if (aFavorite && aSelected && !(bFavorite && bSelected)) {
-  //       return -1;
-  //     }
-  //     if (bFavorite && bSelected && !(aFavorite && aSelected)) {
-  //       return 1;
-  //     }
-
-  //     // Ensuite, autres photos sélectionnées
-  //     if (aSelected && !bSelected) {
-  //       return -1;
-  //     }
-  //     if (bSelected && !aSelected) {
-  //       return 1;
-  //     }
-
-  //     // Ensuite, favorites non sélectionnées
-  //     if (aFavorite && !aSelected && !(bFavorite && !bSelected)) {
-  //       return -1;
-  //     }
-  //     if (bFavorite && !bSelected && !(aFavorite && !bSelected)) {
-  //       return 1;
-  //     }
-
-  //     return 0; // Conserver l'ordre initial si toutes les conditions sont égales
-  //   });
-  // }, [photos, selectedPhotoIds, favorites, isAdmin, isVisible]);
-
   const sortedAndFilteredPhotos = useMemo(() => {
     let filteredPhotos = photos;
   
@@ -679,7 +580,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
     if (!isAdmin || !isVisible) {
       filteredPhotos = filteredPhotos.filter(photo => photo.published);
     }
-  
+
     // Trier les photos par favoris si nécessaire
     return filteredPhotos.sort((a, b) => {
       const aFavorite = favorites.has(a.id);
@@ -693,8 +594,6 @@ const handleEditTag = async (oldTagName, newTagName) => {
     });
   }, [photos, favorites, isAdmin, isVisible]); // Ajouter isVisible aux dépendances
   
-
-
 
   // Initialiser l'état 'favorites' avec les favoris de l'objet 'photos'
   useEffect(() => {
@@ -760,8 +659,6 @@ const handleEditTag = async (oldTagName, newTagName) => {
     setRecentPhotos(initialRecentPhotos);
   }, [photos]);
 
-
-
   const toggleRecent = async (photoId) => {
     try {
       let isRecent = recentPhotos.has(photoId); // Vérifie si la photo est déjà marquée comme récente
@@ -814,64 +711,6 @@ const handleEditTag = async (oldTagName, newTagName) => {
   };
   
 
-
-
-
-
-
-  // const toggleRecent = async (photoId) => {
-  //   try {
-  //     let isRecent = recentPhotos.has(photoId); // Vérifie si la photo est déjà marquée comme récente
-  
-  //     // Met à jour l'ensemble des photos récentes
-  //     if (isRecent) {
-  //       recentPhotos.delete(photoId); // Retire la photo des photos récentes
-  //     } else {
-  //       recentPhotos.add(photoId); // Ajoute la photo aux photos récentes
-  //     }
-  
-  //     // Met à jour les photos pour changer le tag 'RECENT'
-  //     const updatedPhotos = publishedPhotos.map((photo) => {
-  //       if (photo.id === photoId) {
-  //         return {
-  //           ...photo,
-  //           tags: isRecent
-  //             ? photo.tags.filter((tag) => tag.id !== 70) // Retire le tag "TABLEAUX RECENT" si la photo était récente
-  //             : [...photo.tags, { id: 70 }] // Ajoute le tag "TABLEAUX RECENT" si la photo n'était pas récente
-  //         };
-  //       }
-  //       return photo;
-  //     });
-  
-  //     setPublishedPhotos(updatedPhotos);
-  //     setRecentPhotos(new Set(recentPhotos)); // Mettre à jour l'état des photos récentes
-  
-  //     // Appel à l'API pour mettre à jour l'état des photos récentes sur le serveur
-  //     await updateRecentPhotosOnServer(photoId, !isRecent);
-  //   } catch (error) {
-  //     console.error('An error occurred while updating tag "TABLEAUX RECENT":', error);
-  //   }
-  // };
-  
-  // const updateRecentPhotosOnServer = async (photoId, toggleRecent) => {
-  //   console.log("RECENT?", photoId, toggleRecent);
-  //   try {
-  //     const response = await fetch(`/api/toggleRecentPhotos`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ photoId, toggleRecent }),
-  //     });
-  
-  //     if (!response.ok) {
-  //       throw new Error("Failed to update the recent photos");
-  //     }
-  //   } catch (error) {
-  //     console.error("An error occurred while updating recent photos:", error);
-  //     toast.error("Erreur lors de la mise à jour des photos récentes.");
-  //   }
-  // };
   const togglePublished = async ( photoId, published) => {
     
     console.log("publishedPhotos", publishedPhotos , photoId, published)
@@ -912,9 +751,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
     }
   };
 
-
   // applyPublishedChange
-
 
   const handleTogglePublisheds = () => {
     const selectedPhotos = photos.filter((photo) =>
@@ -927,8 +764,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
     setModalContent("Que voulez-vous faire? :");
   };
   const applyPublishedsChange = (makePublished) => {
-    const tagName = "TABLEAUX RECENTS";
-    // console.log(selectedPhotoIds, makeRecents, tagName);
+   
     updatePublishedsInBulk(selectedPhotoIds, makePublished);
     setShowPublishedModal(false);
   };
@@ -980,22 +816,6 @@ const handleEditTag = async (oldTagName, newTagName) => {
     }
   };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   const handleToggleRecents = () => {
     const selectedPhotos = photos.filter((photo) =>
       selectedPhotoIds.includes(photo.id)
@@ -1011,7 +831,6 @@ const handleEditTag = async (oldTagName, newTagName) => {
     updateRecentsInBulk(selectedPhotoIds, makeRecents, tagName);
     setShowRecentsModal(false);
   };
-
 
   const updateRecentsInBulk = async (selectedPhotoIds, addTag, tagName) => {
 
@@ -1168,26 +987,11 @@ const handleEditTag = async (oldTagName, newTagName) => {
     }
   };
 
-  // Tri des photos pour mettre les sélectionnées en haut
-  const sortedPhotos = useMemo(() => {
-    return photos.sort((a, b) => {
-      const aSelected = selectedPhotoIds.includes(a.id);
-      const bSelected = selectedPhotoIds.includes(b.id);
-      if (aSelected && !bSelected) {
-        return -1; // a vient avant b
-      } else if (!aSelected && bSelected) {
-        return 1; // b vient avant a
-      } else {
-        return 0; // l'ordre est maintenu
-      }
-    });
-  }, [photos, selectedPhotoIds]);
-
   return (
     <>
-      <div style={{ display: "flex" }}>
+      <div className="z-[2]"  style={{ display: "flex" }}>
         {isAdmin && isShowAdmin && (
-          <div className="flex flex-col pt-16 px-16 text-white bg-neutral-600 top-0 h-screen max-h-full overflow-y-auto sticky" style={{ width: "20%" }}>
+          <div className="flex flex-col pt-16 px-16 text-white bg-neutral-600 top-0 h-screen max-h-full overflow-y-auto " style={{ width: "20%" }}>
             {/* Admin-specific buttons and tag display logic here */}
 
             <div className="flex flex-row justify-around ">
@@ -1255,27 +1059,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
                 </div>
 
                 <div style={{ margin: "20px 0" }}>
-                  {/* <button
-                    onClick={handleAddTag}
-                    className="rounded-md bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 m-2"
-                  >
-                    Add Tag
-                  </button>
-                  <button
-                    onClick={handleDeleteTag}
-                    className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
-                  >
-                    Delete Tag
-                  </button>
-                  <button
-                    onClick={handleEditTag}
-                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-                  >
-                    Edit Tag
-                  </button> */}
-
-                  {/* Zone de saisie et boutons pour la gestion des tags */}
-
+                
                   <input
                     type="text"
                     placeholder="Enter tag name"
@@ -1287,7 +1071,8 @@ const handleEditTag = async (oldTagName, newTagName) => {
                     onClick={() => openModal('add')}
                     disabled={!tagName.trim() || isTagNameExist(tagName)}
                     className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName) ? `bg-green-700` : `bg-green-500  hover:bg-green-300`}  text-white font-bold py-2 px-4 m-2`}
-                    title={!tagName.trim() ? "Entrez un nom pour un nouveau tag." : allMyTags.includes(tagName) ? "Ce tag existe déjà!" : "Ajouter un tag"}
+                    title={!tagName.trim() ? "Entrez un nom pour un nouveau tag." : allMyTags.some(tag => tag.name === tagName) ? "Ce tag existe déjà!" : "Ajouter un tag"}
+
                   >
                     Add Tag
                   </button>
@@ -1318,7 +1103,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
                   onClose={() => setShowTagCrudModal(false)}
                   title={`${tagAction.charAt(0).toUpperCase() + tagAction.slice(1)} Tag`}
                 >
-                  <p className="p-8">Are you sure you want to {tagAction} the tag "{tagName}"?</p>
+                  <p className="p-8">Are you sure you want to {tagAction} the tag &quot;{tagName}&quot;?</p>
                   {tagAction === 'add' &&
                     <button
                       className='bg-lime-600 rounded-md p-2 m-4 items-end'
@@ -1496,7 +1281,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
                 <option value={25}>25</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
-                <option value={100}>200</option>
+                <option value={200}>200</option>
                 <option value={sortedAndFilteredPhotos.length}>TOUS ({sortedAndFilteredPhotos.length})</option>
               </select>
             </span>
@@ -1521,7 +1306,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
                 if (selectedPhotoIds.includes(photo.id)) {
                   return "8px solid green"; // Vert pour les photos sélectionnées
                 } else {
-                  // Retourner blanc ou noir basé sur la présence du tag "NOIR ET BLANC"
+                  // Retourner blanc ou noir basé sur la présence du tag NOIR ET BLANC
                   return photo.tags?.some((tag) => tag.name === "NOIR ET BLANC")
                     ? "4px solid white"
                     : "4px solid black";

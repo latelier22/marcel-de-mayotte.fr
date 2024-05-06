@@ -14,7 +14,7 @@ const TagModal = ({ isOpen, onClose, title, textClose="Fermer", children }) => {
             </div>
             <style jsx>{`
                 .modal-overlay {
-                    position: fixed;
+                    position: absolute;
                     top: 0;
                     left: 0;
                     right: 0;
@@ -23,6 +23,7 @@ const TagModal = ({ isOpen, onClose, title, textClose="Fermer", children }) => {
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    z-index : 1000;
                 }
                 .modal-content {
                     background: white;

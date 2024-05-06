@@ -67,7 +67,7 @@ const TagManager = ({ allMyTags, setTags }) => {
             </Modal>
 
             <Modal isOpen={modalType === 'delete'} onClose={closeModal} title="Confirm Delete">
-                <p>Are you sure you want to delete "{currentTag}"?</p>
+                <p>Are you sure you want to delete &quot;{currentTag}&quot;?</p>
                 <button onClick={handleDeleteTag}>Confirm Delete</button>
             </Modal>
 
