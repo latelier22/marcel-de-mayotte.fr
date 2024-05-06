@@ -572,27 +572,26 @@ const Gallery = ({ photos, allTags }) => {
   // }, [photos, selectedPhotoIds, favorites, isAdmin, isVisible]);
 
   const sortedAndFilteredPhotos = useMemo(() => {
-    // Filtrer les photos selon les critères d'administration et de visibilité
     let filteredPhotos = photos;
+  
+    // Assurer que seules les photos publiées sont montrées si non admin ou isVisible est false
     if (!isAdmin || !isVisible) {
-      filteredPhotos = filteredPhotos.filter((photo) => photo.published);
+      filteredPhotos = filteredPhotos.filter(photo => photo.published);
     }
-
-    // Trier les photos pour favoriser les favorites
+  
+    // Trier les photos par favoris si nécessaire
     return filteredPhotos.sort((a, b) => {
       const aFavorite = favorites.has(a.id);
       const bFavorite = favorites.has(b.id);
-
-      // Favoriser les photos favorites
       if (aFavorite && !bFavorite) {
         return -1;
       } else if (!aFavorite && bFavorite) {
         return 1;
-      } else {
-        return 0; // Conserver l'ordre initial si toutes les conditions sont égales
       }
+      return 0; // Conserver l'ordre initial si toutes les conditions sont égales
     });
-  }, [photos, favorites, isAdmin, isVisible]);
+  }, [photos, favorites, isAdmin, isVisible]); // Ajouter isVisible aux dépendances
+  
 
 
 
