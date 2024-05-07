@@ -33,6 +33,10 @@ async function Page({ params }) {
   
 const userId = session?.user?.id || null;
 
+const isAdmin = session && session.user.role === 'admin';
+
+console.log("isAdmin",isAdmin)
+
   const page = Pages["catalogue"];
   const pageTitle = page.title;
   const pageDescription = page.description;
@@ -87,7 +91,7 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
 
 
   return (
-    <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
+    <main>
       <Navbar />
       <TagsAndGallery
       tagSlug={tagSlug}
@@ -95,12 +99,13 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
       allTags={allTags}
       progressionsTags={progressionsTags}
       listeTags={listeTags}
-      tagCards={tagCards}  />
+      tagCards={tagCards}
+  />
 
       
 
       <Footer />
-    </RootLayout>
+      </main>
   );
 }
 

@@ -34,7 +34,7 @@ const WordAnimation = ({ word, color, initialX, finalX, delay, rotate, onComplet
     };
   }, [initialX, finalX, rotate, delay, onComplete]);
 
-  return <div className='font-bold text-[6vw]' style={style}>{word}</div>;
+  return <div className='font-bold text-[5vw]' style={style}>{word}</div>;
 };
 
 const Home = () => {
