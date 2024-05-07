@@ -35,6 +35,10 @@ module.exports = {
         },
       },
       keyframes: () => ({
+        fadeInOut: {
+          '0%, 100%': { opacity: 0 },
+          '10%, 90%': { opacity: 1 }
+        },
         slideRight: {
           "0%": { opacity: 0, marginLeft: "-600px" },
           "100%": { opacity: 1, marginLeft: "0" },
@@ -45,6 +49,7 @@ module.exports = {
         },
       }),
       animation: {
+        fadeInOut: 'fadeInOut 6s ease-in-out',
         slideRight: "slideRight 1s ease-in",
         slideLeft: "slideLeft 1s ease-in",
       },

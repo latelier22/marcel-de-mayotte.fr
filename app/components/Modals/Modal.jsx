@@ -1,16 +1,16 @@
 import React from 'react';
 
-const Modal = ({ isOpen, onClose, title, textClose="Fremer", children }) => {
+const Modal = ({ isOpen, onClose, title, textClose="Fermer", children }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay text-black flex flex-col justify-center z-50">
+        <div className="modal-overlay text-black flex flex-col justify-center z-[2222]">
             <div className="modal-content text-center flex flex-col ">
                 <h2>{title}</h2>
                 <div className=" flex flex-col justify-around">
                 {children}
                 </div>
-                <button className='bg-green-500 rounded-md p-2 m-4 items-end' onClick={onClose}>{textClose}</button>
+                <button className='bg-orange-700 rounded-md p-2 m-4 items-end' onClick={onClose}>{textClose}</button>
             </div>
             <style jsx>{`
                 .modal-overlay {
@@ -23,6 +23,7 @@ const Modal = ({ isOpen, onClose, title, textClose="Fremer", children }) => {
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    z-index : 100000;
                 }
                 .modal-content {
                     background: white;
@@ -37,4 +38,3 @@ const Modal = ({ isOpen, onClose, title, textClose="Fremer", children }) => {
 };
 
 export default Modal;
-

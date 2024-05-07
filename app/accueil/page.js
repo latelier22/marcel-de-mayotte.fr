@@ -17,7 +17,7 @@ const Accueil = () => {
   const backgroundColor = "bg-teal-500";
 
   return (
-    <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
+   <main>
       <Navbar />
       <HeaderSimple photos={photos} siteTitle ={site.title} title={pageTitle}/>
       {/* <Picto
@@ -27,7 +27,7 @@ const Accueil = () => {
       <Section section={sections[0]} />
 
       <Footer />
-    </RootLayout>
+      </main>
   );
 };
 
