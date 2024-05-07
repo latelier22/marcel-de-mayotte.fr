@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import citations from "./citations.json"; // Assurez-vous que votre fichier JSON existe dans le dossier data
+import "./page.module.css"; // Assurez-vous d'importer votre fichier CSS contenant les styles d'animation
 
 function Citation() {
   const [currentCitation, setCurrentCitation] = useState(null);
-  const [gauche, setGauche] = useState(false);
 
   useEffect(() => {
     // Sélectionner une citation initiale au montage du composant
@@ -19,9 +19,7 @@ function Citation() {
       const randomCitation = citations[randomIndex];
       setCurrentCitation(randomCitation);
 
-      // Changer la direction de l'animation
-      setGauche(Math.random() >= 0.5);
-    }, 20000);
+    }, 5000);
 
     // Nettoyer l'intervalle lors du démontage du composant
     return () => clearInterval(interval);
@@ -30,7 +28,7 @@ function Citation() {
   return (
     <>
       {currentCitation && (
-        <div className={`container mx-auto my-8 p-4 flex justify-center items-stretch flex-row rounded-md dark:bg-black border-gold-500 border-solid border-2 ${gauche ? "animate-slideLeft" : "animate-slideRight"}`}>
+        <div className={`container mx-auto my-8 p-4 flex justify-center items-stretch flex-row rounded-md dark:bg-black border-gold-500 border-solid border-2 animate-fadeInOut`}>
           <div className="flex flex-col items-end justify-end">
             {Array.isArray(currentCitation) ? (
               currentCitation.map((citation, i) => (

@@ -45,3 +45,17 @@
   pointer-events: auto; /* Active les clics sur le texte */
   cursor: pointer; /* Change le curseur pour indiquer la possibilité de cliquer */
 }
+
+
+@keyframes fadeInOut {
+  0%, 100% {
+    opacity: 0;
+  }
+  5%, 95% {
+    opacity: 1;
+  }
+}
+
+.fadeInOutAnimation {
+  animation: fadeInOut 5s linear forwards; /* Total de 20 secondes comme demandé */
+}
