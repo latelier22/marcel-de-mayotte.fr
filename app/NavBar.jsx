@@ -2,11 +2,14 @@
 
 import { useEffect } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 import { menuItems, site } from "./site";
 import Link from "next/link";
 
 import VisibilityToggleButton from "./components/album/icons/VisibilityToggleButton"
 import ShowAdminToggleButton from "./components/album/icons/ShowAdminToggleButton"
+// import ShowAdminToggleButton from "./components/album/icons/AdminNavBarToggleButton"
 
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -17,6 +20,8 @@ const Navbar = () => {
   const isAdmin = (session && session.user.role === 'admin')
 
   const isVisible = useSelector(state => state.visible.isVisible);
+
+  const router = useRouter();
 
   // console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
 
@@ -93,47 +98,67 @@ const Navbar = () => {
                   </a>
                 </li>
               ))}
+              {isAdmin && (
+                <>
+                  <li className="lg:mb-0 lg:pr-2">
+                    <Link
+                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                      href="/admin"
+                      data-te-nav-link-ref
+                      data-te-ripple-init
+                      data-te-ripple-color="light"
+                    >
+                      ADMIN
+                    </Link>
+                  </li>
+                </>
+              )}
               {/* Ajouter l'option de connexion/déconnexion */}
               {session ? (
                 <>
-                <li className="lg:mb-0 lg:pr-2">
-                  <button
-                     className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
-                    onClick={() => signOut()}
-                  >
-                    {session.user.email.split("@",1) }   /  déconnexion
-                  </button>
-                </li>
-                {isAdmin && (
-                
-                <>
-                  <VisibilityToggleButton />
-                  
-                  <ShowAdminToggleButton />
-                </>
-              
-              
-              )}
-             
+                  <li className="lg:mb-0 lg:pr-2">
+                    <button
+                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                      onClick={() => {
+                        signOut({ callbackUrl: '/accueil' });
+                        // router.push('/accueil');
+
+                      }}
+                    >
+                      {session.user.email.split("@", 1)}   /  déconnexion
+                    </button>
+                  </li>
+                  {isAdmin && (
+
+                    <>
+                      {/* <AdminNavBarToggleButton /> */}
+                      <VisibilityToggleButton />
+
+                      <ShowAdminToggleButton />
+                    </>
+
+
+                  )}
+
                 </>
               ) : (
                 <>
-                <li className="lg:mb-0 lg:pr-2">
-                  <button
-                     className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
-                    onClick={() => signIn()}
-                  >
-                    Connexion
-                  </button>
-                </li>
-                <li className="lg:mb-0 lg:pr-2">
-                  <Link
-                     className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                  <li className="lg:mb-0 lg:pr-2">
+                    <button
+                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                      onClick={() => signIn()}
+                    >
+                      Connexion
+                    </button>
+                  </li>
+                  <li className="lg:mb-0 lg:pr-2">
+                    <Link
+                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                       href={"/inscription"}
-                  >
-                    Inscription
-                  </Link>
-                </li>
+                    >
+                      Inscription
+                    </Link>
+                  </li>
                 </>
               )}
             </ul>
