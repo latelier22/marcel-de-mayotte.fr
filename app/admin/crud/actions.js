@@ -3,7 +3,7 @@ export const menuItems = [
     { label: "Catégories", route: "/tags" },
     { label: "Tableaux", route: "/photos" },
     { label: "Progressions", route: "/progressions" },
-    { label: "Citations", route: "/citationss" },
+    { label: "Citations", route: "/admin/citations" },
     
   ];
   

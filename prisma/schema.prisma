@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
+  url      ="mysql://root:Bigtoon221274@localhost:3306/catalogue4"
 }
 
 model Photo {
@@ -55,4 +55,16 @@ model Favorite {
   user   User  @relation(fields: [userId], references: [id])
 
   @@unique([userId, photoId], name: "userId_photoId")
+}
+
+model Citation {
+  id              Int        @id @default(autoincrement())
+   texte          String     @db.Text
+  auteur          String?
+  photoId         Int?       // Optional ID of the linked photo
+  etat            String     @default("brouillon") // Draft, published, deleted
+  parentCitationId Int?      // Optional ID of the parent citation
+  parentCitation  Citation?  @relation("ChildCitations", fields: [parentCitationId], references: [id])
+  childCitations  Citation[] @relation("ChildCitations")
+
 }
