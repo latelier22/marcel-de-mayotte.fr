@@ -1,10 +1,9 @@
 "use client"
 
 import React, { useState, useEffect } from "react";
-import citations from "./citations.json"; // Assurez-vous que votre fichier JSON existe dans le dossier data
 import "./page.module.css"; // Assurez-vous d'importer votre fichier CSS contenant les styles d'animation
 
-function Citation() {
+function Citation({citations}) {
   const [currentCitation, setCurrentCitation] = useState(null);
 
   useEffect(() => {

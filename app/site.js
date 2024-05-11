@@ -19,7 +19,7 @@ export const site = {
 };
 
 export const menuItems = [
-  { label: "Accueil", route: "/" },
+  { label: "Accueil", route: "/accueil" },
   // { label: "Actualités", route: "/actualites" },
   { "label": "Tableaux récents \u2605", "route": "/catalogue/tableaux-recents" },
   { label: "Tableaux plus anciens", route: "/catalogue/tableaux-plus-anciens" },

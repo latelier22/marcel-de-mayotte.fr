@@ -8,25 +8,21 @@ import Section from "../Section";
 import Banner from "../Banner";
 import {cards, sections, site, photos} from "../site"
 import Citation from "../Citation";
-import getCitations from "../components/getCitations";
 
-
-async function Accueil () {
+const Accueil = () => {
   // Dynamic metadata for the home page
   const pageTitle = "Accueil";
   const pageDescription = "Bienvenue sur le site de Marcel Séjour";
 
   const backgroundColor = "bg-teal-500";
 
-  const citations = await getCitations()
-
   return (
    <main>
       <Navbar />
       <HeaderSimple photos={photos} siteTitle ={site.title} title={pageTitle}/>
-      {/* <Picto 
+      {/* <Picto
       s /> */}
-       <Citation citations={citations} section={sections[0]} />
+       <Citation section={sections[0]} />
       <Banner photo = {photos[0]} />
       <Section section={sections[0]} />
 
