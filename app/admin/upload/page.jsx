@@ -8,7 +8,7 @@ async function Page() {
         
     const files = await fetchFiles();
 
-    console.log("Page files", files)
+    // console.log("Page files", files)
             
     return (
         <>

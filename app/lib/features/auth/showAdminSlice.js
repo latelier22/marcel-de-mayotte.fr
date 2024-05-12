@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 // Définissez l'état initial de votre slice.
 const initialState = {
-  isShowAdmin: false,
+  isShowAdmin: true,
 };
 
 const showAdminSlice = createSlice({
