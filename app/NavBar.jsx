@@ -21,6 +21,9 @@ const Navbar = () => {
 
   const isVisible = useSelector(state => state.visible.isVisible);
 
+  const isShowAdmin = useSelector((state) => state.showAdmin.isShowAdmin);
+
+  // isShowAdmin
   const router = useRouter();
 
   // console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
@@ -98,21 +101,7 @@ const Navbar = () => {
                   </a>
                 </li>
               ))}
-              {isAdmin && (
-                <>
-                  <li className="lg:mb-0 lg:pr-2">
-                    <Link
-                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
-                      href="/admin"
-                      data-te-nav-link-ref
-                      data-te-ripple-init
-                      data-te-ripple-color="light"
-                    >
-                      ADMIN
-                    </Link>
-                  </li>
-                </>
-              )}
+           
               {/* Ajouter l'option de connexion/déconnexion */}
               {session ? (
                 <>
@@ -139,6 +128,21 @@ const Navbar = () => {
 
 
                   )}
+                     {isAdmin && isShowAdmin &&(
+                <>
+                  <li className="lg:mb-0 lg:pr-2">
+                    <Link
+                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                      href="/admin"
+                      data-te-nav-link-ref
+                      data-te-ripple-init
+                      data-te-ripple-color="light"
+                    >
+                      ADMIN
+                    </Link>
+                  </li>
+                </>
+              )}
 
                 </>
               ) : (

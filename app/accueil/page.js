@@ -18,7 +18,14 @@ async function Accueil () {
 
   const backgroundColor = "bg-teal-500";
 
-  const citations = await getCitations()
+  const onlyPublished =true;
+
+  const citations = await getCitations({onlyPublished});
+
+  console.log(citations)
+
+  // const publishedCitations = citations.filter(citation => citation.etat === "publiée")
+  // console.log ("FILTER PUBLIEE", publishedCitations)
 
   return (
    <main>
@@ -26,7 +33,8 @@ async function Accueil () {
       <HeaderSimple photos={photos} siteTitle ={site.title} title={pageTitle}/>
       {/* <Picto 
       s /> */}
-       <Citation citations={citations} section={sections[0]} />
+      <Citation citations={citations} section={sections[0]} />
+
       <Banner photo = {photos[0]} />
       <Section section={sections[0]} />
 

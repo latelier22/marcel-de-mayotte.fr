@@ -253,7 +253,7 @@ function ListCitations({ allCitations }) {
             <div key={citation.id} className={`p-4 mb-4 cursor-pointer ${citation.id === lastModifiedCitationId ? 'bg-gray-800' : ''} ${citation === selectedCitation ? 'border-green-500 border-solid border-2' : ''}`} onClick={() => handleCitationClick(citation)}>
                 {editing && citation === selectedCitation ? (
                     <div className="flex flex-col">
-                        <input className="flex flex-col bg-black p-4 " type="text" value={editFormData.texte} onChange={e => setEditFormData({ ...editFormData, texte: e.target.value })} />
+                        <input className="flex flex-col bg-black p-4 " type="textarea" value={editFormData.texte} onChange={e => setEditFormData({ ...editFormData, texte: e.target.value })} />
                         <input className="flex flex-col bg-black p-4 " type="text" value={editFormData.auteur} onChange={e => setEditFormData({ ...editFormData, auteur: e.target.value })} />
                         <div className="flex flex-col">
                             <label className="mr-2">
@@ -269,7 +269,7 @@ function ListCitations({ allCitations }) {
                     </div>
                 ) : (
                     <div>
-                        <p className="text-3xl">"{citation.texte}"</p>
+                        <p className="text-3xl">&quot;{citation.texte}&quot;</p>
                         <p className="text-right text-2xl italic">- {citation.auteur}</p>
                         <p className="text-sm text-green-300">{citation.etat}</p>
                         {citation === selectedCitation && (
@@ -284,7 +284,7 @@ function ListCitations({ allCitations }) {
                 )}
                 {selectedCitation === citation && newChildData.parentCitationId === citation.id && (
                     <div className="flex flex-col bg-black p-4 border-l-4 border-green-500 ml-4">
-                        <input className="flex flex-col bg-black p-4 " type="text" placeholder="Texte" value={newChildData.texte} onChange={e => setNewChildData({ ...newChildData, texte: e.target.value })} />
+                        <input className="flex flex-col bg-black p-4 " type="textarea" placeholder="Texte" value={newChildData.texte} onChange={e => setNewChildData({ ...newChildData, texte: e.target.value })} />
                         <input className="flex flex-col bg-black p-4 " type="text" placeholder="Auteur" value={newChildData.auteur} onChange={e => setNewChildData({ ...newChildData, auteur: e.target.value })} />
                         <div className="flex flex-col">
                             <label className="mr-2">
@@ -323,7 +323,7 @@ function ListCitations({ allCitations }) {
                 <div className="new-citation-form p-4 border border-gray-300 rounded">
                     <input
                         className="flex w-full flex-col bg-black p-4 "
-                        type="text"
+                        type="textarea"
                         placeholder="Saisir votre citation"
                         value={editFormData.texte}
                         onChange={(e) => setEditFormData({ ...editFormData, texte: e.target.value })}
