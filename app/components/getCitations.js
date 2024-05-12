@@ -1,10 +1,12 @@
-import myFetch from "../components/myFech";
+
+import fetchCitations from "./fetchCitations";
 
 
 async function getCitations() {
     try {
         // Fetch all citations
-        const citations = await myFetch("/api/citations/getCitations", 'GET', null, 'citations');
+        
+        const citations = await fetchCitations();
         
         // Create a dictionary to hold all citations with children
         const citationDict = {};

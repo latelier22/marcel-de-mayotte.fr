@@ -1,5 +1,6 @@
 "use client"
 import React, { useState, useRef, useEffect } from 'react';
+import myFetch from '../../components/myFech';
 
 function ListCitations({ allCitations }) {
     const [citations, setCitations] = useState(allCitations);
@@ -12,6 +13,7 @@ function ListCitations({ allCitations }) {
     const [creatingNew, setCreatingNew] = useState(false);
     const [lastModifiedCitationId, setLastModifiedCitationId] = useState(null);
 
+    console.log(allCitations);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -56,30 +58,34 @@ function ListCitations({ allCitations }) {
         setEditing(true);
     };
 
+
     const handleUpdateCitation = async () => {
         if (!selectedCitation) {
             setError('No citation selected for updating.');
             return;
         }
-
+    
+        // Prepare the payload with the necessary data format
+        const payload = {
+            data: editFormData // Assuming editFormData already contains { texte, auteur, etat }
+        };
+    
         try {
-            const response = await fetch(`http://localhost:3976/api/citations/updateCitation/${selectedCitation.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(editFormData)
-            });
-
-            if (!response.ok) throw new Error('Failed to update citation');
-
-            const data = await response.json();
-            const updatedCitation = data.citation;
-            console.log("UPDATED CITATION", updatedCitation)
-
+            const response = await myFetch(`/api/citations/${selectedCitation.id}`, 'PUT', payload, 'citation');
+    
+            // Assuming response structure has a top-level `data` field which contains `id` and `attributes`
+            const updatedCitation = {
+                id: response.data.id,
+                ...response.data.attributes
+            };
+    
+            console.log("UPDATED CITATION", updatedCitation);
+    
+            // Update the list of citations
             const updatedCitations = citations.map(citation =>
                 citation.id === updatedCitation.id ? { ...citation, ...editFormData } : citation
             );
+    
             setCitations(updatedCitations);
             setEditing(false);
             setLastModifiedCitationId(updatedCitation.id);
@@ -89,31 +95,35 @@ function ListCitations({ allCitations }) {
             setError('Failed to update citation due to a network error');
         }
     };
-
+    
     const handleAddChild = (parentCitation) => {
         console.log("reset");
         setNewChildData({ texte: '', auteur: '', etat: 'brouillon', parentCitationId: parentCitation.id });
     };
+
+
 
     const handleSaveNewChild = async () => {
         if (!newChildData.texte || !newChildData.auteur) {
             setError('Please fill all fields for the new citation.');
             return;
         }
-
+    
+        // Prepare the payload with the necessary data format
+        const payload = {
+            data: newChildData // Assuming newChildData contains { texte, auteur, etat, parentCitationId }
+        };
+    
         try {
-            const response = await fetch(`http://localhost:3976/api/citations/createCitation`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newChildData)
-            });
+            const response = await myFetch('/api/citations', 'POST', payload, 'citation');
+    
+            const addedCitation = {
+                id: response.data.id,
+                ...response.data.attributes
+            }
 
-            if (!response.ok) throw new Error('Failed to add new child citation');
+            console.log("ADDED NEW CHILD CITATION", addedCitation);
 
-            const data = await response.json();
-            const addedCitation = data.citation;
             let newCitations = [...citations];
             // Find the last child of this parent to insert the new child after
             const parentChildren = newCitations.filter(c => c.parentCitationId === newChildData.parentCitationId);
@@ -126,8 +136,9 @@ function ListCitations({ allCitations }) {
             }
             addedCitation.parentCitationId = newChildData.parentCitationId; // Ensure it has the correct parent ID
             newCitations.splice(insertIndex, 0, addedCitation);
-            setLastModifiedCitationId(addedCitation.id);
+    
             setCitations(newCitations);
+            setLastModifiedCitationId(addedCitation.id);
             setNewChildData({ texte: '', auteur: '', etat: 'brouillon', parentCitationId: null }); // Reset form data
             setSelectedCitation(null);
         } catch (error) {
@@ -136,22 +147,62 @@ function ListCitations({ allCitations }) {
         }
     };
 
+    
+
+    // const handleSaveNewChild = async () => {
+    //     if (!newChildData.texte || !newChildData.auteur) {
+    //         setError('Please fill all fields for the new citation.');
+    //         return;
+    //     }
+
+    //     try {
+    //         const response = await fetch(`http://localhost:3976/api/citations/createCitation`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify(newChildData)
+    //         });
+
+    //         if (!response.ok) throw new Error('Failed to add new child citation');
+
+    //         const data = await response.json();
+    //         const addedCitation = data.citation;
+    //         let newCitations = [...citations];
+    //         // Find the last child of this parent to insert the new child after
+    //         const parentChildren = newCitations.filter(c => c.parentCitationId === newChildData.parentCitationId);
+    //         let insertIndex = newCitations.findIndex(c => c.id === newChildData.parentCitationId);
+    //         if (parentChildren.length > 0) {
+    //             const lastChild = parentChildren[parentChildren.length - 1];
+    //             insertIndex = newCitations.indexOf(lastChild) + 1;
+    //         } else {
+    //             insertIndex += 1; // If no children, insert after the parent
+    //         }
+    //         addedCitation.parentCitationId = newChildData.parentCitationId; // Ensure it has the correct parent ID
+    //         newCitations.splice(insertIndex, 0, addedCitation);
+    //         setLastModifiedCitationId(addedCitation.id);
+    //         setCitations(newCitations);
+    //         setNewChildData({ texte: '', auteur: '', etat: 'brouillon', parentCitationId: null }); // Reset form data
+    //         setSelectedCitation(null);
+    //     } catch (error) {
+    //         console.error(`An error occurred while adding a new child citation:`, error);
+    //         setError('Failed to add new child citation due to a network error');
+    //     }
+    // };
+
+
     const handleDeleteCitation = async () => {
         if (!selectedCitation) {
             setError('No citation selected for deletion.');
             return;
         }
-
+    
         try {
-            const response = await fetch(`http://localhost:3976/api/citations/deleteCitation/${selectedCitation.id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) throw new Error('Failed to delete citation');
-
+            const response = await myFetch(`/api/citations/${selectedCitation.id}`, 'DELETE', null, 'citations');
+            console.log(response);
+    
+            console.log(`citation ${selectedCitation.id} deleted successfully`);
+    
             const updatedCitations = citations.filter(c => c.id !== selectedCitation.id);
             setCitations(updatedCitations);
             setSelectedCitation(null);
@@ -160,29 +211,31 @@ function ListCitations({ allCitations }) {
             setError('Failed to delete citation due to a network error');
         }
     };
+    
+
+
 
     const handleCreateNewCitation = async () => {
         if (!editFormData.texte || !editFormData.auteur) {
             setError('Please fill all fields for the new citation.');
             return;
         }
-
+    
+        // Prepare the data in the format expected by the backend
+        const payload = {
+            data: editFormData // Assuming editFormData already contains { texte, auteur, etat }
+        };
+    
+        console.log("Sending payload:", payload);
+    
         try {
-            const response = await fetch(`http://localhost:3976/api/citations/createCitation`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(editFormData)
-            });
-
-            if (!response.ok) throw new Error('Failed to create new citation');
-
-            const data = await response.json();
-            const addedCitation = data.citation
-            console.log("CREATED CITATION", addedCitation)
-            setCitations([...citations, addedCitation]);
-            setLastModifiedCitationId(addedCitation.id);
+            const response = await myFetch('/api/citations', 'POST', payload, 'citation');
+            const newCitation = {
+                id: response.data.id,
+                ...response.data.attributes
+            }
+            setCitations([...citations, newCitation]);
+            setLastModifiedCitationId(newCitation.id);
             setCreatingNew(false);
             setEditFormData({ texte: '', auteur: '', etat: '' });
         } catch (error) {
@@ -190,9 +243,7 @@ function ListCitations({ allCitations }) {
             setError('Failed to create new citation due to a network error');
         }
     };
-
-
-
+    
 
     const renderCitationFamily = (citation) => {
         // Determine if the citation has children

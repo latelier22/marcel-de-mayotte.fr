@@ -3,11 +3,12 @@ import ListCitations from "./ListCitations";
 import TitleLine from "../../TitleLine";
 import Link from "next/link";
 import myFetch from "../../components/myFech"; // Importer la fonction myFetch
+import fetchCitations from "../../components/fetchCitations";
 
 async function Page() {
     
         
-    const citations = await myFetch("/api/citations/getCitations", 'GET', null, 'citations');
+    const citations = await fetchCitations();
             
     return (
         <>
@@ -24,4 +25,3 @@ async function Page() {
 }
 
 export default Page;
-
