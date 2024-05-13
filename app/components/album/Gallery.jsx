@@ -82,6 +82,8 @@ const Gallery = ({ photos, allTags }) => {
 
   const containerRef = useRef(null);
 
+  const [zoomGallery, setZoomGallery] = useState(350)
+
   const handleRestoreSelection = () => {
     setSelectedPhotoIds(lastSelection); // Restaure la dernière sélection sauvegardée
     setAllSelected(lastSelection.length === photos.length); // Met à jour si toutes les photos sont sélectionnées
@@ -121,17 +123,17 @@ const Gallery = ({ photos, allTags }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-        if (containerRef.current && !containerRef.current.contains(event.target)) {
-          setSelectedPhotoIds([]);
-            
-        }
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setSelectedPhotoIds([]);
+
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-}, []);
+  }, []);
 
 
 
@@ -1310,18 +1312,18 @@ const Gallery = ({ photos, allTags }) => {
           {/* Votre contenu principal de la galerie ici */}
           {/* Pagination and settings above the photo album */}
           <div className="left-12 top-2 w-full">
-              <input
-                className="text-black w-full text-bold text-2xl text-center"
-                type="textarea"
-                placeholder="Recherche par mot (titre, nom d'image, tag...)"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-              />
-            </div>
+            <input
+              className="text-black w-full text-bold text-2xl text-center"
+              type="textarea"
+              placeholder="Recherche par mot (titre, nom d'image, tag...)"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
 
 
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
-            
+
             <button
               className={`p-2 rounded-sm ${currentPage === 1 ? 'bg-neutral-500 text-neutral-700' : 'bg-neutral-700 text-white'}`}
               onClick={goToPreviousPage}
@@ -1351,13 +1353,29 @@ const Gallery = ({ photos, allTags }) => {
             >
               Page Suivante
             </button>
+            <button
+              className="p-2 rounded-sm bg-neutral-700 text-white"
+              onClick={() => setZoomGallery(zoomGallery + 50)}
+              // disabled={currentPage === totalPages}
+            >
+              ZOOM IN
+            </button>
+            <button
+              className="p-2 rounded-sm bg-neutral-700 text-white"
+              onClick={() => setZoomGallery(zoomGallery - 50)}
+              // disabled={currentPage === totalPages}
+            >
+              ZOOM OUT
+            </button>
+
+
           </div>
 
           <PhotoAlbum
             photos={paginatedPhotos}
-            spacing={50}
+            spacing={zoomGallery / 7}
             layout="rows"
-            targetRowHeight={350}
+            targetRowHeight={zoomGallery}
             onClick={({ index }) => setIndex(index)}
             renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
               // Fonction pour déterminer le style de bordure basé sur les tags et l'état de sélection
@@ -1374,6 +1392,7 @@ const Gallery = ({ photos, allTags }) => {
 
               return (
                 <>
+                
                   <div
                     onClick={(e) => handlePhotoClick(e, photo.id)}
                     style={{
@@ -1384,6 +1403,7 @@ const Gallery = ({ photos, allTags }) => {
                     }}
                     title={photo.src}
                   >
+                    {zoomGallery >= 200 && (
                     <EditableButton
                       text={titles[photo.id] || ""}
                       onChange={(e) => {
@@ -1398,9 +1418,10 @@ const Gallery = ({ photos, allTags }) => {
                       }
                       isEditable={!isReadOnly}
                       inputRef={inputRef}
-                    />
+                    />)}
 
                     {/* Icône de cœur pour marquer comme favori */}
+                    {zoomGallery >= 200 && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1409,9 +1430,9 @@ const Gallery = ({ photos, allTags }) => {
                       className={`absolute top-2 left-2`}
                     >
                       <Heart isOpen={favorites.has(photo.id)} />
-                    </button>
+                    </button> )}
                     {/* @ts-ignore*/}
-                    {isAdmin && isShowAdmin && (
+                    {(zoomGallery >= 200) && isAdmin && isShowAdmin && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1425,7 +1446,7 @@ const Gallery = ({ photos, allTags }) => {
                     )}
 
                     {/* @ts-ignore*/}
-                    {isAdmin && isShowAdmin && (
+                    {(zoomGallery >= 200) && isAdmin && isShowAdmin && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1438,7 +1459,7 @@ const Gallery = ({ photos, allTags }) => {
                       </button>
                     )}
                     {/* @ts-ignore*/}
-                    {isAdmin && isShowAdmin && (
+                    {(zoomGallery >= 200) && isAdmin && isShowAdmin && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
