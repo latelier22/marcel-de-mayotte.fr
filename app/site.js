@@ -1,5 +1,6 @@
 import { Vesper_Libre } from "next/font/google";
 
+//STRAPI SINGLE : site
 export const site = {
   title: "Liberté Egalité Magnégné",
   description: "Artiste peintre de Mayotte - Marcel Séjour - 0639676875",
@@ -15,7 +16,8 @@ export const site = {
   logo: { url: "/images/logo-barre-du-haut.png", alt: "logo Marcel Séjour" },
   Logo: { url: "/images/logo-banniere.png", alt: "logo logo Marcel Séjour" },
   facebook :"https://www.facebook.com/profile.php?id=100010085468800",
-  vpsServer :"https://marcel-de-mayotte.latelier22.fr"
+  vpsServer :"https://marcel-de-mayotte.latelier22.fr",
+  strapiServer: "https://admin.marcel-de-mayotte.fr"
 };
 
 export const menuItems = [
