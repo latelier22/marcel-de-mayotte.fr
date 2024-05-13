@@ -54,10 +54,6 @@ const Gallery = ({ photos, allTags }) => {
   const [lastSelection, setLastSelection] = useState([]);
   const [photosState, setPhotosState] = useState(photos);
 
-
-
-
-
   const [allMyTags, setAllMyTags] = useState(allTags);
 
   const [selectedTag, setSelectedTag] = useState("");
@@ -70,7 +66,6 @@ const Gallery = ({ photos, allTags }) => {
   const [modalContent, setModalContent] = useState("");
   const [showTagCrudModal, setShowTagCrudModal] = useState(false);
 
-
   // @ts-ignore
   const isVisible = useSelector((state) => state.visible.isVisible);
 
@@ -81,11 +76,12 @@ const Gallery = ({ photos, allTags }) => {
   // @ts-ignore
   const isAdmin = session && session.user.role === "admin";
 
-  const isActive = !isAdmin || (isAdmin && !isShowAdmin )
+  const isActive = !isAdmin || (isAdmin && !isShowAdmin)
 
+  const [searchTerm, setSearchTerm] = useState('');
 
+  const containerRef = useRef(null);
 
-  
   const handleRestoreSelection = () => {
     setSelectedPhotoIds(lastSelection); // Restaure la dernière sélection sauvegardée
     setAllSelected(lastSelection.length === photos.length); // Met à jour si toutes les photos sont sélectionnées
@@ -119,14 +115,27 @@ const Gallery = ({ photos, allTags }) => {
       setIndex(-1); // Réinitialiser l'index si on n'est pas en mode admin
       handleDeselectAll();
     }
-    else
-    {handleRestoreSelection();}
+    else { handleRestoreSelection(); }
 
   }, [isShowAdmin]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+        if (containerRef.current && !containerRef.current.contains(event.target)) {
+          setSelectedPhotoIds([]);
+            
+        }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+    };
+}, []);
 
 
-  
+
+
 
   // Utiliser useMemo pour déterminer les tags non utilisés basés sur les objets de tag
   // const unusedTags = useMemo(() => {
@@ -174,17 +183,18 @@ const Gallery = ({ photos, allTags }) => {
         usedTags.add(tag.name);
       });
     });
-  
+
     const newUnusedTags = allMyTags
-      .filter(tag => !usedTags.has(tag.name) &&
-        !(tag.name.startsWith('Progression') && tag.name !== 'PROGRESSIONS'))
+      .filter(tag => !usedTags.has(tag.name))
+      // .filter(tag => !usedTags.has(tag.name) &&
+      //   !(tag.name.startsWith('Progression') && tag.name !== 'PROGRESSIONS'))
       .map(tag => tag.name)
       .sort();
-  
+
     setUnusedTags(newUnusedTags);
 
-    console.log('All Tags:', allMyTags);
-    console.log('Unused Tags:', unusedTags);
+    // console.log('All Tags:', allMyTags);
+    // console.log('Unused Tags:', unusedTags);
 
 
   }, [allMyTags, photos, isShowAdmin]); // Écouter les changements dans allMyTags
@@ -193,55 +203,56 @@ const Gallery = ({ photos, allTags }) => {
   // CRUD TAG
 
   // Fonction pour vérifier si un tag existe
+  // Fonction pour vérifier si un tag existe, avec une comparaison sensible à la casse
   const isTagNameExist = (tagName) => {
-    return allMyTags.some(tag => tag.name === tagName.trim());
+    return allMyTags.some(tag => tag.name === tagName);
   };
 
 
   // Ajouter un tag
-const handleAddTag = async (tagName) => {
-  const trimmedTagName = tagName.trim();
-  if (trimmedTagName && !isTagNameExist(trimmedTagName)) {
-    const tagSlug = getSlug(trimmedTagName); // Ensure slug is generated once and used consistently
+  const handleAddTag = async (tagName) => {
+    const trimmedTagName = tagName.trim();
+    if (trimmedTagName && !isTagNameExist(trimmedTagName)) {
+      const tagSlug = getSlug(trimmedTagName); // Ensure slug is generated once and used consistently
+      try {
+        const createdTag = await createTag(trimmedTagName, tagSlug);
+        setAllMyTags(prevTags => [...prevTags, {
+          ...createdTag,
+          count: 0,
+          mainTag: false,
+          present: false,
+          url: `generated-url-for-${trimmedTagName}`,  // Generate or specify URL if needed
+        }]);
+        toast.success(`Tag "${trimmedTagName}" added successfully!`);
+      } catch (error) {
+        console.error("Failed to create tag:", error);
+        toast.error(`Failed to add tag: ${error.message}`);
+      }
+    } else {
+      toast.error("This tag already exists or invalid tag name!");
+    }
+  };
+
+  async function createTag(tagName, tagSlug) {
     try {
-      const createdTag = await createTag(trimmedTagName, tagSlug);
-      setAllMyTags(prevTags => [...prevTags, {
-        ...createdTag,
-        count: 0,
-        mainTag: false,
-        present: false,
-        url: `generated-url-for-${trimmedTagName}`,  // Generate or specify URL if needed
-      }]);
-      toast.success(`Tag "${trimmedTagName}" added successfully!`);
+      const response = await fetch('/api/createTag', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tagName, tagSlug }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      return await response.json();  // Ensure you wait for the JSON parsing
     } catch (error) {
-      console.error("Failed to create tag:", error);
-      toast.error(`Failed to add tag: ${error.message}`);
+      console.error("Error creating tag:", error);
+      throw error;  // Rethrow to handle it in the calling function
     }
-  } else {
-    toast.error("This tag already exists or invalid tag name!");
   }
-};
-
-async function createTag(tagName, tagSlug) {
-  try {
-    const response = await fetch('/api/createTag', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ tagName, tagSlug }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
-    return await response.json();  // Ensure you wait for the JSON parsing
-  } catch (error) {
-    console.error("Error creating tag:", error);
-    throw error;  // Rethrow to handle it in the calling function
-  }
-}
 
 
   // Supprimer un tag
@@ -263,11 +274,11 @@ async function createTag(tagName, tagSlug) {
         },
         body: JSON.stringify({ tagName }),
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
+
       // Mettre à jour l'état local après la confirmation de la suppression
       const newTags = allMyTags.filter(tag => tag.name !== tagName);
       setAllMyTags(newTags);
@@ -277,7 +288,7 @@ async function createTag(tagName, tagSlug) {
       toast.error(`Failed to delete tag: ${error.message}`);
     }
   };
-  
+
   // Intégrer la fonction de suppression dans handleDeleteTag
   const handleDeleteTag = (tagName) => {
     if (allMyTags.some(tag => tag.name === tagName)) {
@@ -287,44 +298,64 @@ async function createTag(tagName, tagSlug) {
     }
   };
 
-// Éditer un tag existant avec mise à jour serveur
-const handleEditTag = async (oldTagName, newTagName) => {
-  oldTagName = oldTagName.trim();
-  newTagName = newTagName.trim();
-  if (!isTagNameExist(oldTagName) || isTagNameExist(newTagName)) {
-    toast.error(`Edit failed: ${!isTagNameExist(oldTagName) ? "Original tag does not exist." : "New tag name already exists."}`);
-    return;
-  }
+  // Éditer un tag existant avec mise à jour serveur
+  // Fonction pour vérifier si un tag existe avec sensibilité à la casse
 
-  try {
-    const response = await fetch('/api/editTag', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ oldTagName, newTagName }),
-    });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+
+  // Amélioration de la gestion d'édition pour permettre le changement de casse
+  const handleEditTag = async (oldTagName, newTagName) => {
+    oldTagName = oldTagName.trim();
+    newTagName = newTagName.trim();
+
+    // Vérifie si le tag existe avec la même casse
+    if (!isTagNameExist(oldTagName)) {
+      toast.error("Original tag does not exist.");
+      return;
     }
 
-    const result = await response.json();
-    if (result.success) {
-      // Mise à jour de l'état local si la mise à jour sur le serveur réussit
-      const newTags = allMyTags.map(tag =>
-        tag.name.toLowerCase() === oldTagName.toLowerCase() ? { ...tag, name: newTagName } : tag
-      );
-      setAllMyTags(newTags);
-      toast.success(`Tag "${oldTagName}" updated to "${newTagName}" successfully!`);
-    } else {
-      toast.error(result.message);
+    // Permettre la modification si le nouveau nom est le même que l'ancien mais avec une casse différente
+    if (oldTagName === newTagName) {
+      toast.info("No changes detected.");
+      return;
     }
-  } catch (error) {
-    console.error("Failed to update the tag:", error);
-    toast.error(`Error updating tag: ${error.message}`);
-  }
-};
+
+    // // Vérifie si le nouveau tag existe déjà avec une casse différente
+    // if (isTagNameExist(newTagName) && oldTagName.toLowerCase() !== newTagName.toLowerCase()) {
+    //   toast.error("New tag name already exists with different casing.");
+    //   return;
+    // }
+
+    try {
+      const response = await fetch('/api/editTag', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ oldTagName, newTagName }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        // Mise à jour de l'état local si la mise à jour sur le serveur réussit
+        const newTags = allMyTags.map(tag =>
+          tag.name === oldTagName ? { ...tag, name: newTagName } : tag
+        );
+        setAllMyTags(newTags);
+        toast.success(`Tag "${oldTagName}" updated to "${newTagName}" successfully!`);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Failed to update the tag:", error);
+      toast.error(`Error updating tag: ${error.message}`);
+    }
+  };
+
 
   // Gestion des modales pour les confirmations
   const openModal = (action) => {
@@ -575,15 +606,30 @@ const handleEditTag = async (oldTagName, newTagName) => {
     }
   };
 
+  function normalizeString(str) {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  }
+
+
   const sortedAndFilteredPhotos = useMemo(() => {
     let filteredPhotos = photos;
-  
-    // Assurer que seules les photos publiées sont montrées si non admin ou isVisible est false
+
+    // Filtrer les photos basées sur la publication
     if (!isAdmin || !isVisible) {
       filteredPhotos = filteredPhotos.filter(photo => photo.published);
     }
 
-    // Trier les photos par favoris si nécessaire
+    // Filtrer les photos basées sur le titre, le nom, ou les tags, en ignorant les accents et la casse
+    if (searchTerm) {
+      const normalizedSearchTerm = normalizeString(searchTerm);
+      filteredPhotos = filteredPhotos.filter(photo =>
+        normalizeString(photo.title || "").includes(normalizedSearchTerm) ||
+        normalizeString(photo.name || "").includes(normalizedSearchTerm) ||
+        photo.tags?.some(tag => normalizeString(tag.name).includes(normalizedSearchTerm))
+      );
+    }
+
+    // Trier les photos par favoris
     return filteredPhotos.sort((a, b) => {
       const aFavorite = favorites.has(a.id);
       const bFavorite = favorites.has(b.id);
@@ -594,8 +640,8 @@ const handleEditTag = async (oldTagName, newTagName) => {
       }
       return 0; // Conserver l'ordre initial si toutes les conditions sont égales
     });
-  }, [photos, favorites, isAdmin, isVisible]); // Ajouter isVisible aux dépendances
-  
+  }, [photos, favorites, isAdmin, isVisible, searchTerm]); // Ajouter searchTerm aux dépendances
+
 
   // Initialiser l'état 'favorites' avec les favoris de l'objet 'photos'
   useEffect(() => {
@@ -655,8 +701,8 @@ const handleEditTag = async (oldTagName, newTagName) => {
       }
       return recentPhotosSet;
     }, new Set());
-    
-    console.log("recentPhotos",recentPhotos)
+
+    console.log("recentPhotos", recentPhotos)
 
     setRecentPhotos(initialRecentPhotos);
   }, [photos]);
@@ -664,21 +710,21 @@ const handleEditTag = async (oldTagName, newTagName) => {
   const toggleRecent = async (photoId) => {
     try {
       let isRecent = recentPhotos.has(photoId); // Vérifie si la photo est déjà marquée comme récente
-  
+
       const updatedPhotos = publishedPhotos.map((photo) => {
         if (photo.id === photoId) {
           // Déterminer si le tag doit être ajouté ou retiré
           const updatedTags = isRecent
             ? photo.tags.filter((tag) => tag.id !== 70) // Retirer le tag
             : [...photo.tags, { id: 70, name: "TABLEAUX RECENTS" }]; // Ajouter le tag
-  
+
           return { ...photo, tags: updatedTags };
         }
         return photo;
       });
-  
+
       setPublishedPhotos(updatedPhotos); // Mettre à jour l'état local
-  
+
       // Mettre à jour l'ensemble des photos récentes
       if (isRecent) {
         recentPhotos.delete(photoId);
@@ -686,7 +732,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
         recentPhotos.add(photoId);
       }
       setRecentPhotos(new Set(recentPhotos));
-  
+
       // Appel API
       const response = await fetch(`/api/toggleRecentPhotos`, {
         method: "POST",
@@ -695,7 +741,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
         },
         body: JSON.stringify({ photoId, toggleRecent: !isRecent }),
       });
-  
+
       if (response.ok) {
         // Si succès de l'API, filtrer les photos pour les retirer de la vue si nécessaire
         if (isRecent) { // Si on retirait le tag
@@ -711,11 +757,11 @@ const handleEditTag = async (oldTagName, newTagName) => {
       toast.error("Erreur lors de la mise à jour des photos récentes.");
     }
   };
-  
 
-  const togglePublished = async ( photoId, published) => {
-    
-    console.log("publishedPhotos", publishedPhotos , photoId, published)
+
+  const togglePublished = async (photoId, published) => {
+
+    console.log("publishedPhotos", publishedPhotos, photoId, published)
 
     const newPhotos = publishedPhotos.map((photo) => {
       if (photo.id === photoId) {
@@ -766,7 +812,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
     setModalContent("Que voulez-vous faire? :");
   };
   const applyPublishedsChange = (makePublished) => {
-   
+
     updatePublishedsInBulk(selectedPhotoIds, makePublished);
     setShowPublishedModal(false);
   };
@@ -991,7 +1037,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
 
   return (
     <>
-      <div className="z-[2]"  style={{ display: "flex" }}>
+      <div ref={containerRef} className="z-[2]" style={{ display: "flex" }}>
         {isAdmin && isShowAdmin && (
           <div className="flex flex-col pt-16 px-16 text-white bg-neutral-600 top-0 h-screen max-h-full overflow-y-auto " style={{ width: "20%" }}>
             {/* Admin-specific buttons and tag display logic here */}
@@ -1061,7 +1107,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
                 </div>
 
                 <div style={{ margin: "20px 0" }}>
-                
+
                   <input
                     type="text"
                     placeholder="Enter tag name"
@@ -1163,15 +1209,15 @@ const handleEditTag = async (oldTagName, newTagName) => {
                   <h4 className="text-lg  text-center font-semibold">Autres Tags</h4>
                   <div className="mt-4 flex flex-wrap">
 
-                  {unusedTags.map(tag => (
-  <button 
-    className="flex items-center flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2"
-    key={tag}
-    onClick={() => handleTagClick(tag)} // Supposer que handleTagClick peut prendre un nom de tag
-  >
-    {tag}
-  </button>
-))}
+                    {unusedTags.map(tag => (
+                      <button
+                        className="flex items-center flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2"
+                        key={tag}
+                        onClick={() => handleTagClick(tag)} // Supposer que handleTagClick peut prendre un nom de tag
+                      >
+                        {tag}
+                      </button>
+                    ))}
                   </div>
 
                 </div>
@@ -1260,11 +1306,22 @@ const handleEditTag = async (oldTagName, newTagName) => {
             </div>
           </div>
         )}
-
         <div style={{ width: isAdmin && isShowAdmin ? "80%" : "100%", padding: "10px" }}>
           {/* Votre contenu principal de la galerie ici */}
           {/* Pagination and settings above the photo album */}
-          <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+          <div className="left-12 top-2 w-full">
+              <input
+                className="text-black w-full text-bold text-2xl text-center"
+                type="textarea"
+                placeholder="Recherche par mot (titre, nom d'image, tag...)"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+
+          <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
+            
             <button
               className={`p-2 rounded-sm ${currentPage === 1 ? 'bg-neutral-500 text-neutral-700' : 'bg-neutral-700 text-white'}`}
               onClick={goToPreviousPage}
@@ -1318,7 +1375,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
               return (
                 <>
                   <div
-                   onClick={(e) => handlePhotoClick(e, photo.id)}
+                    onClick={(e) => handlePhotoClick(e, photo.id)}
                     style={{
                       ...wrapperStyle,
                       border: getBorderStyle(photo), // Appliquer le style de bordure ici
@@ -1401,7 +1458,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
             }}
           />
           <Lightbox
-            open={ isActive && index >= 0} // DESACTIVER L'ACCES A LIGHTBOX
+            open={isActive && index >= 0} // DESACTIVER L'ACCES A LIGHTBOX
             index={index}
             close={() => setIndex(-1)}
             slides={paginatedPhotos}

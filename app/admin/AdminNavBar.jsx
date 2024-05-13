@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
-import {  menuItems } from "./crud/actions";
+import   menuItems  from "./crud/actions";
 import Link from "next/link";
 
 import { useSelector, useDispatch } from 'react-redux';

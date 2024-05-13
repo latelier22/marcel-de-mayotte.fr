@@ -2,6 +2,7 @@
 
 
 import Navbar from "../NavBar";
+
 import AdminNavBar from "./AdminNavBar"
 
 export default async function AdminLayout({
@@ -11,7 +12,7 @@ export default async function AdminLayout({
   return (
     <>
      <Navbar />
-    <AdminNavBar />
+    
     {children}
     </>
 

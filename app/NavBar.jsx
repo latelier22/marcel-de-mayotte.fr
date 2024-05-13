@@ -7,9 +7,32 @@ import { useRouter } from "next/navigation";
 import { menuItems, site } from "./site";
 import Link from "next/link";
 
+import AdminDropDown from "./admin/AdminDropDown"
+
 import VisibilityToggleButton from "./components/album/icons/VisibilityToggleButton"
 import ShowAdminToggleButton from "./components/album/icons/ShowAdminToggleButton"
 // import ShowAdminToggleButton from "./components/album/icons/AdminNavBarToggleButton"
+
+import Dropdown from "./Dropdown";
+
+const adminItems = [
+  
+  {
+    label: "ADMIN",
+    children: [
+    
+    { label: "Ajouts de photos", route: "/admin/upload" },
+    { label: "Voir les import catalogue", route: "/catalogue/import" },
+    { label: "Citations", route: "/admin/citations" },
+     
+
+    ],
+  },
+];
+
+
+
+
 
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -30,11 +53,12 @@ const Navbar = () => {
 
   useEffect(() => {
     const init = async () => {
-      const { Collapse, initTE } = await import("tw-elements");
-      initTE({ Collapse });
+      const { Collapse, initTE, Dropdown } = await import("tw-elements");
+      initTE({ Collapse, Dropdown });
     };
     init();
   }, []);
+
 
   return (
     <>
@@ -101,7 +125,7 @@ const Navbar = () => {
                   </a>
                 </li>
               ))}
-           
+
               {/* Ajouter l'option de connexion/déconnexion */}
               {session ? (
                 <>
@@ -128,21 +152,24 @@ const Navbar = () => {
 
 
                   )}
-                     {isAdmin && isShowAdmin &&(
-                <>
-                  <li className="lg:mb-0 lg:pr-2">
-                    <Link
-                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
-                      href="/admin"
-                      data-te-nav-link-ref
-                      data-te-ripple-init
-                      data-te-ripple-color="light"
-                    >
-                      ADMIN
-                    </Link>
-                  </li>
-                </>
-              )}
+                  {isAdmin && isShowAdmin && (
+                    <>
+                      <div className="flex gap-8 items-center text-white">
+                        {adminItems.map((item) => {
+                          return item.hasOwnProperty("children") ? (
+                            <Dropdown item={item} />
+                          ) : (
+                            <Link className="hover:text-blue-500" href={item?.route || ""}>
+                              {item.label}
+                            </Link>
+                          );
+                        })}</div>
+
+
+
+
+                    </>
+                  )}
 
                 </>
               ) : (
@@ -174,3 +201,6 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+

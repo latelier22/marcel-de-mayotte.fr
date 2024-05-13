@@ -31,7 +31,7 @@ const TagsAndGallery = ({ photos, allTags, progressionsTags, listeTags, tagCards
                 {tagSlug === "progressions" ? (
                     <Cards cards={tagCards} syliusCard={true} label={"Voir les étapes..."} />
                 ) : (
-                    <Gallery photos={photos} allTags={allTags} />
+                    <Gallery photos={photos} allTags={allTags}/>
                 )}
             </div>
         </div>

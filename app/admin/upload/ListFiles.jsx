@@ -2,7 +2,8 @@
 
 import myFetch from '../../components/myFech';
 import React, { useState, useEffect, useRef } from 'react';
-
+import Link from 'next/link';
+import DotLoaderSpinner from '../../components/spinners/DotLoaderSpinner';
 // pages/ListFiles.jsx
 // import React, { useState, useRef, useEffect } from 'react';
 // import myFetch from '../../components/myFetch';
@@ -11,6 +12,7 @@ function ListFiles({ allFiles }) {
     const [files, setFiles] = useState(allFiles);
     const [selectedFileId, setSelectedFileId] = useState(null);
     const fileInputRef = useRef(null);
+    const [isUploading, SetIsUploading] = useState(false)
     const [editing, setEditing] = useState(false);
     const [creatingNew, setCreatingNew] = useState(false);
     const containerRef = useRef(null);
@@ -136,15 +138,18 @@ function ListFiles({ allFiles }) {
         formData.append('files', file);
 
         try {
+            SetIsUploading(true)
             const response = await myFetch('/api/upload', 'POST', formData, 'image upload');
             if (response) {
                 const newFile = response[0]
                 console.log("File received by fetch:", newFile);
                 setFiles([...files, newFile]); // Ajoutez les nouveaux fichiers en haut de la liste
+                SetIsUploading(false)
             }
         } catch (error) {
             console.error("Upload failed:", error);
         }
+
     };
 
 
@@ -161,11 +166,20 @@ function ListFiles({ allFiles }) {
 
     return (
         <div ref={containerRef} className="container mx-auto my-8 p-4 shadow-lg rounded">
-            <div className="flex flex-row justify-start items-center gap 2"></div>
-            <button onClick={() => fileInputRef.current.click()} disable={selectedFileId} className={`${selectedFileId ? 'hidden' : ''} bg-green-500 text-white px-4 py-2 rounded mb-4 `}>
+            <DotLoaderSpinner isLoading ={isUploading} />
+            <div className="flex flex-row justify-start items-center my-8 p-4 gap-2">
+           
+            <div className="bg-green-500 text-white px-4 py-2 rounded">
+            <button onClick={() => fileInputRef.current.click()} disable={selectedFileId} className={`${selectedFileId ? 'hidden' : ''} bg-green-500 text-white px-4 h-full rounded `}>
                 Upload Image
             </button>
             <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleUploadImage} />
+            </div>
+            <Link
+            href="/catalogue/import"
+            className=" bg-orange-500 text-white px-4 py-2 rounded">
+                SHOW IMPORTED
+            </Link>
             {selectedFileIds.length >= 2 && (
                 <>
                     <button onClick={(e) => {
@@ -188,6 +202,7 @@ function ListFiles({ allFiles }) {
                     </button>
                 </>
             )}
+            </div>
 
 
             <table className="w-full">
