@@ -3,10 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // Utilisation de next/navigation pour la redirection
 
-const WordAnimation = ({ word, color, initialX, finalX, delay, rotate, onComplete }) => {
+const WordAnimation = ({ word, color, initialX, finalX, initialRotate, delay, rotate, onComplete }) => {
   const [style, setStyle] = useState({
     opacity: 0,
-    transform: `translateX(${initialX}vw) rotate(0deg)`, // Utiliser vw pour le positionnement initial
+    transform: `translateX(${initialX}vw) rotate(${initialRotate}deg)`, // Utiliser vw pour le positionnement initial
     position: 'absolute',
     top: '50%',
     left: '40%',
@@ -53,8 +53,10 @@ const Home = () => {
     }
   }, [step, router]);
 
+  const handleDivClic = () => { router.push("/accueil")}
+
   return (
-    <div className='container h-screen flex items-center justify-center' style={{ transition: 'opacity 1s', opacity: fadeOut ? 0 : 1 }}>
+    <div onClick={handleDivClic} className='container h-screen flex items-center justify-center' style={{ transition: 'opacity 1s', opacity: fadeOut ? 0 : 1 }}>
       {step >= 1 && (
         <WordAnimation
           word="Liberté"
@@ -62,6 +64,7 @@ const Home = () => {
           initialX="0"
           finalX="-25" // Pourcentage de la translation à gauche
           delay={0}
+          initialRotate={-10}
           rotate={0}
           onComplete={() => setStep(2)}
         />
@@ -73,6 +76,7 @@ const Home = () => {
           initialX="0"
           finalX="0" // Aucun déplacement
           delay={0}
+          initialRotate={10}
           rotate={0}
           onComplete={() => setStep(3)}
         />
@@ -84,6 +88,7 @@ const Home = () => {
           initialX="-100" // Départ à droite
           finalX="25" // Translation vers la gauche
           delay={0}
+          initialRotate={-20}
           rotate={20}
           onComplete={() => setStep(4)}
         />

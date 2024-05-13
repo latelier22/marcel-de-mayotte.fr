@@ -9,6 +9,7 @@ import Banner from "../Banner";
 import {cards, sections, site, photos} from "../site"
 import Citation from "../Citation";
 import getCitations from "../components/getCitations";
+import Anim from "../Anim/Anim1"
 
 
 async function Accueil () {
@@ -18,27 +19,12 @@ async function Accueil () {
 
   const backgroundColor = "bg-teal-500";
 
-  const onlyPublished =true;
-
-  const citations = await getCitations({onlyPublished});
-
-  // console.log(citations)
-
-  // const publishedCitations = citations.filter(citation => citation.etat === "publiée")
-  // console.log ("FILTER PUBLIEE", publishedCitations)
+  const citations = await getCitations()
 
   return (
    <main>
       <Navbar />
-      <HeaderSimple photos={photos} siteTitle ={site.title} title={pageTitle}/>
-      {/* <Picto 
-      s /> */}
-      <Citation citations={citations} section={sections[0]} />
-
-      <Banner photo = {photos[0]} />
-      <Section section={sections[0]} />
-
-      <Footer />
+   <Anim/>
       </main>
   );
 };

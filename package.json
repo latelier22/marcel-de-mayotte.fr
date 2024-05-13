@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "PORT=3977 next dev",
     "build": "next build",
-    "start": "PORT=3977 next start",
+    "start": "PORT=3976 next start",
     "lint": "next lint"
   },
   "dependencies": {
@@ -40,6 +40,7 @@
     "react-redux": "^9.1.1",
     "react-side-effect": "^2.1.2",
     "react-slick": "^0.30.2",
+    "react-spring": "^9.7.3",
     "react-toastify": "^10.0.5",
     "redux": "^5.0.1",
     "sharp": "^0.33.3",

@@ -58,9 +58,14 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
 
   const photos = listePhotos.map((photo) => {
     // Vérifier si photo.dimensions est défini et n'est pas null
+    const baseURL = photo.url.startsWith('/uploads')
+        ? process.env.NEXT_PUBLIC_STRAPI_URL
+        : `${site.vpsServer}/images/`;
+
+    const imageUrl = `${baseURL}${photo.url}`;
   
       return {
-        src: `${site.vpsServer}/images/${photo.url}`,
+        src: imageUrl,
         width: photo.width,
         height: photo.height,
         id: photo.id,

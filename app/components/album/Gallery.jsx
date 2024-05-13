@@ -81,6 +81,8 @@ const Gallery = ({ photos, allTags }) => {
   // @ts-ignore
   const isAdmin = session && session.user.role === "admin";
 
+  const isActive = !isAdmin || (isAdmin && !isShowAdmin )
+
 
 
   
@@ -511,7 +513,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
 
 
   const handlePhotoClick = (e, photoId) => {
-    if (isShowAdmin) {
+    if (isShowAdmin && isAdmin) {
       e.stopPropagation();
       handleTagButtonClick(photoId);
     }
@@ -1399,7 +1401,7 @@ const handleEditTag = async (oldTagName, newTagName) => {
             }}
           />
           <Lightbox
-            open={!isShowAdmin && index >= 0} // DESACTIVER L'ACCES A LIGHTBOX
+            open={ isActive && index >= 0} // DESACTIVER L'ACCES A LIGHTBOX
             index={index}
             close={() => setIndex(-1)}
             slides={paginatedPhotos}

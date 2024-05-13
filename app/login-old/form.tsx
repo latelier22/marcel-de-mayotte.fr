@@ -4,8 +4,6 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { FormEvent } from 'react';
 
-import FormAuth from '../components/UI/FormAuth'
-
 export default function Form() {
   const router = useRouter();
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -19,13 +17,26 @@ export default function Form() {
 
     console.log({ response });
     if (!response?.error) {
-      router.push('/accueil');
+      router.push('/');
       router.refresh();
     }
   };
   return (
-    <>
-    <FormAuth title={"CONNECTEZ VOUS AVEC VOTRE EMAIL"} btnAction={"Se connectre"} handleSubmit={handleSubmit}/>
-    </>
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col gap-2 mx-auto max-w-md mt-10"
+    >
+      <input
+        name="email"
+        className="border border-black text-black"
+        type="email"
+      />
+      <input
+        name="password"
+        className="border border-black  text-black"
+        type="password"
+      />
+      <button type="submit">Login</button>
+    </form>
   );
 }
