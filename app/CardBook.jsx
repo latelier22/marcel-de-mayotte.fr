@@ -14,6 +14,13 @@ const Card = ({ index, card, buttonColor, children, syliusCard, label }) => {
     init();
   }, []);
 
+
+  const baseURL = card.url && card.url.startsWith('/uploads')
+    ? process.env.NEXT_PUBLIC_STRAPI_URL
+    : `${site.vpsServer}/images/`;
+
+    const imageUrl = `${baseURL}${card.url}`;
+
   buttonColor = "bg-gradient-to-br from-gold-900 via-gold-500 to-gold-800"
 
   return (
@@ -29,7 +36,7 @@ const Card = ({ index, card, buttonColor, children, syliusCard, label }) => {
       
 
 <Image
-          src= {syliusCard ? `${site.vpsServer}/images/${card.url}` : `/images/${card.url}`}
+          src= {syliusCard ? `${imageUrl}` : `/images/${card.url}`}
           alt= {card.title}
           className={`mb-5 w-72 h-72  object-cover object-center cursor-zoom-in hover:object-contain data-[te-lightbox-disabled]:cursor-auto`}
           loading="lazy"

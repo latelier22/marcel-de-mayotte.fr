@@ -1,0 +1,397 @@
+[
+  {
+    "id": 1,
+    "texte": "L'art commence avec la retenue",
+    "auteur": "Michel SERRES, philosophe",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": [
+      {
+        "id": 2,
+        "texte": "L'amour aussi !",
+        "auteur": "Marcel Séjour,artiste peintre",
+        "photoId": null,
+        "etat": "publiée",
+        "parentCitationId": 1
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "texte": "L'amour aussi !",
+    "auteur": "Marcel Séjour,artiste peintre",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": 1,
+    "parentCitation": {
+      "id": 1,
+      "texte": "L'art commence avec la retenue",
+      "auteur": "Michel SERRES, philosophe",
+      "photoId": null,
+      "etat": "publiée",
+      "parentCitationId": null
+    },
+    "childCitations": [
+      {
+        "id": 76,
+        "texte": "g",
+        "auteur": "g",
+        "photoId": null,
+        "etat": "brouillon",
+        "parentCitationId": 2
+      },
+      {
+        "id": 77,
+        "texte": "g",
+        "auteur": "g",
+        "photoId": null,
+        "etat": "publiée",
+        "parentCitationId": 2
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "texte": "La force principale du dessin c’est qu’il contribue à évacuer la peur du noir.\n Et c’est valable pour tout le monde puisque même les Noirs ont peur du noir.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": [
+      {
+        "id": 146,
+        "texte": "gdfgdfg",
+        "auteur": "dfgdfg",
+        "photoId": null,
+        "etat": "brouillon",
+        "parentCitationId": 3
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "texte": "Travailler en noir et blanc permet, comme ici à Mayotte,\n de représenter le rustique sans tomber dans le sordide.\nLa couleur est là juste pour faire plaisir ; pas pour rendre compte.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 5,
+    "texte": "Quand je peins un tableau je veux dire quelque chose qui rassure.",
+    "auteur": "Vincent Van Gogh",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": [
+      {
+        "id": 6,
+        "texte": "Cette phrase-là, je la prends à mon compte. \n Si je parlais comme je peins, j’aurais plein de femmes et plein d’enfants. \n Denam’neyo",
+        "auteur": "Marcel Séjour",
+        "photoId": null,
+        "etat": "publiée",
+        "parentCitationId": 5
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "texte": "Cette phrase-là, je la prends à mon compte. \n Si je parlais comme je peins, j’aurais plein de femmes et plein d’enfants. \n Denam’neyo",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": 5,
+    "parentCitation": {
+      "id": 5,
+      "texte": "Quand je peins un tableau je veux dire quelque chose qui rassure.",
+      "auteur": "Vincent Van Gogh",
+      "photoId": null,
+      "etat": "publiée",
+      "parentCitationId": null
+    },
+    "childCitations": []
+  },
+  {
+    "id": 7,
+    "texte": "Il faut vingt-cinq ans pour apprendre à dessiner ;\n il faut une semaine pour apprendre à peindre.",
+    "auteur": "Jean Dominique Ingres, peintre français du 19ème siècle",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 8,
+    "texte": "Pour avoir Mayotte avec soi, il faut ou la forcer, ou la séduire. On souhaite bien du courage à ceux qui veulent la forcer.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 9,
+    "texte": "Occupe-toi des ombres, et la lumière s’occupera d’elle-même. Voilà un bon précepte de dessinateur.\n Occupe-toi de tes ombres et la lumière s’occupera de toi. Ça doit pouvoir marcher comme ça aussi.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 10,
+    "texte": "L’art est la belle représentation d’une chose et non la représentation d’une belle chose.",
+    "auteur": "Emmanuel Kant",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 11,
+    "texte": "Les artistes sont des gens qui ont contact avec toutes les classes sociales\n et qui sont par conséquent ex- trêmement dangereux.\n  Je vous recommande donc d’éviter autant que possible de les fréquenter.",
+    "auteur": "Conseil donné aux membres de sa famille par la reineVictoria.",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 12,
+    "texte": "Magnégné, mot mahorais connu de toute la région, qualifiant une action, \nune personne ou une chose, dont la réalisation va de l’approximatif au grand n’importe quoi.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 13,
+    "texte": "Après avoir vécu plus de vingt ans dans les Comores, je suis encore assez souvent surpris par le comportement de leurs habitants,\n et ce qui m’étonne le plus, c’est d’être encore surpris. Je demeure donc un étranger, et c’est très bien comme ça.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 14,
+    "texte": "Les œuvres d’art sont les lettres de noblesse de la seule aristocratie, celle qui a ses ancêtres devant elle.",
+    "auteur": "Rainer Maria Rilke",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": [
+      {
+        "id": 15,
+        "texte": "Je n’ai jamais rien lu de Rilke mais je sens que je vais m’y mettre parce qu’une phrase comme celle-là c’est exactement ce que de temps à autre j’ai besoin d’entendre; et de croire.",
+        "auteur": "Marcel Séjour",
+        "photoId": null,
+        "etat": "publiée",
+        "parentCitationId": 14
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "texte": "Je n’ai jamais rien lu de Rilke mais je sens que je vais m’y mettre parce qu’une phrase comme celle-là c’est exactement ce que de temps à autre j’ai besoin d’entendre; et de croire.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": 14,
+    "parentCitation": {
+      "id": 14,
+      "texte": "Les œuvres d’art sont les lettres de noblesse de la seule aristocratie, celle qui a ses ancêtres devant elle.",
+      "auteur": "Rainer Maria Rilke",
+      "photoId": null,
+      "etat": "publiée",
+      "parentCitationId": null
+    },
+    "childCitations": []
+  },
+  {
+    "id": 16,
+    "texte": "Ce n’est pas de la beauté, mais c’est de la laideur du monde que nait l’énergie de l’artiste.\n Aux massacres, aux humiliations, aux décompositions, il opposera des harmonies.\n Dérisoires, au regard du vivant, mais indispensables tout de même.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 17,
+    "texte": "Partager ou protéger. C’est le choix auquel l’humanité va de plus en plus être confrontée.\n Jamais choix de survie n’aura été aussi simple.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 18,
+    "texte": "Ici le foyer commence là où se trouve l’enfant ; celle qui le fait, et celle(s) qui l’alimente(nt). \nEn Europe le foyer commence avec le feu ; celui qui le protège et celui qui l’alimente.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 19,
+    "texte": "Faire quelque chose bien, une fois, c’est facile. Faire quelque chose bien deux fois demande une technique considérable.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 20,
+    "texte": "Le style c’est une élégante façon d’arranger ses erreurs.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 21,
+    "texte": "Quand j’étais jeune, j’aurais aimé être riche et ne rien faire d’autre que suivre mon plaisir. \nJe n’ai jamais été riche et c’est ce qui m’a sauvé. \n \n Aujourd’hui je ne veux, ni ne peux, sans doute, rien faire d’autre que peindre. \n Là, maintenant, ce que j’aurais aimé c’est être un meilleur peintre ; mais pas autre chose que peintre.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 22,
+    "texte": "Le plus difficile dans le dessin ? Ne pas se répéter.",
+    "auteur": "Léonard de Vinci",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 23,
+    "texte": "On commence au fusain, on continue à la peinture noire (à l'huile), et on finit avec la couleur.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 24,
+    "texte": "Qu’on en juge ! \nEmpalé sur son roc au cœur du Mozambique, \nL’alizée le menant d’espoirs en désespoirs\n Sisyphe prophétique ou Léviathan lubrique,\nMarcel sur son rocher geint et croque ses Noirs.\n C’est pas du Baudelaire ça ? En tout cas ça y ressemble.\n On aurait ainsi retrouvé à Mayotte le quatrain manquant\nce qui prouverait que le poète a bien séjourné sur l’île.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 25,
+    "texte": "Démarrer est un vrai bonheur. On joue avec l’idée et on est mû par le désir.\nC’est la saison de l’enthousiasme, le printemps en quelque sorte.\nJe passerais volontiers mon temps à démarrer. Après, c’est du boulot, de la recherche, avec ici et là des mini joies, lorsqu’on a trouvé une harmonie satisfaisante.\nFinir, par contre, « demande un cœur d’acier ». ",
+    "auteur": "C’est Ingres qui le dit, et il a bien raison.",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 26,
+    "texte": "Quand un sujet m’intéresse il m’arrive de le reprendre, en variant les compositions.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 27,
+    "texte": "Le matriarcat est LA force constitutive de Mayotte ; pas la République.",
+    "auteur": "Marcel Séjour",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": null,
+    "parentCitation": null,
+    "childCitations": []
+  },
+  {
+    "id": 76,
+    "texte": "g",
+    "auteur": "g",
+    "photoId": null,
+    "etat": "brouillon",
+    "parentCitationId": 2,
+    "parentCitation": {
+      "id": 2,
+      "texte": "L'amour aussi !",
+      "auteur": "Marcel Séjour,artiste peintre",
+      "photoId": null,
+      "etat": "publiée",
+      "parentCitationId": 1
+    },
+    "childCitations": []
+  },
+  {
+    "id": 77,
+    "texte": "g",
+    "auteur": "g",
+    "photoId": null,
+    "etat": "publiée",
+    "parentCitationId": 2,
+    "parentCitation": {
+      "id": 2,
+      "texte": "L'amour aussi !",
+      "auteur": "Marcel Séjour,artiste peintre",
+      "photoId": null,
+      "etat": "publiée",
+      "parentCitationId": 1
+    },
+    "childCitations": []
+  },
+  {
+    "id": 146,
+    "texte": "gdfgdfg",
+    "auteur": "dfgdfg",
+    "photoId": null,
+    "etat": "brouillon",
+    "parentCitationId": 3,
+    "parentCitation": {
+      "id": 3,
+      "texte": "La force principale du dessin c’est qu’il contribue à évacuer la peur du noir.\n Et c’est valable pour tout le monde puisque même les Noirs ont peur du noir.",
+      "auteur": "Marcel Séjour",
+      "photoId": null,
+      "etat": "publiée",
+      "parentCitationId": null
+    },
+    "childCitations": []
+  }
+]

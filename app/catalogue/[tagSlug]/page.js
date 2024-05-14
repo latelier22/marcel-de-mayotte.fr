@@ -9,7 +9,7 @@ import getImagesbyTag from "../../components/getImagesbyTag";
 // import Gallery from "../../components/album/Gallery";
 import getProgressionsTags from "../../components/getProgressionsTags";
 import Cards from "../../Cards";
-import {authOptions} from "../../Auth"
+import { authOptions } from "../../Auth"
 
 import TagsAndGallery from "../../components/album/TagsAndGallery"
 
@@ -21,21 +21,21 @@ async function Page({ params }) {
 
   const session = await getServerSession(authOptions);
 
-//   if (session) {
-//     // La session existe, vous pouvez accéder à `session.user`, `session.expires`, etc.
-//     console.log("connecté", session);
-   
-    
-// } else {
-  
-//   console.log("non connecté");
-// }
-  
-const userId = session?.user?.id || null;
+  //   if (session) {
+  //     // La session existe, vous pouvez accéder à `session.user`, `session.expires`, etc.
+  //     console.log("connecté", session);
 
-const isAdmin = session && session.user.role === 'admin';
 
-console.log("isAdmin",isAdmin)
+  // } else {
+
+  //   console.log("non connecté");
+  // }
+
+  const userId = session?.user?.id || null;
+
+  const isAdmin = session && session.user.role === 'admin';
+
+  console.log("isAdmin", isAdmin)
 
   const page = Pages["catalogue"];
   const pageTitle = page.title;
@@ -45,10 +45,12 @@ console.log("isAdmin",isAdmin)
 
   const allPhotos = await getImages();
   const allTags = await getTags(allPhotos);
-  const listePhotos = await getImagesbyTag(tagSlug,userId);
+  const listePhotos = await getImagesbyTag(tagSlug, userId);
   const listeAllTags = await getTags(listePhotos);
 
-const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith("progression") && tag.name.toLowerCase() !== "progressions");
+  // const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith("progression") && tag.name.toLowerCase() !== "progressions");
+
+  const listeTags = allTags;
 
   // Marquez les tags présents dans listeTags
   allTags.forEach((tag) => {
@@ -58,28 +60,33 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
 
   const photos = listePhotos.map((photo) => {
     // Vérifier si photo.dimensions est défini et n'est pas null
-  
-      return {
-        src: `${site.vpsServer}/images/${photo.url}`,
-        width: photo.width,
-        height: photo.height,
-        id: photo.id,
-        tags: photo.tags,
-        name: photo.name,
-        dimensions : photo.dimensions,
-        published: photo.published, 
-        isFavorite : photo.isFavorite,
-        title : photo.title,
-        description : photo.description
-      };
+    const baseURL = photo.url.startsWith('/uploads')
+      ? process.env.NEXT_PUBLIC_STRAPI_URL
+      : `${site.vpsServer}/images/`;
 
-    }
+    const imageUrl = `${baseURL}${photo.url}`;
+
+    return {
+      src: imageUrl,
+      width: photo.width,
+      height: photo.height,
+      id: photo.id,
+      tags: photo.tags,
+      name: photo.name,
+      dimensions: photo.dimensions,
+      published: photo.published,
+      isFavorite: photo.isFavorite,
+      title: photo.title,
+      description: photo.description
+    };
+
+  }
   );
 
   const progressionsTags = await getProgressionsTags(listePhotos);
 
 
-  const tagCards = progressionsTags.slice(1,progressionsTags.length).map((tag) => ({
+  const tagCards = progressionsTags.slice(1, progressionsTags.length).map((tag) => ({
     title: tag.name,
     text: "",
     button: "",
@@ -94,18 +101,18 @@ const listeTags = listeAllTags.filter(tag => !tag.name.toLowerCase().startsWith(
     <main>
       <Navbar />
       <TagsAndGallery
-      tagSlug={tagSlug}
-      photos={photos}
-      allTags={allTags}
-      progressionsTags={progressionsTags}
-      listeTags={listeTags}
-      tagCards={tagCards}
-  />
+        tagSlug={tagSlug}
+        photos={photos}
+        allTags={allTags}
+        progressionsTags={progressionsTags}
+        listeTags={listeTags}
+        tagCards={tagCards}
+      />
 
-      
+
 
       <Footer />
-      </main>
+    </main>
   );
 }
 

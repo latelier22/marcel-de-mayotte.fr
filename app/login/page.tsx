@@ -4,7 +4,6 @@ import Form from './form';
 import { redirect } from 'next/navigation';
 
 import Navbar from "../NavBar"
-import AdminNavBar from "../admin/AdminNavBar"
 import Footer from "../Footer";
 import RootLayout from "../layout";
 import { Pages, site } from "../site";
