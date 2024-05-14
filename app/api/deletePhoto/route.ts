@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../prisma/prisma';
+import { disconnect } from 'process';
 
 export async function DELETE(request) {
   const { photoId } = await request.json();
@@ -10,7 +11,7 @@ export async function DELETE(request) {
       where: { id: photoId },
       data: {
         tags: {
-          deleteMany: {}, // Suppression de toutes les associations avec les tags
+          disconnect: [], // Suppression de toutes les associations avec les tags
         },
         favorites: {
           deleteMany: {}, // Suppression de toutes les associations avec les favoris

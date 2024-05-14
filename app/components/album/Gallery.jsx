@@ -422,6 +422,13 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
   };
 
   const handleTagButtonClick = (photoId) => {
+
+    photos.forEach((photo) => {
+      if (selectedPhotoIds.includes(photo.id)) {
+       console.log(photo.tags)
+      }
+    });
+
     const isSelected = selectedPhotoIds.includes(photoId);
     let newSelectedPhotoIds = selectedPhotoIds.slice();
 
@@ -436,6 +443,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
 
   useEffect(() => {
     console.log("Selected Photo IDs:", selectedPhotoIds);
+    
   }, [selectedPhotoIds]);
 
   const handleTagSelection = (tagId) => {
