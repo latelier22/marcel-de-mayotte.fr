@@ -22,12 +22,12 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Eye, Star, Htag, Heart } from "./icons";
+import { Eye, Star, Htag, Heart, Trash } from "./icons";
 import EditableButton from "./buttons/EditableButton";
 
 import { useSelector } from "react-redux";
 
-const Gallery = ({ photos, allTags }) => {
+const Gallery = ({ photos : initialPhotos, allTags }) => {
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
@@ -39,7 +39,7 @@ const Gallery = ({ photos, allTags }) => {
   const [tagStatus, setTagStatus] = useState({});
   const [allSelected, setAllSelected] = useState(false);
   const [lastSelection, setLastSelection] = useState([]);
-  const [photosState, setPhotosState] = useState(photos);
+  const [photos, setPhotos] = useState(initialPhotos);
   const [allMyTags, setAllMyTags] = useState(allTags);
   const [selectedTag, setSelectedTag] = useState("");
   const [showTagModal, setShowTagModal] = useState(false);
@@ -134,7 +134,7 @@ const Gallery = ({ photos, allTags }) => {
       try {
         const createdTag = await createTag(trimmedTagName, tagSlug);
         setAllMyTags((prevTags) => [...prevTags, { ...createdTag, count: 0, mainTag: false, present: false, url: `generated-url-for-${trimmedTagName}` }]);
-        toast.success(`Tag "${trimmedTagName}" added successfully!`);
+        // toast.success(`Tag "${trimmedTagName}" added successfully!`);
 
         // Update selected photos with the new tag if there are any selected
         if (selectedPhotoIds.length > 0) {
@@ -142,10 +142,10 @@ const Gallery = ({ photos, allTags }) => {
         }
       } catch (error) {
         console.error("Failed to create tag:", error);
-        toast.error(`Failed to add tag: ${error.message}`);
+        // toast.error(`Failed to add tag: ${error.message}`)
       }
     } else {
-      toast.error("This tag already exists or invalid tag name!");
+      // toast.error("This tag already exists or invalid tag name!");
     }
   };
 
@@ -186,10 +186,10 @@ const Gallery = ({ photos, allTags }) => {
 
       const newTags = allMyTags.filter((tag) => tag.name !== tagName);
       setAllMyTags(newTags);
-      toast.success(`Tag "${tagName}" removed successfully!`);
+      // toast.success(`Tag "${tagName}" removed successfully!`);
     } catch (error) {
       console.error("Error deleting tag:", error);
-      toast.error(`Failed to delete tag: ${error.message}`);
+      // toast.error(`Failed to delete tag: ${error.message}`);
     }
   };
 
@@ -197,7 +197,7 @@ const Gallery = ({ photos, allTags }) => {
     if (allMyTags.some((tag) => tag.name === tagName)) {
       deleteTag(tagName);
     } else {
-      toast.error("Tag does not exist!");
+      // toast.error("Tag does not exist!");
     }
   };
 
@@ -206,12 +206,12 @@ const Gallery = ({ photos, allTags }) => {
     newTagName = newTagName.trim();
 
     if (!isTagNameExist(oldTagName)) {
-      toast.error("Original tag does not exist.");
+      // toast.error("Original tag does not exist.");
       return;
     }
 
     if (oldTagName === newTagName) {
-      toast.info("No changes detected.");
+      // toast.info("No changes detected.");
       return;
     }
 
@@ -232,13 +232,13 @@ const Gallery = ({ photos, allTags }) => {
       if (result.success) {
         const newTags = allMyTags.map((tag) => (tag.name === oldTagName ? { ...tag, name: newTagName } : tag));
         setAllMyTags(newTags);
-        toast.success(`Tag "${oldTagName}" updated to "${newTagName}" successfully!`);
+        // toast.success(`Tag "${oldTagName}" updated to "${newTagName}" successfully!`);
       } else {
-        toast.error(result.message);
+        // toast.error(result.message);
       }
     } catch (error) {
       console.error("Failed to update the tag:", error);
-      toast.error(`Error updating tag: ${error.message}`);
+      // toast.error(`Error updating tag: ${error.message}`);
     }
   };
 
@@ -338,14 +338,14 @@ const Gallery = ({ photos, allTags }) => {
   };
 
   const updateTagInBulk = async (addTag, tag) => {
-    const updatedPhotos = photosState.map((photo) => {
+    const updatedPhotos = photos.map((photo) => {
       if (selectedPhotoIds.includes(photo.id) && !photo.tags.find((t) => t.name === tag)) {
         return { ...photo, tags: [...photo.tags, { name: tag, id: Date.now() }] };
       }
       return photo;
     });
 
-    setPhotosState(updatedPhotos);
+    setPhotos(updatedPhotos);
 
     try {
       const response = await fetch(`/api/updateTagInBulk`, {
@@ -359,10 +359,10 @@ const Gallery = ({ photos, allTags }) => {
       if (!response.ok) {
         throw new Error("Failed to update tags on the server");
       }
-      toast.success("Tags updated successfully!");
+      // toast.success("Tags updated successfully!");
     } catch (error) {
       console.error("Failed to update tags:", error);
-      toast.error("Error updating tags.");
+      // toast.error("Error updating tags.");
     }
   };
 
@@ -382,6 +382,37 @@ const Gallery = ({ photos, allTags }) => {
     });
     setTitles(initialTitles);
   }, [photos, isAdmin]);
+
+  const handleDeleteButtonClick = async (photoId) => {
+    try {
+      const response = await fetch(`/api/deletePhoto`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ photoId }),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete the photo");
+      }
+  
+      // Mettre à jour l'état des photos après suppression
+      setPhotos((prevPhotos) => prevPhotos.filter((photo) => photo.id !== photoId));
+      toast.success("Photo deleted successfully!");
+    } catch (error) {
+      console.error("Delete failed:", error);
+      toast.error("Failed to delete photo");
+    }
+  };
+  
+
+
+
+
+
+
+
 
   const handlePhotoClick = (e, photoId) => {
     if (isShowAdmin && isAdmin) {
@@ -428,10 +459,10 @@ const Gallery = ({ photos, allTags }) => {
       });
 
       if (!response.ok) throw new Error("Failed to update photo title");
-      toast.success("Titre mis à jour!");
+      // toast.success("Titre mis à jour!");
     } catch (error) {
       console.error("Erruer lors de la mise à jour", error);
-      toast.error("Failed to update title");
+      // toast.error("Failed to update title");
     }
   };
 
@@ -548,25 +579,31 @@ const Gallery = ({ photos, allTags }) => {
           const remainingPhotos = updatedPhotos.filter((photo) => photo.tags.some((tag) => tag.id === 70));
           setPublishedPhotos(remainingPhotos);
         }
-        toast.success("Mise à jour réussie!");
+        // toast.success("Mise à jour réussie!");
       } else {
-        throw new Error("Failed to update the photo tags");
+        // throw new Error("Failed to update the photo tags");
       }
     } catch (error) {
       console.error("Failed to toggle recent tag:", error);
-      toast.error("Erreur lors de la mise à jour des photos récentes.");
+      // toast.error("Erreur lors de la mise à jour des photos récentes.");
     }
   };
 
   const togglePublished = async (photoId, published) => {
-    const newPhotos = publishedPhotos.map((photo) => {
+
+
+    console.log( "tog pub : ",photoId, published, paginatedPhotos)
+
+    const newPhotos = photos.map((photo) => {
       if (photo.id === photoId) {
         return { ...photo, published: !photo.published };
       }
       return photo;
     });
 
-    setPublishedPhotos(newPhotos);
+    console.log("recheche photo par id ", newPhotos.filter( (p) => p.id === photoId))
+
+    setPhotos(newPhotos);
 
     const targetPhoto = newPhotos.find((p) => p.id === photoId);
     if (!targetPhoto) {
@@ -606,6 +643,16 @@ const Gallery = ({ photos, allTags }) => {
   };
 
   const updatePublishedsInBulk = async (selectedPhotoIds, makePublished) => {
+    // Mettre à jour l'état local avant l'appel à l'API pour un retour visuel rapide
+    const newPhotos = photos.map((photo) => {
+      if (selectedPhotoIds.includes(photo.id)) {
+        return { ...photo, published: makePublished };
+      }
+      return photo;
+    });
+  
+    setPhotos(newPhotos);
+  
     try {
       const response = await fetch(`/api/updatePublishedsBulk`, {
         method: "POST",
@@ -614,34 +661,24 @@ const Gallery = ({ photos, allTags }) => {
         },
         body: JSON.stringify({ selectedPhotoIds, makePublished }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to update Published in bulk");
       }
+  
       toast.success("Published updated successfully in bulk!");
-
-      const newPhotos = photosState.map((photo) => {
-        if (selectedPhotoIds.includes(photo.id)) {
-          return { ...photo, isPublished: makePublished };
-        }
-        return photo;
-      });
-      setPhotosState(newPhotos);
-
-      const newPublished = new Set(publishedPhotos);
-      selectedPhotoIds.forEach((photoId) => {
-        if (makePublished) {
-          newPublished.add(photoId);
-        } else {
-          newPublished.delete(photoId);
-        }
-      });
-      setPublishedPhotos(newPublished);
     } catch (error) {
       console.error("An error occurred while updating Published in bulk:", error);
       toast.error("Erreur lors de la mise à jour des Images publiées en masse.");
+      // Revert local state in case of error
+      setPhotos((prevPhotos) =>
+        prevPhotos.map((photo) =>
+          selectedPhotoIds.includes(photo.id) ? { ...photo, published: !makePublished } : photo
+        )
+      );
     }
   };
+  
 
   const handleToggleRecents = () => {
     const selectedPhotos = photos.filter((photo) => selectedPhotoIds.includes(photo.id));
@@ -659,14 +696,14 @@ const Gallery = ({ photos, allTags }) => {
   };
 
   const updateRecentsInBulk = async (selectedPhotoIds, addTag, tagName) => {
-    const updatedPhotos = photosState.map((photo) => {
+    const updatedPhotos = photos.map((photo) => {
       if (selectedPhotoIds.includes(photo.id) && !photo.tags.find((t) => t.name === tagName)) {
         return { ...photo, tags: [...photo.tags, { name: tagName, id: Date.now() }] };
       }
       return photo;
     });
 
-    setPhotosState(updatedPhotos);
+    setPhotos(updatedPhotos);
 
     try {
       const response = await fetch(`/api/updateTagInBulk`, {
@@ -680,10 +717,10 @@ const Gallery = ({ photos, allTags }) => {
       if (!response.ok) {
         throw new Error("Failed to update tags on the server");
       }
-      toast.success("Tags updated successfully!");
+      // toast.success("Tags updated successfully!");
     } catch (error) {
       console.error("Failed to update tags:", error);
-      toast.error("Error updating tags.");
+      // toast.error("Error updating tags.");
     }
   };
 
@@ -714,15 +751,15 @@ const Gallery = ({ photos, allTags }) => {
       if (!response.ok) {
         throw new Error("Failed to update favorites in bulk");
       }
-      toast.success("Favorites updated successfully in bulk!");
+      // toast.success("Favorites updated successfully in bulk!");
 
-      const newPhotos = photosState.map((photo) => {
+      const newPhotos = photos.map((photo) => {
         if (selectedPhotoIds.includes(photo.id)) {
           return { ...photo, isFavorite: makeFavorite };
         }
         return photo;
       });
-      setPhotosState(newPhotos);
+      setPhotos(newPhotos);
 
       const newFavorites = new Set(favorites);
       selectedPhotoIds.forEach((photoId) => {
@@ -735,13 +772,13 @@ const Gallery = ({ photos, allTags }) => {
       setFavorites(newFavorites);
     } catch (error) {
       console.error("An error occurred while updating favorites in bulk:", error);
-      toast.error("Erreur lors de la mise à jour des favoris en masse.");
+      // toast.error("Erreur lors de la mise à jour des favoris en masse.");
     }
   };
 
   const toggleFavorite = async (photoId) => {
     if (!session) {
-      toast.info("Veuillez vous connecter ou vous inscrire pour mémoriser vos favoris.");
+      // toast.info("Veuillez vous connecter ou vous inscrire pour mémoriser vos favoris.");
       return;
     }
 
@@ -781,7 +818,7 @@ const Gallery = ({ photos, allTags }) => {
       }
     } catch (error) {
       console.error("An error occurred while updating favorites:", error);
-      toast.error("Erreur lors de la mise à jour des favoris.");
+      // toast.error("Erreur lors de la mise à jour des favoris.");
     }
   };
 
@@ -1016,9 +1053,14 @@ const Gallery = ({ photos, allTags }) => {
                         <Heart isOpen={favorites.has(photo.id)} />
                       </button>
                     )}
-                    {zoomGallery >= 200 && isAdmin && isShowAdmin && (
+                    {zoomGallery >= 200 && isAdmin && isShowAdmin && !photo.published && isVisible &&(
+                      <button onClick={(e) => { e.stopPropagation(); setIndex(-1); handleDeleteButtonClick(photo.id); }} className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}>
+                        <Trash isOpen={true} />
+                      </button>
+                    )}
+                    {zoomGallery >= 200 && isAdmin && isShowAdmin && photo.published && (
                       <button onClick={(e) => { e.stopPropagation(); setIndex(-1); handleTagButtonClick(photo.id); }} className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}>
-                        <Htag isOpen={true} />
+                        <Htag isOpen={true} /> 
                       </button>
                     )}
                     {zoomGallery >= 200 && isAdmin && isShowAdmin && (
