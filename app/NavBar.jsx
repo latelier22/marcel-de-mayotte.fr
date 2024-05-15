@@ -24,6 +24,8 @@ const adminItems = [
     { label: "Ajouts de photos", route: "/admin/upload" },
     { label: "Voir les import catalogue", route: "/catalogue/import" },
     { label: "Citations", route: "/admin/citations" },
+    { label: "Blog", route: "/admin/blog" },
+
      
 
     ],

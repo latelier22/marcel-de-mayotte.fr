@@ -3,7 +3,7 @@
 import  RichTextEditor  from "./RichText"
 import { useState, useEffect } from 'react';
 
-
+import renderHTML from 'react-render-html';
 
 
 const MantineRichTextEditor = ({ initialValue }) => {
@@ -33,7 +33,7 @@ const MantineRichTextEditor = ({ initialValue }) => {
   }, [initialValue]);
 
   return (
-    <div>
+    <div className="my-64">
       <RichTextEditor value={value} onChange={setValue} />
       <button onClick={() => handleSave({ ...initialValue, content: value })} className="bg-blue-500 text-white px-4 py-2 rounded mt-4">Save</button>
 

@@ -1,6 +1,8 @@
 import React from "react";
 import TitleLine from "../../TitleLine";
-import RichTextEditor from "../../components/blog/RichTextEditor";
+// import RichTextEditor from "../../components/blog/RichTextEditor";
+import ReactQuillEditor from "./ReactRichEditor"
+import 'react-quill/dist/quill.snow.css'; // Import the CSS file for the Quill editor
 
 // import myFetch from "../../components/myFetch"; // Importer la fonction myFetch
 
@@ -44,7 +46,7 @@ const Page = async () => {
       </div>
 
       <div className="flex flex-row justify-center">
-        <RichTextEditor
+        <ReactQuillEditor
           initialValue={post}
           className="mx-auto h-96 w-2/3"
         />

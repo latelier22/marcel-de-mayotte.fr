@@ -4,6 +4,7 @@ import React from 'react';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import './page.module.css';
+import 'react-quill/dist/quill.snow.css';
 import { site } from './site';
 
 import { NextAuthProvider} from "utils/NextAuthProvider"
@@ -13,7 +14,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 const siteMetadata = site;
 
-export default async function RootLayout({
+export default function RootLayout({
   children
 }) 
 {
@@ -33,8 +34,12 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com"/>
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"/>
         <link href="https://fonts.googleapis.com/css2?family=BioRhyme:wght@200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet"/>
+        
+              
       </head>
+      
       <body className=" font-texte bg-white dark:bg-neutral-900">
+      
         <ReduxProvider>
       <NextAuthProvider>
       
