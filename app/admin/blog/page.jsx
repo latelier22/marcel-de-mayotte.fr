@@ -45,10 +45,10 @@ const Page = async () => {
         <TitleLine title="GESTION DU BLOG" />
       </div>
 
-      <div className="flex flex-row justify-center">
+      <div className="container mx-auto mb-48 text-2xl h-96">
         <ReactQuillEditor
           initialValue={post}
-          className="mx-auto h-96 w-2/3"
+          className="mx-auto"
         />
       </div>
 
@@ -56,7 +56,9 @@ const Page = async () => {
         <h1>Liste des articles</h1>
         <div key={post.id} className="p-4 border-b border-gray-300">
           <h2>{post.auteur}</h2>
-          <div dangerouslySetInnerHTML={{ __html: JSON.stringify(post.content) }} />
+          <div 
+          className="text-2xl text-pink"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(post.content) }} />
         </div>
       </div>
     </>

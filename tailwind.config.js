@@ -53,8 +53,31 @@ module.exports = {
         slideRight: "slideRight 1s ease-in",
         slideLeft: "slideLeft 1s ease-in",
       },
-    },
+      typography: {
+        DEFAULT: {
+          css: {
+            'h1, h2, h3, h4, h5, h6': {
+              color: '#FF0000',
+            },
+            'p': {
+              marginTop: '50',
+              marginBottom: '1rem',
+            },
+            '.ql-align-center': {
+              textAlign: 'center',
+            },
+            '.ql-align-right': {
+              textAlign: 'right',
+            },
+            '.ql-align-left': {
+              textAlign: 'left',
+            },
+          },
+        },
+      },
+
+    }
   },
   darkMode: "class",
-  plugins: [require("tw-elements/dist/plugin.cjs")],
+  plugins: [require("tw-elements/dist/plugin.cjs", '@tailwindcss/typography')],
 };

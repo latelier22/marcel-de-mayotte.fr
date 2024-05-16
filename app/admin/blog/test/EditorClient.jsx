@@ -47,7 +47,6 @@ export default function Home() {
     <>
       <div className="pt-64 marker:h-screen w-screen flex items-start justify-center flex-row">
         <div className="h-[40vw] w-[50vw]">
-               
           <QuillEditor
             value={content}
             onChange={handleEditorChange}
@@ -56,13 +55,21 @@ export default function Home() {
             className="w-full h-[70%] mt-10 bg-black"
           />
         </div>
-
-        <div className="ml-48 bg-pink-500 text-white w-[40vw] h-[50vw]">
-          <h6>Output is {content}</h6>
-          <div dangerouslySetInnerHTML={{ __html: content }} />
-          <div>{parse(content)}</div>
+      
+        
+        
+        <div
+      className="prose mx-auto"
+      dangerouslySetInnerHTML={{ __html: content }}
+    />
         </div>
-      </div>
+
+        <div className="">
+           {content} 
+        </div>
+         
+        
+      
     </>
   );
 }
