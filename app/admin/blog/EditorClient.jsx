@@ -48,7 +48,7 @@ const EditorClient = ({ initialContent, onContentChange }) => {
         onChange={handleEditorChange}
         modules={quillModules}
         formats={quillFormats}
-        className="w-full h-64 bg-white"
+        className="w-full h-64 className='bg-yellow-100'"
       />
     </div>
   );

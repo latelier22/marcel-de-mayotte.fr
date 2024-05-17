@@ -138,11 +138,23 @@ function ListPosts({ allPosts }) {
         }
     };
 
+    function formatContent(content, maxLength) {
+        if (!content) return '';
+        const words = content.split(' ');
+        if (words.length > maxLength) {
+            return words.slice(0, maxLength).join(' ') + '...';
+        }
+        return content;
+    }
+
+
+
+
     const renderPostFamily = (post) => {
         const hasComments = posts.some(comment => comment.parentPostId === post.id);
         return (
-            <div key={post.id} className={`p-4 mb-4 cursor-pointer ${post.id === lastModifiedPostId ? 'bg-gray-800' : ''} ${post === selectedPost ? 'border-green-500 border-solid border-2' : ''}`} onClick={() => handlePostClick(post)}>
-                {editing && post === selectedPost ? (
+            <div key={post.id} className={`p-4 mb-4 cursor-pointer ${post.id === lastModifiedPostId ? 'bg-yellow-200' : ''} ${post === selectedPost ? 'border-green-500 border-solid border-2' : ''}`} onClick={() => handlePostClick(post)}>
+                {editing && (post === selectedPost) && (
                     <div className="flex flex-col">
                         <EditorClient
                             initialContent={editFormData.content}
@@ -154,36 +166,41 @@ function ListPosts({ allPosts }) {
                             <button onClick={() => handleAddComment(post)}>Add Comment</button>
                         </div>
                     </div>
-                ) : (
-                    <div>
-                        <h2>{post.title}</h2>
-                        <div dangerouslySetInnerHTML={{ __html: post.content }} />
-                        <p>- {post.auteur}</p>
-                        <p>{post.etat}</p>
+                ) 
+                }
+                {!editing && (<div
+                        className={`${post.id === lastModifiedPostId ? 'bg-yellow-200' : 'bg-yellow-100'}`}>
+                        <h2 className=' text-center my-4'>{post.title}</h2>
+                        <div dangerouslySetInnerHTML={{ __html: formatContent(post.content, 200) }} />
+                        <p className='text-right'>- {post.auteur}</p>
+                        <p className='text-right font-bold'>{post.etat}</p>
                         <button onClick={() => handleEditPost(post)}>Edit</button>
-                    </div>
-                )}
+                    </div>)}
             </div>
         );
     };
 
     return (
-        <div ref={containerRef} className="container mx-auto my-8 p-4 shadow-lg rounded">
-            <button onClick={() => setCreatingNew(true)} className="bg-green-500 text-white px-4 py-2 rounded mb-4">Create New Post</button>
+        <div ref={containerRef} className="container bg-yellow-100  text-red-900 mx-auto my-8 p-4 shadow-lg rounded">
+            <button onClick={() => setCreatingNew(true)} className="bg-lime-500 px-4 py-2 rounded mb-4">Create New Post</button>
             {creatingNew && (
                 <div>
-                    <input type="text" placeholder="Title" value={editFormData.title} onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })} />
+                    <input 
+                    className='bg-yellow-100'
+                    type="text" placeholder="Title" value={editFormData.title} onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })} />
                     <EditorClient
                         initialContent={editFormData.content}
                         onContentChange={(content) => setEditFormData({ ...editFormData, content })}
                     />
-                    <input type="text" placeholder="Auteur" value={editFormData.auteur} onChange={(e) => setEditFormData({ ...editFormData, auteur: e.target.value })} />
+                    <input 
+                    className='bg-yellow-100'
+                    type="text" placeholder="Auteur" value={editFormData.auteur} onChange={(e) => setEditFormData({ ...editFormData, auteur: e.target.value })} />
                     <div>
                         <button onClick={handleCreateNewPost}>Create</button>
                     </div>
                 </div>
             )}
-            {posts.map(post => renderPostFamily(post))}
+            {posts.slice().reverse().map(post => renderPostFamily(post))}
             {error && <p className="text-red-500">{error}</p>}
         </div>
     );
