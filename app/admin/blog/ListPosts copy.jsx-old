@@ -1,0 +1,208 @@
+"use client";
+import React, { useState, useRef, useEffect } from 'react';
+import myFetch from '../../components/myFetch';
+import EditorClient from './EditorClient';
+
+function ListPosts({ allPosts }) {
+    const [posts, setPosts] = useState(allPosts);
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [editing, setEditing] = useState(false);
+    const [editFormData, setEditFormData] = useState({ title: '', content: '', auteur: '', etat: 'brouillon' });
+    const [newCommentData, setNewCommentData] = useState({ texte: '', auteur: '', etat: 'brouillon', parentPostId: null });
+    const [error, setError] = useState('');
+    const containerRef = useRef(null);
+    const [creatingNew, setCreatingNew] = useState(false);
+    const [lastModifiedPostId, setLastModifiedPostId] = useState(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setSelectedPost(null);
+                setEditing(false);
+                setCreatingNew(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
+        const groupPosts = (posts) => {
+            const parentMap = {};
+            posts.forEach(post => {
+                if (post.parentPostId) {
+                    parentMap[post.parentPostId] = parentMap[post.parentPostId] || [];
+                    parentMap[post.parentPostId].push(post);
+                } else {
+                    parentMap[post.id] = parentMap[post.id] || [];
+                    parentMap[post.id].unshift(post); // Ensure parent is first
+                }
+            });
+            return Object.values(parentMap).flat();
+        };
+        setPosts(groupPosts(allPosts));
+    }, [allPosts]);
+
+    const handlePostClick = (post) => {
+        if (!editing) {
+            setSelectedPost(post);
+            setEditFormData({ title: post.title, content: post.content, auteur: post.auteur, etat: post.etat });
+        }
+    };
+
+    const handleEditPost = () => {
+        setEditing(true);
+    };
+
+    const handleUpdatePost = async () => {
+        if (!selectedPost) {
+            setError('No post selected for updating.');
+            return;
+        }
+
+        const payload = { data: editFormData };
+
+        try {
+            const response = await myFetch(`/api/posts/${selectedPost.id}`, 'PUT', payload, 'post');
+            const updatedPost = { id: response.data.id, ...response.data.attributes };
+
+            const updatedPosts = posts.map(post =>
+                post.id === updatedPost.id ? { ...post, ...editFormData } : post
+            );
+
+            setPosts(updatedPosts);
+            setEditing(false);
+            setLastModifiedPostId(updatedPost.id);
+            setSelectedPost(null);
+        } catch (error) {
+            console.error(`An error occurred while updating post:`, error);
+            setError('Failed to update post due to a network error');
+        }
+    };
+
+    const handleAddComment = (parentPost) => {
+        setNewCommentData({ texte: '', auteur: '', etat: 'brouillon', parentPostId: parentPost.id });
+    };
+
+    const handleSaveNewComment = async () => {
+        if (!newCommentData.texte || !newCommentData.auteur) {
+            setError('Please fill all fields for the new post.');
+            return;
+        }
+
+        const payload = { data: newCommentData };
+
+        try {
+            const response = await myFetch('/api/posts', 'POST', payload, 'post');
+            const addedPost = { id: response.data.id, ...response.data.attributes };
+
+            let newPosts = [...posts];
+            const parentComments = newPosts.filter(c => c.parentPostId === newCommentData.parentPostId);
+            let insertIndex = newPosts.findIndex(c => c.id === newCommentData.parentPostId);
+            if (parentComments.length > 0) {
+                const lastComment = parentComments[parentComments.length - 1];
+                insertIndex = newPosts.indexOf(lastComment) + 1;
+            } else {
+                insertIndex += 1;
+            }
+            addedPost.parentPostId = newCommentData.parentPostId;
+            newPosts.splice(insertIndex, 0, addedPost);
+
+            setPosts(newPosts);
+            setLastModifiedPostId(addedPost.id);
+            setNewCommentData({ texte: '', auteur: '', etat: 'brouillon', parentPostId: null });
+            setSelectedPost(null);
+        } catch (error) {
+            console.error(`An error occurred while adding a new comment post:`, error);
+            setError('Failed to add new comment post due to a network error');
+        }
+    };
+
+    const handleDeletePost = async () => {
+        if (!selectedPost) {
+            setError('No post selected for deletion.');
+            return;
+        }
+
+        try {
+            const response = await myFetch(`/api/posts/${selectedPost.id}`, 'DELETE', null, 'posts');
+            const updatedPosts = posts.filter(c => c.id !== selectedPost.id);
+            setPosts(updatedPosts);
+            setSelectedPost(null);
+        } catch (error) {
+            console.error(`An error occurred while deleting post:`, error);
+            setError('Failed to delete post due to a network error');
+        }
+    };
+
+    const handleCreateNewPost = async () => {
+        if (!editFormData.title || !editFormData.content || !editFormData.auteur) {
+            setError('Please fill all fields for the new post.');
+            return;
+        }
+
+        const payload = { data: editFormData };
+
+        try {
+            const response = await myFetch('/api/posts', 'POST', payload, 'post');
+            const newPost = { id: response.data.id, ...response.data.attributes };
+            setPosts([...posts, newPost]);
+            setLastModifiedPostId(newPost.id);
+            setCreatingNew(false);
+            setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon' });
+        } catch (error) {
+            console.error(`An error occurred while creating a new post:`, error);
+            setError('Failed to create new post due to a network error');
+        }
+    };
+
+    const renderPostFamily = (post) => {
+        const hasComments = posts.some(comment => comment.parentPostId === post.id);
+
+        return (
+            <div key={post.id} className={`p-4 mb-4 cursor-pointer ${post.id === lastModifiedPostId ? 'bg-gray-800' : ''} ${post === selectedPost ? 'border-green-500 border-solid border-2' : ''}`} onClick={() => handlePostClick(post)}>
+                {editing && post === selectedPost ? (
+                    <div className="flex flex-col">
+                        <input
+                            className="mb-2 p-2 border border-gray-300"
+                            type="text"
+                            value={editFormData.title}
+                            onChange={e => setEditFormData({ ...editFormData, title: e.target.value })}
+                            placeholder="Title"
+                        />
+                        <EditorClient
+                            initialContent={editFormData.content}
+                            onContentChange={(content) => setEditFormData({ ...editFormData, content })}
+                        />
+                        <input
+                            className="mt-2 p-2 border border-gray-300"
+                            type="text"
+                            value={editFormData.auteur}
+                            onChange={e => setEditFormData({ ...editFormData, auteur: e.target.value })}
+                            placeholder="Auteur"
+                        />
+                        <div className="flex flex-col mt-2">
+                            <label className="mr-2">
+                                <input type="radio" value="publiée" checked={editFormData.etat === "publiée"} onChange={e => setEditFormData({ ...editFormData, etat: e.target.value })} />
+                                Publiée
+                            </label>
+                            <label>
+                                <input type="radio" value="brouillon" checked={editFormData.etat === "brouillon"} onChange={e => setEditFormData({ ...editFormData, etat: e.target.value })} />
+                                Brouillon
+                            </label>
+                        </div>
+                        <button className="bg-green-500 text-white px-4 py-2 rounded mt-2" onClick={handleUpdatePost}>Save</button>
+                    </div>
+                ) : (
+                    <div>
+                        <h2 className="text-xl font-bold">{post.title}</h2>
+                        <div className="prose" dangerouslySetInnerHTML={{ __html: post.content }} />
+                        <p className="text-right text-2xl italic">- {post.auteur}</p>
+                        <p className="text-sm text-green-300">{post.etat}</p>
+                        {post === selectedPost && (
+                            <>
+                                <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleEditPost}>Edit</button>
+                               

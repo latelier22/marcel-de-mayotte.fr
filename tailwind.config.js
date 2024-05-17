@@ -79,5 +79,5 @@ module.exports = {
     }
   },
   darkMode: "class",
-  plugins: [require("tw-elements/dist/plugin.cjs", '@tailwindcss/typography')],
+  plugins: [require("tw-elements/dist/plugin.cjs"), require('@tailwindcss/typography')],
 };

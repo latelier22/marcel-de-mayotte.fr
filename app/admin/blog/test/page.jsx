@@ -1,5 +1,5 @@
 
-import Editor from "./EditorClient";
+import Editor from "../EditorClient";
 
 export default function Home() {
   return (

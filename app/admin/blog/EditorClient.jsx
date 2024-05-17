@@ -1,14 +1,11 @@
 "use client";
-
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import '../styles/quill.snow.css'
-import parse from 'html-react-parser';
 
 const QuillEditor = dynamic(() => import("react-quill"), { ssr: false });
 
-export default function Home() {
-  const [content, setContent] = useState("");
+const EditorClient = ({ initialContent, onContentChange }) => {
+  const [content, setContent] = useState(initialContent || "");
 
   const quillModules = {
     toolbar: [
@@ -41,35 +38,20 @@ export default function Home() {
 
   const handleEditorChange = (newContent) => {
     setContent(newContent);
+    onContentChange(newContent);
   };
 
   return (
-    <>
-      <div className="pt-64 marker:h-screen w-screen flex items-start justify-center flex-row">
-        <div className="h-[40vw] w-[50vw]">
-          <QuillEditor
-            value={content}
-            onChange={handleEditorChange}
-            modules={quillModules}
-            formats={quillFormats}
-            className="w-full h-[70%] mt-10 bg-black"
-          />
-        </div>
-      
-        
-        
-        <div
-      className="prose mx-auto"
-      dangerouslySetInnerHTML={{ __html: content }}
-    />
-        </div>
-
-        <div className="">
-           {content} 
-        </div>
-         
-        
-      
-    </>
+    <div className="w-full">
+      <QuillEditor
+        value={content}
+        onChange={handleEditorChange}
+        modules={quillModules}
+        formats={quillFormats}
+        className="w-full h-64 bg-white"
+      />
+    </div>
   );
-}
+};
+
+export default EditorClient;
