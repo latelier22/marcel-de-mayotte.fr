@@ -29,13 +29,15 @@ function ListPosts({ allPosts }) {
         console.log(allPosts.map( (p) => {p.comments.attributes}));
     }, [allPosts]);
 
+    
     const groupPosts = (posts) => {
         const parentMap = {};
         posts.forEach(post => {
             if (post.comments && post.comments.data) {
                 post.comments = post.comments.data.map(comment => ({
                     ...comment.attributes,
-                    id: comment.id
+                    id: comment.id,
+                    comments: comment.comments || [] // Ensure nested comments are initialized
                 }));
             }
             parentMap[post.id] = post;
@@ -73,35 +75,30 @@ function ListPosts({ allPosts }) {
     
 
     const handleToggleCommentStatus = async (comment) => {
-        const updatedStatus = comment.etat === 'publiée' ? 'à valider' : 'publiée';
+        const updatedStatus = comment.etat === 'validée' ? 'à valider' : 'validée';
         try {
+            // Mise à jour de l'état du commentaire via l'API
             await myFetch(`/api/comments/${comment.id}`, 'PUT', {
                 data: { etat: updatedStatus }
-            },"comment");
-            // Update local state
+            },'comment status');
+    
+            // Mise à jour de l'état local
             setPosts(prevPosts =>
-                prevPosts.map(post =>
-                    post.id === selectedPost.id
-                        ? {
-                            ...post,
-                            comments: post.comments.map(c =>
-                                c.id === comment.id
-                                    ? { ...c, etat: updatedStatus }
-                                    : c
-                            )
-                        }
-                        : post
-                )
+                prevPosts.map(post => ({
+                    ...post,
+                    comments: post.comments.map(c =>
+                        c.id === comment.id
+                            ? { ...c, etat: updatedStatus }
+                            : c
+                    )
+                }))
             );
         } catch (error) {
-            console.error('Failed to toggle comment status:', error);
-            setError('Failed to toggle comment status due to a network error');
+            console.error('Une erreur est survenue lors du changement de statut du commentaire :', error);
+            setError('Impossible de changer le statut du commentaire en raison d\'une erreur réseau');
         }
     };
     
-
-
-
 
     const handleUpdatePost = async () => {
         if (!selectedPost) {
@@ -164,6 +161,18 @@ function ListPosts({ allPosts }) {
     
 
 
+    const handleReplyComment = (parentComment) => {
+        setNewCommentData({
+            texte: '',
+            auteur: '',
+            etat: 'à valider',
+            parentPostId: selectedPost.id,
+            parentCommentId: parentComment.id // Inclure le parentCommentId
+        });
+        setShowNewCommentForm(true);
+    };
+    
+
 
     const handleAddComment = (parentPost) => {
         setNewCommentData({ texte: '', auteur: '', etat: 'à valider', parentPostId: parentPost.id });
@@ -174,28 +183,54 @@ function ListPosts({ allPosts }) {
     
     const handleSaveNewComment = async () => {
         if (!newCommentData.texte || !newCommentData.auteur) {
-            setError('Please fill all fields for the new post.');
+            setError('Veuillez remplir tous les champs pour le nouveau commentaire.');
             return;
         }
-        const payload = { data: newCommentData };
+    
+        // Construire le payload en incluant toujours la référence au post
+        const payload = {
+            data: {
+                texte: newCommentData.texte,
+                auteur: newCommentData.auteur,
+                etat: 'à valider',
+                post: { id: selectedPost.id }, // Toujours inclure la référence au post
+                ...(newCommentData.parentCommentId ? { comment: { id: newCommentData.parentCommentId } } : {}) // Inclure le commentaire parent si présent
+            }
+        };
+    
         try {
-            console.log("payload",payload)
-            const response = await myFetch('/api/comments', 'POST', payload, 'post'); // Assuming comments are posted to /api/comments
-            const addedComment = { id: response.data.id, ...response.data.attributes };
+            console.log("payload", payload);
+            const response = await myFetch('/api/comments', 'POST', payload);
+            const addedComment = { id: response.data.id, ...response.data.attributes, comments: [] }; // Ajouter un champ `comments` vide
+    
+            // Mettre à jour la liste des commentaires en insérant la nouvelle réponse
             const updatedPosts = posts.map(post => {
-                if (post.id === newCommentData.parentPostId) {
-                    return { ...post, comments: [...(post.comments || []), addedComment] };
+                if (post.id === selectedPost.id) {
+                    if (newCommentData.parentCommentId) {
+                        // Si c'est une réponse à un commentaire
+                        const updatedComments = post.comments.map(comment => {
+                            if (comment.id === newCommentData.parentCommentId) {
+                                return { ...comment, comments: [...(comment.comments || []), addedComment] };
+                            }
+                            return comment;
+                        });
+                        return { ...post, comments: updatedComments };
+                    } else {
+                        // Sinon, c'est un commentaire direct au post
+                        return { ...post, comments: [...(post.comments || []), addedComment] };
+                    }
                 }
                 return post;
             });
+    
             setPosts(updatedPosts);
             setLastModifiedPostId(addedComment.id);
-            setNewCommentData({ texte: '', auteur: '', etat: 'brouillon', parentPostId: null });
+            setNewCommentData({ texte: '', auteur: '', etat: 'à valider', parentPostId: null, parentCommentId: null });
             setShowNewCommentForm(false);
             setSelectedPost(null);
         } catch (error) {
-            console.error('An error occurred while adding a new comment:', error);
-            setError('Failed to add new comment due to a network error');
+            console.error('Une erreur est survenue lors de l\'ajout d\'un nouveau commentaire :', error);
+            setError('Impossible d\'ajouter un nouveau commentaire en raison d\'une erreur réseau');
         }
     };
     
@@ -275,6 +310,34 @@ function ListPosts({ allPosts }) {
         return null;
     };
     
+    const renderNestedComments = (comments) => {
+        return comments.map(comment => (
+            <div key={comment.id} className="mt-2">
+                <div className="border p-2">
+                    <p>{comment.texte}</p>
+                    <p className="text-sm">- {comment.auteur}</p>
+                    <div className="flex space-x-2 justify-end">
+                        <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleToggleCommentStatus(comment)}>
+                            {comment.etat === 'publiée' ? 'À valider' : 'Publiée'}
+                        </button>
+                        <button className="bg-red-500 text-white px-2 py-1 rounded" onClick={() => handleDeleteComment(comment.id, selectedPost.id)}>Delete</button>
+                        <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={() => handleReplyComment(comment)}>Reply</button>
+                    </div>
+                    {/* Afficher les commentaires imbriqués */}
+                    {comment.comments && comment.comments.length > 0 && (
+                        <div className="ml-4 mt-2 border-l-2 pl-4">
+                            {renderNestedComments(comment.comments)}
+                        </div>
+                    )}
+                </div>
+            </div>
+        ));
+    };
+    
+
+
+
+    
     const renderPostFamily = (post) => {
         const hasComments = post.comments && post.comments.length > 0;
         const commentCount = hasComments ? post.comments.length : 0;
@@ -348,38 +411,8 @@ function ListPosts({ allPosts }) {
                             </div>
                         )}
                         {showComments[post.id] && hasComments && (
-                            <div className="mt-4 ml-8 border-l-2 pl-4 text-right text-black">
-                                {post.comments.map(comment => (
-                                    <div key={comment.id} className="mt-2">
-                                        <p>{comment.texte}</p>
-                                        <p className="text-sm">- {comment.auteur}</p>
-                                        <div className="flex space-x-2 justify-end">
-                                            <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleToggleCommentStatus(comment)}>
-                                                {comment.etat === 'publiée' ? 'À valider' : 'Publiée'}
-                                            </button>
-                                            <button className="bg-red-500 text-white px-2 py-1 rounded" onClick={() => handleDeleteComment(comment.id, post.id)}>Delete</button>
-                                            <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={() => handleReplyComment(comment)}>Reply</button>
-                                        </div>
-                                        {/* Display nested comments if any */}
-                                        {comment.comments && comment.comments.length > 0 && (
-                                            <div className="ml-4 mt-2 border-l-2 pl-4 text-right">
-                                                {comment.comments.map(nestedComment => (
-                                                    <div key={nestedComment.id} className="mt-2">
-                                                        <p>{nestedComment.texte}</p>
-                                                        <p className="text-sm">- {nestedComment.auteur}</p>
-                                                        <div className="flex space-x-2 justify-end">
-                                                            <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleToggleCommentStatus(nestedComment)}>
-                                                                {nestedComment.etat === 'publiée' ? 'À valider' : 'Publiée'}
-                                                            </button>
-                                                            <button className="bg-red-500 text-white px-2 py-1 rounded" onClick={() => handleDeleteComment(nestedComment.id, post.id)}>Delete</button>
-                                                            <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={() => handleReplyComment(nestedComment)}>Reply</button>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                            <div className="mt-4">
+                                {renderNestedComments(post.comments)}
                             </div>
                         )}
                     </div>
@@ -387,6 +420,7 @@ function ListPosts({ allPosts }) {
             </div>
         );
     };
+    
     
     return (
         <div ref={containerRef} className="container bg-yellow-100 text-red-900 mx-auto my-8 p-4 shadow-lg rounded">
@@ -438,4 +472,4 @@ function ListPosts({ allPosts }) {
     );
 }
 
-export default ListPosts
+export default ListPosts;
