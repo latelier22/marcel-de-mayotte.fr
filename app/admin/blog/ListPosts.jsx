@@ -11,7 +11,7 @@ function ListPosts({ allPosts }) {
     const [editFormData, setEditFormData] = useState({ title: '', content: '', auteur: '', etat: 'brouillon' });
     const [newCommentData, setNewCommentData] = useState({ texte: '', auteur: '', etat: 'brouillon', parentPostId: null });
     const [showComments, setShowComments] = useState({});
-
+    const [showNewCommentForm, setShowNewCommentForm] = useState(false);
     const [error, setError] = useState('');
     const containerRef = useRef(null);
     const [creatingNew, setCreatingNew] = useState(false);
@@ -26,28 +26,23 @@ function ListPosts({ allPosts }) {
 
     useEffect(() => {
         setPosts(groupPosts(allPosts));
-        console.log(allPosts.map( (p) => {p.comments}));
+        console.log(allPosts.map( (p) => {p.comments.attributes}));
     }, [allPosts]);
 
 
 
     const groupPosts = (posts) => {
-        const parentMap = {};
-        posts.forEach(post => {
-            if (post.comments) {
-                post.comments = post.comments.data; // Assuming Strapi returns comments in the data field
-                console.log("comments",post.comments)
-            }
-            if (post.parentPostId) {
-                parentMap[post.parentPostId] = parentMap[post.parentPostId] || [];
-                parentMap[post.parentPostId].push(post);
-            } else {
-                parentMap[post.id] = parentMap[post.id] || [];
-                parentMap[post.id].unshift(post); // Ensure parent is first
-            }
+        return posts.map(post => {
+            const comments = post.comments ? post.comments.data : [];
+            console.log(`Post ID: ${post.id} - Comments Count: ${comments.length}`, comments);
+            return {
+                ...post,
+                comments: comments
+            };
         });
-        return Object.values(parentMap).flat();
     };
+    
+    
     
     const toggleComments = (postId) => {
         setShowComments(prev => ({
@@ -98,7 +93,10 @@ function ListPosts({ allPosts }) {
 
     const handleAddComment = (parentPost) => {
         setNewCommentData({ texte: '', auteur: '', etat: 'brouillon', parentPostId: parentPost.id });
+        setShowNewCommentForm(true);
+        setSelectedPost(parentPost);
     };
+    
 
     const handleSaveNewComment = async () => {
         if (!newCommentData.texte || !newCommentData.auteur) {
@@ -107,7 +105,8 @@ function ListPosts({ allPosts }) {
         }
         const payload = { data: newCommentData };
         try {
-            const response = await myFetch('/api/posts', 'POST', payload);
+            console.log("payload",payload);
+            const response = await myFetch('/api/comments', 'POST', payload);
             const addedPost = { id: response.data.id, ...response.data.attributes };
             const parentIndex = posts.findIndex(p => p.id === newCommentData.parentPostId);
             const newPosts = [...posts];
@@ -199,64 +198,7 @@ function ListPosts({ allPosts }) {
     const renderPostFamily = (post) => {
         const hasComments = post.comments && post.comments.length > 0;
         const commentCount = hasComments ? post.comments.length : 0;
-    
-        const handleToggleCommentStatus = async (comment) => {
-            const updatedStatus = comment.attributes.etat === 'publiée' ? 'brouillon' : 'publiée';
-            try {
-                await myFetch(`/api/comments/${comment.id}`, 'PUT', {
-                    data: { etat: updatedStatus }
-                });
-                // Update local state
-                setPosts(prevPosts =>
-                    prevPosts.map(p =>
-                        p.id === post.id
-                            ? {
-                                ...p,
-                                comments: p.comments.map(c =>
-                                    c.id === comment.id
-                                        ? { ...c, attributes: { ...c.attributes, etat: updatedStatus } }
-                                        : c
-                                )
-                            }
-                            : p
-                    )
-                );
-            } catch (error) {
-                console.error('Failed to toggle comment status:', error);
-            }
-        };
-    
-        const handleDeleteComment = async (comment) => {
-            try {
-                await myFetch(`/api/comments/${comment.id}`, 'DELETE');
-                // Update local state
-                setPosts(prevPosts =>
-                    prevPosts.map(p =>
-                        p.id === post.id
-                            ? {
-                                ...p,
-                                comments: p.comments.filter(c => c.id !== comment.id)
-                            }
-                            : p
-                    )
-                );
-            } catch (error) {
-                console.error('Failed to delete comment:', error);
-            }
-        };
-    
-        const handleReplyComment = (parentComment) => {
-            setNewCommentData({
-                texte: '',
-                auteur: '',
-                etat: 'brouillon',
-                parentCommentId: parentComment.id,
-                parentPostId: post.id
-            });
-            setSelectedPost(post);
-            setEditing(false); // Ensure editing mode is off
-            setCreatingNew(false); // Ensure creating new post mode is off
-        };
+        console.log("ommentCount",commentCount)
     
         return (
             <div key={post.id} className={`p-4 mb-4 cursor-pointer ${post.id === lastModifiedPostId ? 'bg-yellow-200' : ''} ${post === selectedPost ? 'border-green-500 border-solid border-2' : ''}`} onClick={() => handlePostClick(post)}>
@@ -323,6 +265,25 @@ function ListPosts({ allPosts }) {
                                         </div>
                                     </div>
                                 ))}
+                                {/* Form to add a new comment */}
+                                {showNewCommentForm && selectedPost === post && (
+                                    <div className="flex flex-col mt-4">
+                                        <textarea
+                                            placeholder="Comment text"
+                                            value={newCommentData.texte}
+                                            onChange={(e) => setNewCommentData({ ...newCommentData, texte: e.target.value })}
+                                            className="p-2 border rounded"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Auteur"
+                                            value={newCommentData.auteur}
+                                            onChange={(e) => setNewCommentData({ ...newCommentData, auteur: e.target.value })}
+                                            className="p-2 border rounded mt-2"
+                                        />
+                                        <button className="bg-green-500 text-white px-4 py-2 rounded mt-2" onClick={handleSaveNewComment}>Save Comment</button>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -330,6 +291,7 @@ function ListPosts({ allPosts }) {
             </div>
         );
     };
+    
     
 
     return (
