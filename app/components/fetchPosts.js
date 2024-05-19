@@ -1,25 +1,20 @@
-import myFetch from "./myFech";
+import myFetch from './myFech';
 
+async function fetchPosts() {
+    const response = await myFetch('/api/posts?populate=*', 'GET', null, 'posts');
+    const strapiPosts = response.data;
 
-async function fetchPosts () {
+    const posts = strapiPosts.map(post => ({
+        id: post.id,
+        ...post.attributes,
+        comments: post.attributes.comments ? post.attributes.comments.data.map(comment => ({
+            id: comment.id,
+            ...comment.attributes
+        })) : []
+    }));
 
-    const response = await myFetch("/api/posts?populate=*", 'GET', null, 'posts');
-    // const response = await myFetch('/api/posts?populate=*');
-
-        const strapiPosts = response.data
-        console.log(strapiPosts);
-
-        const posts = strapiPosts.map(post => ({
-            id: post.id,
-            ...post.attributes
-        }));
-        
-        console.log(posts);
-
-    return posts
-
+    console.log('fetch posts', posts.slice(0, 2));
+    return posts;
 }
 
 export default fetchPosts;
-
-

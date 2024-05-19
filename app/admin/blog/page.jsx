@@ -4,6 +4,7 @@ import 'react-quill/dist/quill.snow.css'; // Import the CSS file for the Quill e
 import myFetch from '../../components/myFech';
 import ListPosts from "./ListPosts"
 import fetchPosts from "../../components/fetchPosts";
+import fetchComments from "../../components/fetchComments";
 
 
     
@@ -11,8 +12,10 @@ import fetchPosts from "../../components/fetchPosts";
 
  async function Page () {
 
+  const allComments = await fetchComments();
   const allPosts = await fetchPosts();
-  console.log("allPosts", allPosts)
+
+  
 
   return (
     <>
@@ -22,7 +25,7 @@ import fetchPosts from "../../components/fetchPosts";
 
       {/* Liste des citations */}
       <div className="container mx-auto my-8 p-4 shadow-lg rounded">
-          <ListPosts allPosts={allPosts}/>
+          <ListPosts allPosts={allPosts} allComments={allComments} />
       </div>
     </>
   );
