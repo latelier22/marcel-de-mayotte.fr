@@ -28,14 +28,13 @@ function ListPosts({ allPosts, allComments }) {
     useEffect(() => {
         setPosts(groupPosts(allPosts, allComments));
         console.log(posts)
-        
     }, [allComments, allPosts]);
 
     const groupPosts = (posts, comments) => {
         if (!Array.isArray(comments)) return posts;
         return posts.map(post => ({
             ...post,
-            comments: comments.filter(comment => comment.post === post.id)
+            comments: comments.filter(comment => comment.post === post.id).map(comment => comment.id)
         }));
     };
 
@@ -58,6 +57,19 @@ function ListPosts({ allPosts, allComments }) {
         setEditing(true);
     };
 
+
+    const handleDeletePost = async (postId) => {
+        try {
+            await myFetch(`/api/posts/${postId}`, 'DELETE');
+            const updatedPosts = posts.filter(post => post.id !== postId);
+            setPosts(updatedPosts);
+        } catch (error) {
+            console.error('An error occurred while deleting the post:', error);
+            setError('Failed to delete post due to a network error');
+        }
+    };
+    
+
     const toggleComments = (postId) => {
         setShowComments(prev => ({
             ...prev,
@@ -71,42 +83,44 @@ function ListPosts({ allPosts, allComments }) {
             await myFetch(`/api/comments/${comment.id}`, 'PUT', { data: { etat: updatedStatus } }, 'comment');
             const updatedComments = comments.map(c => c.id === comment.id ? { ...c, etat: updatedStatus } : c);
             setComments(updatedComments);
-    
-            // Mettre à jour l'état des posts pour refléter le changement dans les commentaires
-            const updatedPosts = posts.map(post =>
-                post.id === comment.post ? { ...post, comments: updatedComments.filter(c => c.post === post.id) } : post
-            );
-            setPosts(updatedPosts);
-    
         } catch (error) {
             console.error('Failed to toggle comment status:', error);
             setError('Failed to toggle comment status due to a network error');
         }
     };
-    
 
     const handleDeleteComment = async (commentId) => {
         try {
-            const deleteCommentAndChildren = async (commentId) => {
-                const response = await myFetch(`/api/comments/${commentId}?populate=*`);
-                const comment = response.data;
-                if (comment.comments && comment.comments.data.length > 0) {
-                    for (let childComment of comment.comments.data) {
-                        await deleteCommentAndChildren(childComment.id);
-                    }
-                }
-                await myFetch(`/api/comments/${commentId}`, 'DELETE');
+            // Function to recursively find all child comment IDs
+            const findAllChildIds = (id, allComments) => {
+                let childIds = allComments.filter(comment => comment.parent_comment === id).map(comment => comment.id);
+                return childIds.reduce((acc, childId) => acc.concat(childId, findAllChildIds(childId, allComments)), []);
             };
-            await deleteCommentAndChildren(commentId);
-            const updatedComments = comments.filter(comment => comment.id !== commentId);
-            setComments(updatedComments);
     
-            // Mettre à jour l'état des posts pour refléter la suppression dans les commentaires
-            const updatedPosts = posts.map(post => 
-                post.id === selectedPost.id ? { ...post, comments: updatedComments.filter(comment => comment.post === post.id) } : post
-            );
-            setPosts(updatedPosts);
+            // Collect all IDs to delete (the comment itself and all its children)
+            const idsToDelete = [commentId, ...findAllChildIds(commentId, comments)];
     
+            // Delete comments from the backend - assuming batch delete isn't supported, loop through each
+            for (const id of idsToDelete) {
+                await myFetch(`/api/comments/${id}`, 'DELETE');
+            }
+    
+            // Update the comments state to remove the deleted comments
+            setComments(prevComments => prevComments.filter(comment => !idsToDelete.includes(comment.id)));
+    
+            // Update posts state to reflect the removal of comments
+            setPosts(prevPosts => prevPosts.map(post => {
+                return {
+                    ...post,
+                    comments: post.comments.filter(id => !idsToDelete.includes(id))
+                };
+            }));
+    
+            // Resetting selected post and last modified post state
+            setSelectedPost(selectedPost ? selectedPost.id : null);
+            setLastModifiedPostId(selectedPost ? selectedPost.id : null);
+    
+            setError(''); // Clear any previous errors
         } catch (error) {
             console.error('An error occurred while deleting the comment:', error);
             setError('Failed to delete comment due to a network error');
@@ -119,7 +133,6 @@ function ListPosts({ allPosts, allComments }) {
         setShowNewCommentForm(true);
         setSelectedPost(parentPost);
     };
-
     const handleSaveNewComment = async () => {
         if (!newCommentData.texte || !newCommentData.auteur) {
             setError('Veuillez remplir tous les champs pour le nouveau commentaire.');
@@ -132,118 +145,66 @@ function ListPosts({ allPosts, allComments }) {
                 auteur: newCommentData.auteur,
                 etat: 'à valider',
                 post: { id: selectedPost.id },
-                comment: newCommentData.parentCommentId ? { id: newCommentData.parentCommentId } : undefined
+                parent_comment: newCommentData.parentCommentId ? { id: newCommentData.parentCommentId } : undefined
             }
         };
     
         try {
             const response = await myFetch('/api/comments', 'POST', payload);
-            const addedComment = { id: response.data.id, ...response.data.attributes };
+            const addedComment = { id: response.data.id, ...response.data.attributes, child_comments: [] };
     
             // Mettre à jour l'état des commentaires
-            const updatedComments = [...comments, addedComment];
-            setComments(updatedComments);
+            setComments(prevComments => {
+                // Add new comment to the comments list
+                const updatedComments = [...prevComments, addedComment];
     
-            // Imbriquer le nouveau commentaire sous son parent
-            const updatedPosts = posts.map(post => {
+                // If the comment has a parent, add this comment's ID to the parent's child_comments array
+                if (newCommentData.parentCommentId) {
+                    return updatedComments.map(comment => {
+                        if (comment.id === newCommentData.parentCommentId) {
+                            return {
+                                ...comment,
+                                child_comments: [...comment.child_comments, addedComment.id]
+                            };
+                        }
+                        return comment;
+                    });
+                }
+    
+                return updatedComments;
+            });
+    
+            // Update posts state to reflect new comment count or nesting
+            setPosts(prevPosts => prevPosts.map(post => {
                 if (post.id === selectedPost.id) {
-                    const updateCommentHierarchy = (commentsList) => {
-                        return commentsList.map(comment => {
-                            if (comment.id === newCommentData.parentCommentId) {
-                                return {
-                                    ...comment,
-                                    comments: [...(comment.comments || []), addedComment]
-                                };
-                            } else if (comment.comments) {
-                                return {
-                                    ...comment,
-                                    comments: updateCommentHierarchy(comment.comments)
-                                };
-                            }
-                            return comment;
-                        });
-                    };
-    
+                    let newComments = [...post.comments];
+                    if (!newCommentData.parentCommentId) {
+                        newComments.push(addedComment.id);
+                    }
                     return {
                         ...post,
-                        comments: newCommentData.parentCommentId ? updateCommentHierarchy(post.comments) : [...post.comments, addedComment]
+                        comments: newComments
                     };
                 }
                 return post;
-            });
+            }));
     
-            setPosts(updatedPosts);
-            setLastModifiedPostId(addedComment.id);
             setNewCommentData({ texte: '', auteur: '', etat: 'à valider', parentPostId: null, parentCommentId: null });
-            setShowNewCommentForm(false);
-            setSelectedPost(null);
+            setShowNewCommentForm(true);
+            setSelectedPost(selectedPost.id);
+            setLastModifiedPostId(selectedPost.id);
         } catch (error) {
             console.error('Une erreur est survenue lors de l\'ajout d\'un nouveau commentaire :', error);
             setError('Impossible d\'ajouter un nouveau commentaire en raison d\'une erreur réseau');
         }
     };
     
-    
-    
+
     const handleReplyComment = (parentComment) => {
         setNewCommentData({ texte: '', auteur: '', etat: 'à valider', parentPostId: selectedPost.id, parentCommentId: parentComment.id });
         setShowNewCommentForm(true);
     };
 
-    const handleCreateNewPost = async () => {
-        if (!editFormData.title || !editFormData.content || !editFormData.auteur) {
-            setError('Please fill all fields for the new post.');
-            return;
-        }
-        const payload = { data: editFormData };
-        try {
-            const response = await myFetch('/api/posts', 'POST', payload);
-            const newPost = { id: response.data.id, ...response.data.attributes };
-            setPosts([newPost, ...posts]);
-            setLastModifiedPostId(newPost.id);
-            setCreatingNew(false);
-            setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon' });
-        } catch (error) {
-            console.error('An error occurred while creating a new post:', error);
-            setError('Failed to create new post due to a network error');
-        }
-    };
-
-    const handleUpdatePost = async () => {
-        if (!selectedPost) {
-            setError('No post selected for updating.');
-            return;
-        }
-        const payload = { data: editFormData };
-        try {
-            const response = await myFetch(`/api/posts/${selectedPost.id}`, 'PUT', payload);
-            const updatedPost = { id: response.data.id, ...response.data.attributes };
-            const updatedPosts = posts.map(post => post.id === updatedPost.id ? updatedPost : post);
-            setPosts(updatedPosts);
-            setEditing(false);
-            setLastModifiedPostId(updatedPost.id);
-            setSelectedPost(null);
-        } catch (error) {
-            console.error('An error occurred while updating post:', error);
-            setError('Failed to update post due to a network error');
-        }
-    };
-
-    const handleDeletePost = async () => {
-        if (!selectedPost) {
-            setError('No post selected for deletion.');
-            return;
-        }
-        try {
-            await myFetch(`/api/posts/${selectedPost.id}`, 'DELETE');
-            const updatedPosts = posts.filter(post => post.id !== selectedPost.id);
-            setPosts(updatedPosts);
-            setSelectedPost(null);
-        } catch (error) {
-            console.error('An error occurred while deleting post:', error);
-            setError('Failed to delete post due to a network error');
-        }
-    };
 
     function formatContent(content, maxLength) {
         if (!content) return '';
@@ -256,7 +217,7 @@ function ListPosts({ allPosts, allComments }) {
 
     const renderButtons = (post) => {
         const hasComments = post.comments && post.comments.length > 0;
-
+    
         if (post === selectedPost && editing) {
             return (
                 <div className="flex space-x-2">
@@ -283,14 +244,9 @@ function ListPosts({ allPosts, allComments }) {
         }
         return null;
     };
-
-
-
     
-    const renderComments = (comments) => {
-        console.log("render",comments)
-        return comments.map(comment => (
-            // (!comment.comment || !comment.comment.data) &&(  // N'affichez que les commentaires sans parent
+    const renderCommentTree = (comment, allComments) => {
+        return (
             <div key={comment.id} className="mt-2 mr-4 border-r-2 border-red-800 pr-4">
                 <p>{comment.texte}</p>
                 <p className="text-sm">- {comment.auteur}</p>
@@ -301,11 +257,44 @@ function ListPosts({ allPosts, allComments }) {
                     <button className="bg-red-500 text-white px-2 py-1 rounded" onClick={() => handleDeleteComment(comment.id)}>Delete</button>
                     <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={() => handleReplyComment(comment)}>Reply</button>
                 </div>
-                {comment.comments && comment.comments.length > 0 && renderComments(comment.comments)}
+                {comment.child_comments && comment.child_comments.length > 0 && (
+                    <div className="ml-4 border-l-2 pl-4">
+                        {comment.child_comments.map(childId => {
+                            const childComment = allComments.find(c => c.id === childId);
+                            return childComment ? renderCommentTree(childComment, allComments) : null;
+                        })}
+                    </div>
+                )}
             </div>
-            // )
-        ));
+        );
     };
+    
+    const renderComments = (commentIds, allComments) => {
+        const rootComments = commentIds.map(id => allComments.find(c => c.id === id && !c.parent_comment));
+        return rootComments.map(comment => comment ? renderCommentTree(comment, allComments) : null);
+    };
+    
+
+
+    // const renderComments = (commentIds, allComments) => {
+    //     const commentsToRender = commentIds.map(id => allComments.find(c => c.id === id));
+    //     return commentsToRender.map(comment => (
+    //         !comment.parent_comment && (  // N'affichez que les commentaires sans parent
+    //             <div key={comment.id} className="mt-2 mr-4 border-r-2 border-red-800 pr-4">
+    //                 <p>{comment.texte}</p>
+    //                 <p className="text-sm">- {comment.auteur}</p>
+    //                 <div className="flex space-x-2 justify-end">
+    //                     <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleToggleCommentStatus(comment)}>
+    //                         {comment.etat === 'validée' ? 'validée => à valider' : 'à valider => validée'}
+    //                     </button>
+    //                     <button className="bg-red-500 text-white px-2 py-1 rounded" onClick={() => handleDeleteComment(comment.id)}>Delete</button>
+    //                     <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={() => handleReplyComment(comment)}>Reply</button>
+    //                 </div>
+    //                 {comment.child_comments && comment.child_comments.length > 0 && renderComments(comment.child_comments, allComments)}
+    //             </div>
+    //         )
+    //     ));
+    // };
 
     const renderPostFamily = (post) => {
         const hasComments = post.comments && post.comments.length > 0;
@@ -380,7 +369,7 @@ function ListPosts({ allPosts, allComments }) {
                         )}
                         {showComments[post.id] && hasComments && (
                             <div className="mt-4 ml-8 border-l-2 pl-4 text-right text-black">
-                                {renderComments(post.comments)}
+                                {renderComments(post.comments, comments)}
                             </div>
                         )}
                     </div>

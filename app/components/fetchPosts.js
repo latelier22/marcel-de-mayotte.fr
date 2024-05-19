@@ -6,11 +6,14 @@ async function fetchPosts() {
 
     const posts = strapiPosts.map(post => ({
         id: post.id,
-        ...post.attributes,
-        comments: post.attributes.comments ? post.attributes.comments.data.map(comment => ({
-            id: comment.id,
-            ...comment.attributes
-        })) : []
+        title: post.attributes.title,
+        content: post.attributes.content,
+        auteur: post.attributes.auteur,
+        etat: post.attributes.etat,
+        createdAt: post.attributes.createdAt,
+        updatedAt: post.attributes.updatedAt,
+        publishedAt: post.attributes.publishedAt,
+        comments: post.attributes.comments ? post.attributes.comments.data.map(comment => comment.id) : []
     }));
 
     console.log('fetch posts', posts.slice(0, 2));
