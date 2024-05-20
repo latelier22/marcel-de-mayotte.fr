@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 
-import {site} from "../site"
+import getBaseUrl from "../components/getBaseUrl";
 
 const PostCard = ({ post }) => {
     console.log("card post", post)
@@ -15,11 +15,7 @@ const PostCard = ({ post }) => {
         return content;
     }
 
-    const baseURL = post.imageUrl && post.imageUrl.startsWith('/uploads')
-    ? process.env.NEXT_PUBLIC_STRAPI_URL
-    : `${site.vpsServer}/images/`;
-
-   
+    const baseURL = post.imageUrl && getBaseUrl(post.imageUrl);
 
     return (
         <div className="card shadow-lg rounded overflow-hidden">

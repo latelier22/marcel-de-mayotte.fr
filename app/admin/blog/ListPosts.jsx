@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import myFetch from '../../components/myFetch';
 import EditorClient from './EditorClient'; // Ensure you import your editor correctly
+import Image from 'next/image';
+import getBaseUrl from '../../components/getBaseUrl';
 
 function ListPosts({ allPosts, allComments }) {
     const [posts, setPosts] = useState(allPosts);
@@ -30,7 +32,7 @@ function ListPosts({ allPosts, allComments }) {
         console.log(posts)
     }, [allComments, allPosts]);
 
-    
+
 
     const groupPosts = (posts, comments) => {
         if (!Array.isArray(comments)) return posts;
@@ -83,7 +85,7 @@ function ListPosts({ allPosts, allComments }) {
     const handleDeletePost = async (postId) => {
 
         try {
-            await myFetch(`/api/posts/${postId}`, 'DELETE', null, `delete post ${postId}`);
+            await myFetch(`/api/posts/${postId}`, 'DELETE', null, "delete post");
             const updatedPosts = posts.filter(post => post.id !== postId);
             setPosts(updatedPosts);
         } catch (error) {
@@ -94,39 +96,39 @@ function ListPosts({ allPosts, allComments }) {
 
 
     const handleCreateNewPost = async () => {
-    if (!editFormData.title || !editFormData.content || !editFormData.auteur) {
-        setError('Please fill all fields for the new post.');
-        return;
-    }
-    const payload = { data: editFormData };
-    try {
-        const response = await myFetch('/api/posts', 'POST', payload);
-        // Normaliser le post comme dans fetchPosts
-        const newPost = {
-            id: response.data.id,
-            imageUrl: response.data.attributes.medias && response.data.attributes.medias.data && response.data.attributes.medias.data.length > 0
-                ? response.data.attributes.medias.data[0].attributes.url
-                : null,
-            title: response.data.attributes.title,
-            content: response.data.attributes.content,
-            auteur: response.data.attributes.auteur,
-            etat: response.data.attributes.etat,
-            createdAt: response.data.attributes.createdAt,
-            updatedAt: response.data.attributes.updatedAt,
-            publishedAt: response.data.attributes.publishedAt,
-            comments: response.data.attributes.comments && response.data.attributes.comments.data
-                ? response.data.attributes.comments.data.map(comment => comment.id)
-                : []  // Assurez-vous que 'comments' est initialisé comme un tableau vide
-        };
-        setPosts([newPost, ...posts]);
-        setLastModifiedPostId(newPost.id);
-        setCreatingNew(false);
-        setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon' });
-    } catch (error) {
-        console.error('An error occurred while creating a new post:', error);
-        setError('Failed to create new post due to a network error');
-    }
-};
+        if (!editFormData.title || !editFormData.content || !editFormData.auteur) {
+            setError('Please fill all fields for the new post.');
+            return;
+        }
+        const payload = { data: editFormData };
+        try {
+            const response = await myFetch('/api/posts', 'POST', payload);
+            // Normaliser le post comme dans fetchPosts
+            const newPost = {
+                id: response.data.id,
+                imageUrl: response.data.attributes.medias && response.data.attributes.medias.data && response.data.attributes.medias.data.length > 0
+                    ? response.data.attributes.medias.data[0].attributes.url
+                    : null,
+                title: response.data.attributes.title,
+                content: response.data.attributes.content,
+                auteur: response.data.attributes.auteur,
+                etat: response.data.attributes.etat,
+                createdAt: response.data.attributes.createdAt,
+                updatedAt: response.data.attributes.updatedAt,
+                publishedAt: response.data.attributes.publishedAt,
+                comments: response.data.attributes.comments && response.data.attributes.comments.data
+                    ? response.data.attributes.comments.data.map(comment => comment.id)
+                    : []  // Assurez-vous que 'comments' est initialisé comme un tableau vide
+            };
+            setPosts([newPost, ...posts]);
+            setLastModifiedPostId(newPost.id);
+            setCreatingNew(false);
+            setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon' });
+        } catch (error) {
+            console.error('An error occurred while creating a new post:', error);
+            setError('Failed to create new post due to a network error');
+        }
+    };
 
 
     const toggleComments = (postId) => {
@@ -155,18 +157,18 @@ function ListPosts({ allPosts, allComments }) {
                 let childIds = allComments.filter(comment => comment.parent_comment === id).map(comment => comment.id);
                 return childIds.reduce((acc, childId) => acc.concat(childId, findAllChildIds(childId, allComments)), []);
             };
-    
+
             // Collect all IDs to delete (the comment itself and all its children)
             const idsToDelete = [commentId, ...findAllChildIds(commentId, comments)];
-    
+
             // Delete comments from the backend - assuming batch delete isn't supported, loop through each
             for (const id of idsToDelete) {
                 await myFetch(`/api/comments/${id}`, 'DELETE');
             }
-    
+
             // Update the comments state to remove the deleted comments
             setComments(prevComments => prevComments.filter(comment => !idsToDelete.includes(comment.id)));
-    
+
             // Update posts state to reflect the removal of comments
             setPosts(prevPosts => prevPosts.map(post => {
                 return {
@@ -174,18 +176,18 @@ function ListPosts({ allPosts, allComments }) {
                     comments: post.comments.filter(id => !idsToDelete.includes(id))
                 };
             }));
-    
+
             // Maintenir le focus sur le post parent du commentaire supprimé
             setSelectedPost(myPost);
             setLastModifiedPostId(myPost.id);
-    
+
             setError(''); // Clear any previous errors
         } catch (error) {
             console.error('An error occurred while deleting the comment:', error);
             setError('Failed to delete comment due to a network error');
         }
     };
-    
+
 
 
     const handleAddComment = (parentPost) => {
@@ -293,7 +295,7 @@ function ListPosts({ allPosts, allComments }) {
             return (
                 <div className="flex space-x-2">
                     <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleEditPost}>Edit</button>
-                    <button className={`text-white px-4 py-2 rounded ${hasComments ? 'bg-neutral-600' : 'bg-red-500'}`} onClick={() => handleDeletePost(post)} disabled={hasComments}>Delete</button>
+                    <button className={`text-white px-4 py-2 rounded ${hasComments ? 'bg-neutral-600' : 'bg-red-500'}`} onClick={() => handleDeletePost(post.id)} disabled={hasComments}>Delete</button>
                     <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={() => handleAddComment(post)}>Add Comment</button>
                     {hasComments && (
                         <button className="bg-yellow-500 text-white px-4 py-2 rounded" onClick={() => toggleComments(post.id)}>
@@ -336,35 +338,36 @@ function ListPosts({ allPosts, allComments }) {
     };
 
 
-
-    // const renderComments = (commentIds, allComments) => {
-    //     const commentsToRender = commentIds.map(id => allComments.find(c => c.id === id));
-    //     return commentsToRender.map(comment => (
-    //         !comment.parent_comment && (  // N'affichez que les commentaires sans parent
-    //             <div key={comment.id} className="mt-2 mr-4 border-r-2 border-red-800 pr-4">
-    //                 <p>{comment.texte}</p>
-    //                 <p className="text-sm">- {comment.auteur}</p>
-    //                 <div className="flex space-x-2 justify-end">
-    //                     <button className="bg-blue-500 text-white px-2 py-1 rounded" onClick={() => handleToggleCommentStatus(comment)}>
-    //                         {comment.etat === 'validée' ? 'validée => à valider' : 'à valider => validée'}
-    //                     </button>
-    //                     <button className="bg-red-500 text-white px-2 py-1 rounded" onClick={() => handleDeleteComment(comment.id)}>Delete</button>
-    //                     <button className="bg-green-500 text-white px-2 py-1 rounded" onClick={() => handleReplyComment(comment)}>Reply</button>
-    //                 </div>
-    //                 {comment.child_comments && comment.child_comments.length > 0 && renderComments(comment.child_comments, allComments)}
-    //             </div>
-    //         )
-    //     ));
-    // };
-
     const renderPostFamily = (post) => {
         const hasComments = post.comments && post.comments.length > 0;
         const commentCount = hasComments ? post.comments.length : 0;
+        const baseURL = post.imageUrl && getBaseUrl(post.imageUrl);
+        const fullImageUrl = post.imageUrl ? `${baseURL}${post.imageUrl}` : `https://placehold.co/600x400/EECC44/000000/png?font=monserrat&text=${encodeURIComponent(post.title)}`;
+
 
         return (
-            <div key={post.id} className={`p-4 mb-4 cursor-pointer ${post.id === lastModifiedPostId ? 'bg-yellow-200' : ''} ${post === selectedPost ? 'border-green-500 border-solid border-2' : ''}`} onClick={() => handlePostClick(post)}>
+            <div key={post.id} className={`p-4 mb-4 flex flex-col md:flex-row items-center cursor-pointer ${post.id === lastModifiedPostId ? 'bg-yellow-200' : ''} ${post === selectedPost ? 'border-green-500 border-solid border-2' : ''}`} onClick={() => handlePostClick(post)}>
+                <div className=''
+                style={{ minWidth: '15vw' }} 
+                >
+                    <Image
+                      src={fullImageUrl}
+                      className={`mb-5 w-96 h-96  object-cover object-center `}
+                        loading="lazy"
+                         width="300"
+                         height="300"
+
+                    />
+                </div>
                 {editing && post === selectedPost ? (
                     <div className="flex flex-col">
+                        <input
+                            type="text"
+                            placeholder="Titre"
+                            value={editFormData.title}
+                            onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                            className="p-2 border rounded"
+                        />
                         <EditorClient
                             initialContent={editFormData.content}
                             onContentChange={(content) => setEditFormData({ ...editFormData, content })}
@@ -447,7 +450,7 @@ function ListPosts({ allPosts, allComments }) {
                 // Réinitialiser les données du formulaire
                 setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon' });
             }} className="bg-lime-500 px-4 py-2 rounded mb-4">Create New Post</button>)}
-        
+
             <div ref={containerRef} className="container bg-yellow-100 text-red-900 mx-auto my-8 p-4 shadow-lg rounded">
 
 
