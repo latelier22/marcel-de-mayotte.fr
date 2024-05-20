@@ -1,4 +1,4 @@
-import myFetch from "./myFech";
+import myFetch from "./myFetch";
 
 
 async function fetchFiles () {

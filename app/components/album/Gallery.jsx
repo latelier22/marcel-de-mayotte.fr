@@ -791,7 +791,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
 
   const toggleFavorite = async (photoId) => {
     if (!session) {
-      // toast.info("Veuillez vous connecter ou vous inscrire pour mémoriser vos favoris.");
+       toast.info("Veuillez vous connecter ou vous inscrire pour mémoriser vos favoris.");
       return;
     }
 

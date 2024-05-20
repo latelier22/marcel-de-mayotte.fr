@@ -1,6 +1,6 @@
 "use client"
 
-import myFetch from '../../components/myFech';
+import myFetch from '../../components/myFetch';
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import DotLoaderSpinner from '../../components/spinners/DotLoaderSpinner';

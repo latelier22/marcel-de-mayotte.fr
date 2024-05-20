@@ -1,7 +1,7 @@
 import React from "react";
 import TitleLine from "../../TitleLine";
 import 'react-quill/dist/quill.snow.css'; // Import the CSS file for the Quill editor
-import myFetch from '../../components/myFech';
+import myFetch from '../../components/myFetch';
 import ListPosts from "./ListPosts"
 import fetchPosts from "../../components/fetchPosts";
 import fetchComments from "../../components/fetchComments";

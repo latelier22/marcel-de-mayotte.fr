@@ -1,4 +1,4 @@
-import myFetch from "../components/myFech";
+import myFetch from "../components/myFetch";
 
 
 async function fetchCitations () {

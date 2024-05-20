@@ -1,7 +1,12 @@
-import myFetch from './myFech';
+import myFetch from './myFetch';
 
-async function fetchComments() {
-    const response = await myFetch('/api/comments?populate=*', 'GET', null, 'comments');
+async function fetchComments(postId = null) {
+    let url = '/api/comments?populate=*';
+    if (postId) {
+        url += `&filters[post][id][$eq]=${postId}`; // Assurez-vous que cette syntaxe correspond à celle de votre API
+    }
+    
+    const response = await myFetch(url, 'GET', null, 'comments');
     const strapiComments = response.data;
 
     const comments = strapiComments.map(comment => ({

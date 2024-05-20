@@ -12,10 +12,11 @@ const EditorClient = ({ initialContent, onContentChange }) => {
       [{ header: [1, 2, 3, false] }],
       ["bold", "italic", "underline", "strike", "blockquote"],
       [{ list: "ordered" }, { list: "bullet" }],
-      ["link", "image"],
+      ["link"],
+      // ["link", "image"],
       [{ align: [] }],
       [{ color: [] }],
-      ["code-block"],
+      // ["code-block"],
       ["clean"],
     ],
   };
@@ -30,10 +31,10 @@ const EditorClient = ({ initialContent, onContentChange }) => {
     "list",
     "bullet",
     "link",
-    "image",
+    // "image",
     "align",
     "color",
-    "code-block",
+    // "code-block",
   ];
 
   const handleEditorChange = (newContent) => {
@@ -48,7 +49,8 @@ const EditorClient = ({ initialContent, onContentChange }) => {
         onChange={handleEditorChange}
         modules={quillModules}
         formats={quillFormats}
-        className="w-full h-64 className='bg-yellow-100'"
+        style={{ minHeight: '70vh' }} 
+        className="w-full  bg-yellow-100"
       />
     </div>
   );

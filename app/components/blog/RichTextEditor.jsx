@@ -37,7 +37,7 @@ const MantineRichTextEditor = ({ initialValue }) => {
       <RichTextEditor value={value} onChange={setValue} />
       <button onClick={() => handleSave({ ...initialValue, content: value })} className="bg-blue-500 text-white px-4 py-2 rounded mt-4">Save</button>
 
-      <h1>Prévisualisation de l'article</h1>
+      <h1>Prévisualisation de l&apos;article</h1>
       <div className="text-white p-4 border-b border-gray-300">
         <h2>{initialValue.auteur}</h2>
         <div dangerouslySetInnerHTML={{ __html: JSON.stringify(value) }} />

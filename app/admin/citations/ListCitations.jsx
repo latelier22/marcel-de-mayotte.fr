@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useRef, useEffect } from 'react';
-import myFetch from '../../components/myFech';
+import myFetch from '../../components/myFetch';
 
 function ListCitations({ allCitations }) {
     const [citations, setCitations] = useState(allCitations);
