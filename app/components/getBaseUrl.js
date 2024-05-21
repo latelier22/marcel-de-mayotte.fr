@@ -6,7 +6,7 @@ export default function getBaseUrl(url) {
     ? process.env.NEXT_PUBLIC_STRAPI_URL
     : `${site.vpsServer}/images/`;
 
-    console.log(baseUrl)
+   
 
     return baseUrl;
 }

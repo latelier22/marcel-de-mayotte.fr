@@ -16,17 +16,17 @@ import ShowAdminToggleButton from "./components/album/icons/ShowAdminToggleButto
 import Dropdown from "./Dropdown";
 
 const adminItems = [
-  
+
   {
     label: "ADMIN",
     children: [
-    
-    { label: "Ajouts de photos", route: "/admin/upload" },
-    { label: "Voir les import catalogue", route: "/catalogue/import" },
-    { label: "Citations", route: "/admin/citations" },
-    { label: "Blog", route: "/admin/blog" },
 
-     
+      { label: "Ajouts de photos", route: "/admin/upload" },
+      { label: "Voir les import catalogue", route: "/catalogue/import" },
+      { label: "Citations", route: "/admin/citations" },
+      { label: "Blog", route: "/admin/blog" },
+
+
 
     ],
   },
@@ -157,19 +157,16 @@ const Navbar = () => {
                   {isAdmin && isShowAdmin && (
                     <>
                       <div className="flex gap-8 items-center text-white">
-                        {adminItems.map((item) => {
+                        {adminItems.map((item, index) => {  // Adding index as a second parameter
                           return item.hasOwnProperty("children") ? (
-                            <Dropdown item={item} />
+                            <Dropdown key={item.id || index} item={item} />  // Use item.id if available, otherwise use index
                           ) : (
-                            <Link className="hover:text-blue-500" href={item?.route || ""}>
+                            <Link key={item.id || index} className="hover:text-blue-500" href={item?.route || ""}>
                               {item.label}
                             </Link>
                           );
-                        })}</div>
-
-
-
-
+                        })}
+                      </div>
                     </>
                   )}
 

@@ -88,18 +88,25 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             }
         };
         try {
-            const response = await myFetch(`/api/posts/${selectedPost.id}`, 'PUT', payload);
+            await myFetch(`/api/posts/${selectedPost.id}`, 'PUT', payload);
+            // Faire une nouvelle requête pour récupérer le post mis à jour avec les médias peuplés
+            const response = await myFetch(`/api/posts/${selectedPost.id}?populate=*`, 'GET');
             const updatedPost = { id: response.data.id, ...response.data.attributes };
-            const updatedPosts = posts.map(post => post.id === updatedPost.id ? updatedPost : post);
-            setPosts(updatedPosts);
+            const mediaUrl = updatedPost.medias && updatedPost.medias.data && updatedPost.medias.data.length > 0 
+                ? updatedPost.medias.data[0].attributes.url 
+                : '';
+            const updatedPosts = posts.map(post => post.id === updatedPost.id ? { ...updatedPost, imageUrl: mediaUrl } : post);
+            setPosts(updatedPosts); // Mise à jour de l'état des posts
             setEditing(false);
             setLastModifiedPostId(updatedPost.id);
-            setSelectedPost(null);
+            setSelectedImageUrl(mediaUrl); // Mise à jour de l'image
+            setSelectedPost(updatedPost); // Mettre à jour le post sélectionné pour montrer le post édité
         } catch (error) {
             console.error('An error occurred while updating post:', error);
             setError('Failed to update post due to a network error');
         }
     };
+    
 
     const handleDeletePost = async (postId) => {
         try {
@@ -125,33 +132,40 @@ function ListPosts({ allPosts, allComments, allFiles }) {
         };
         try {
             const response = await myFetch('/api/posts', 'POST', payload);
+            const newPostId = response.data.id;
+    
+            // Faire une nouvelle requête pour récupérer le post créé avec les médias peuplés
+            const newPostResponse = await myFetch(`/api/posts/${newPostId}?populate=*`, 'GET');
             const newPost = {
-                id: response.data.id,
-                imageUrl: response.data.attributes.medias && response.data.attributes.medias.data && response.data.attributes.medias.data.length > 0
-                    ? response.data.attributes.medias.data[0].attributes.url
+                id: newPostResponse.data.id,
+                imageUrl: newPostResponse.data.attributes.medias && newPostResponse.data.attributes.medias.data && newPostResponse.data.attributes.medias.data.length > 0
+                    ? newPostResponse.data.attributes.medias.data[0].attributes.url
                     : null,
-                title: response.data.attributes.title,
-                content: response.data.attributes.content,
-                auteur: response.data.attributes.auteur,
-                etat: response.data.attributes.etat,
-                createdAt: response.data.attributes.createdAt,
-                updatedAt: response.data.attributes.updatedAt,
-                publishedAt: response.data.attributes.publishedAt,
-                comments: response.data.attributes.comments && response.data.attributes.comments.data
-                    ? response.data.attributes.comments.data.map(comment => comment.id)
+                title: newPostResponse.data.attributes.title,
+                content: newPostResponse.data.attributes.content,
+                auteur: newPostResponse.data.attributes.auteur,
+                etat: newPostResponse.data.attributes.etat,
+                createdAt: newPostResponse.data.attributes.createdAt,
+                updatedAt: newPostResponse.data.attributes.updatedAt,
+                publishedAt: newPostResponse.data.attributes.publishedAt,
+                comments: newPostResponse.data.attributes.comments && newPostResponse.data.attributes.comments.data
+                    ? newPostResponse.data.attributes.comments.data.map(comment => comment.id)
                     : []
             };
+    
+            const mediaUrl = newPost.imageUrl || '';
             setPosts([newPost, ...posts]);
             setLastModifiedPostId(newPost.id);
             setCreatingNew(false);
             setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null });
-            setSelectedImageUrl('');
+            setSelectedImageUrl(mediaUrl); // Mise à jour de l'image
+            setSelectedPost(newPost); // Mettre à jour le post sélectionné pour montrer le nouveau post
         } catch (error) {
             console.error('An error occurred while creating a new post:', error);
             setError('Failed to create new post due to a network error');
         }
     };
-
+    
     const toggleComments = (postId) => {
         setShowComments(prev => ({
             ...prev,
@@ -374,9 +388,11 @@ function ListPosts({ allPosts, allComments, allFiles }) {
                     <Image
                         src={fullImageUrl}
                         className={`mb-5 w-96 h-96 object-cover object-center`}
-                        loading="lazy"
+                        
                         width="300"
                         height="300"
+                        alt="blog"
+                        priority
                     />
                 </div>
                 {editing && post === selectedPost ? (

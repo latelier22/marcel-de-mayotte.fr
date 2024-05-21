@@ -13,7 +13,7 @@ async function Page () {
   const allPosts = await fetchPosts();
   const allFiles = await fetchFiles();
 
-  console.log("allfiles",allFiles)
+  console.log("allfiles",allFiles.slice(0,3))
 
   return (
     <>
