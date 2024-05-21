@@ -142,7 +142,7 @@ function ListFiles({ allFiles, allPictures }) {
             numero: file.id,
             name: file.name,
             dimensions: `${file.width}x${file.height}`,
-            url: file.url,
+            url: `${file.url}?format=webp&width=800`,
             width: file.width,
             height: file.height,
             title: titles[file.id],
@@ -220,6 +220,15 @@ function ListFiles({ allFiles, allPictures }) {
         // Add your edit logic here
     };
 
+    const ImageWithFallback = ({ file }) => {
+        const thumbnailUrl = file.formats && file.formats.thumbnail ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.formats.thumbnail.url}` : `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.url}`;
+      
+        return (
+          <img src={thumbnailUrl} alt={file.name} style={{ width: 100, height: 'auto' }} />
+        );
+      };
+      
+
     return (
         <div ref={containerRef} className="container mx-auto my-8 p-4 shadow-lg rounded">
             <DotLoaderSpinner isLoading={isUploading} />
@@ -292,20 +301,8 @@ function ListFiles({ allFiles, allPictures }) {
                         >
                             <td className="py-2">{file.id}</td>
                             <td className="py-2">
-                                <img src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${file.formats.thumbnail.url}`} alt={file.name} style={{ width: 100, height: 'auto' }} />
-{/* 
-                                "formats": {
-      "thumbnail": {
-        "name": "thumbnail_ba 3.JPG",
-        "hash": "thumbnail_ba_3_0b599e6e3f",
-        "ext": ".JPG",
-        "mime": "image/jpeg",
-        "path": null,
-        "width": 135,
-        "height": 156,
-        "size": 4.97,
-        "sizeInBytes": 4975,
-        "url": "/uploads/thumbnail_ba_3_0b599e6e3f.JPG" */}
+                            <ImageWithFallback key={file.id} file={file} />
+
                             </td>
                             <td className="py-2 w-1/5">
                                 {file.name}

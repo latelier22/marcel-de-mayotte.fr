@@ -2127,7 +2127,24 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
               );
             }}
           />
-          <Lightbox open={isActive && index >= 0} index={index} close={() => setIndex(-1)} slides={paginatedPhotos} render={{ slide: NextJsImage }} plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]} />
+          <Lightbox open={isActive && index >= 0} 
+          index={index}
+           close={() => setIndex(-1)} 
+           slides={paginatedPhotos} 
+           render={{ slide: NextJsImage }}
+            plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
+            zoom={{
+               maxZoomPixelRatio : 3,
+              // zoomInMultiplier,
+              // doubleTapDelay,
+              // doubleClickDelay,
+              // doubleClickMaxStops,
+              // keyboardMoveDistance,
+              // wheelZoomDistanceFactor,
+              // pinchZoomDistanceFactor,
+              scrollToZoom : true ,
+            }}
+             />
           <ToastContainer />
           <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button className={`p-2 rounded-sm ${currentPage === 1 ? "bg-neutral-500 text-neutral-700" : "bg-neutral-700 text-white"}`} onClick={goToPreviousPage} disabled={currentPage === 1}>

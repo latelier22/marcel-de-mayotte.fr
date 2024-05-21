@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import myFetch from "../../components/myFetch";
 import Modal from '../../components/Modals/Modal'; // Assurez-vous que le chemin est correct
@@ -13,10 +13,25 @@ const ListComments = ({ post, postComments }) => {
   const [replyingToId, setReplyingToId] = useState(null);
   const [newCommentText, setNewCommentText] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     initializeComments(postComments);
   }, [postComments]);
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleClickOutside = (event) => {
+    if (containerRef.current && !containerRef.current.contains(event.target)) {
+      setEditingCommentId(null);
+      setReplyingToId(null);
+    }
+  };
 
   const initializeComments = (comments) => {
     const commentMap = {};
@@ -48,9 +63,25 @@ const ListComments = ({ post, postComments }) => {
   };
 
   const handleEdit = (commentId) => {
-    setEditingCommentId(commentId);
-    setReplyingToId(null);
-    setTextInputs(prev => ({ ...prev, [commentId]: comments.find(comment => comment.id === commentId).texte }));
+    const commentToEdit = findCommentById(comments, commentId);
+    if (commentToEdit) {
+      setEditingCommentId(commentId);
+      setReplyingToId(null);
+      setTextInputs(prev => ({ ...prev, [commentId]: commentToEdit.texte }));
+    }
+  };
+
+  const findCommentById = (comments, id) => {
+    for (let comment of comments) {
+      if (comment.id === id) {
+        return comment;
+      }
+      const childComment = findCommentById(comment.child_comments, id);
+      if (childComment) {
+        return childComment;
+      }
+    }
+    return null;
   };
 
   const handleInputChange = (e, commentId) => {
@@ -88,6 +119,7 @@ const ListComments = ({ post, postComments }) => {
       return [...prevComments, newComment];
     });
     setReplyingToId(null);
+    setNewCommentText(''); // Réinitialiser le texte du nouveau commentaire
   };
 
   const addReplyToComments = (comments, parentId, newComment) => {
@@ -146,8 +178,8 @@ const ListComments = ({ post, postComments }) => {
             />
           ) : (
             <>
-              <p>{comment.texte}</p>
-              <p className="text-sm">— {comment.auteur} {comment.etat === 'à valider' && '(en attente de validation)'}</p>
+              <p className="text-lg">{comment.texte}</p>
+              <p className="text-sm font-bold">— {comment.auteur} {comment.etat === 'à valider' && '(en attente de validation)'}</p>
             </>
           )}
           <div className="flex space-x-2 justify-end">
@@ -190,10 +222,10 @@ const ListComments = ({ post, postComments }) => {
   };
 
   return (
-    <div className='bg-yellow-200'>
+    <div ref={containerRef} className='bg-yellow-200'>
       <h3>Comments</h3>
       {comments.map(comment => renderCommentTree(comment))}
-      {session && (
+      {session && !editingCommentId && !replyingToId && (
         <div className='flex flex-col items-end'>
           <textarea
             placeholder="Add a comment..."
