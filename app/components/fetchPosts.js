@@ -16,6 +16,7 @@ async function fetchPosts(id = null) {
         return {
             id: post.id,
             imageUrl: imageUrl,
+            medias :  post.attributes.medias,
             title: post.attributes.title,
             content: post.attributes.content,
             auteur: post.attributes.auteur,

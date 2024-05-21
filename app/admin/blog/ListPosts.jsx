@@ -8,20 +8,20 @@ import getBaseUrl from '../../components/getBaseUrl';
 import Select from 'react-select';
 
 function ListPosts({ allPosts, allComments, allFiles }) {
-    const [posts, setPosts] = useState(allPosts);
+    const [posts, setPosts] = useState([]);
     const [comments, setComments] = useState(allComments);
     const [selectedPost, setSelectedPost] = useState(null);
     const [editing, setEditing] = useState(false);
-    const [editFormData, setEditFormData] = useState({ title: '', content: '', auteur: '', etat: 'brouillon' });
+    const [editFormData, setEditFormData] = useState({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null });
     const [newCommentData, setNewCommentData] = useState({ texte: '', auteur: '', etat: 'à valider', parentPostId: null });
-    const [showComments, setShowComments] = useState(false);
+    const [showComments, setShowComments] = useState({});
     const [showNewCommentForm, setShowNewCommentForm] = useState(false);
     const [error, setError] = useState('');
     const containerRef = useRef(null);
     const [creatingNew, setCreatingNew] = useState(false);
     const [lastModifiedPostId, setLastModifiedPostId] = useState(null);
     const [images, setImages] = useState(allFiles);
-    const [selectedImageUrl, setSelectedImageUrl] = useState(editFormData.imageUrl);
+    const [selectedImageUrl, setSelectedImageUrl] = useState('');
 
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
@@ -31,7 +31,8 @@ function ListPosts({ allPosts, allComments, allFiles }) {
     }, []);
 
     useEffect(() => {
-        setPosts(groupPosts(allPosts, allComments));
+        const initialPosts = groupPosts(allPosts, allComments);
+        setPosts(initialPosts);
     }, [allComments, allPosts]);
 
     const groupPosts = (posts, comments) => {
@@ -43,10 +44,10 @@ function ListPosts({ allPosts, allComments, allFiles }) {
     };
 
     const handleImageChange = (selectedOption) => {
-        const newImageUrl = selectedOption ? selectedOption.value : '';
-        console.log('Selected image URL:', newImageUrl);
-        setEditFormData({ ...editFormData, imageUrl: newImageUrl });
-        setSelectedImageUrl(newImageUrl);
+        const newMediaId = selectedOption ? selectedOption.value : null;
+        console.log('Selected media ID:', newMediaId);
+        setEditFormData({ ...editFormData, mediaId: newMediaId });
+        setSelectedImageUrl(newMediaId ? images.find(img => img.id === newMediaId).url : '');
     };
 
     const handleClickOutside = (event) => {
@@ -58,10 +59,12 @@ function ListPosts({ allPosts, allComments, allFiles }) {
     };
 
     const handlePostClick = (post) => {
-        if (!editing) {
+        if (!editing && !creatingNew) {
             setSelectedPost(post);
-            console.log("post", post);
-            setEditFormData({ title: post.title, content: post.content, auteur: post.auteur, etat: post.etat });
+            const mediaId = post.medias && post.medias.data && post.medias.data.length > 0 ? post.medias.data[0].id : null;
+            const mediaUrl = mediaId ? post.medias.data[0].attributes.url : '';
+            setEditFormData({ title: post.title, content: post.content, auteur: post.auteur, etat: post.etat, mediaId: mediaId });
+            setSelectedImageUrl(mediaUrl);
         }
     };
 
@@ -74,7 +77,16 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             setError('No post selected for updating.');
             return;
         }
-        const payload = { data: editFormData };
+        if (!editFormData.mediaId) {
+            setError('Please select a media.');
+            return;
+        }
+        const payload = {
+            data: {
+                ...editFormData,
+                medias: { id: editFormData.mediaId }
+            }
+        };
         try {
             const response = await myFetch(`/api/posts/${selectedPost.id}`, 'PUT', payload);
             const updatedPost = { id: response.data.id, ...response.data.attributes };
@@ -101,11 +113,16 @@ function ListPosts({ allPosts, allComments, allFiles }) {
     };
 
     const handleCreateNewPost = async () => {
-        if (!editFormData.title || !editFormData.content || !editFormData.auteur) {
-            setError('Please fill all fields for the new post.');
+        if (!editFormData.title || !editFormData.content || !editFormData.auteur || !editFormData.mediaId) {
+            setError('Please fill all fields and select a media for the new post.');
             return;
         }
-        const payload = { data: editFormData };
+        const payload = {
+            data: {
+                ...editFormData,
+                medias: { id: editFormData.mediaId }
+            }
+        };
         try {
             const response = await myFetch('/api/posts', 'POST', payload);
             const newPost = {
@@ -127,7 +144,8 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             setPosts([newPost, ...posts]);
             setLastModifiedPostId(newPost.id);
             setCreatingNew(false);
-            setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon' });
+            setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null });
+            setSelectedImageUrl('');
         } catch (error) {
             console.error('An error occurred while creating a new post:', error);
             setError('Failed to create new post due to a network error');
@@ -321,6 +339,20 @@ function ListPosts({ allPosts, allComments, allFiles }) {
         );
     };
 
+    const imageOptions = images.map(image => {
+        const baseUrl = getBaseUrl(image.url);
+        const thumbnailUrl = image.formats && image.formats.thumbnail ? `${baseUrl}${image.formats.thumbnail.url}` : `${baseUrl}${image.url}`;
+        return {
+            value: image.id,
+            label: (
+                <div className="flex items-center">
+                    <img src={thumbnailUrl} alt={image.name} width={50} height={50} className="object-cover mr-2" />
+                    <span>{image.name}</span>
+                </div>
+            ),
+        };
+    });
+
     const renderComments = (commentIds, allComments, post) => {
         const rootComments = commentIds.map(id => allComments.find(c => c.id === id && !c.parent_comment));
         return rootComments.map(comment => comment ? renderCommentTree(comment, allComments, post) : null);
@@ -330,23 +362,11 @@ function ListPosts({ allPosts, allComments, allFiles }) {
         const hasComments = post.comments && post.comments.length > 0;
         const commentCount = hasComments ? post.comments.length : 0;
         const baseURL = selectedImageUrl ? getBaseUrl(selectedImageUrl) : post.imageUrl && getBaseUrl(post.imageUrl);
-        const fullImageUrl = selectedImageUrl ? `${baseURL}${selectedImageUrl}`
-            : post.imageUrl ? `${baseURL}${post.imageUrl}`
+        const fullImageUrl = post === selectedPost && selectedImageUrl
+            ? `${baseURL}${selectedImageUrl}`
+            : post.medias && post.medias.data && post.medias.data.length > 0
+                ? `${getBaseUrl(post.medias.data[0].attributes.url)}${post.medias.data[0].attributes.url}`
                 : `https://placehold.co/600x400/EECC44/000000/png?font=monserrat&text=${encodeURIComponent(post.title)}`;
-
-        const imageOptions = images.map(image => {
-            const baseUrl = getBaseUrl(image.url);
-            const thumbnailUrl = `${baseUrl}${image.formats.thumbnail.url}`;
-            return {
-                value: image.url,
-                label: (
-                    <div className="flex items-center">
-                        <img src={thumbnailUrl} alt={image.name} width={50} height={50} className="object-cover mr-2" />
-                        <span>{image.name}</span>
-                    </div>
-                ),
-            };
-        });
 
         return (
             <div key={post.id} className={`p-4 mb-4 flex flex-col md:flex-row items-center cursor-pointer ${post.id === lastModifiedPostId ? 'bg-yellow-200' : ''} ${post === selectedPost ? 'border-green-500 border-solid border-2' : ''}`} onClick={() => handlePostClick(post)}>
@@ -371,7 +391,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
                         <Select
                             options={imageOptions}
                             onChange={handleImageChange}
-                            value={imageOptions.find(option => option.value === editFormData.imageUrl)}
+                            value={imageOptions.find(option => option.value === editFormData.mediaId)}
                             isClearable
                         />
                         <EditorClient
@@ -450,57 +470,63 @@ function ListPosts({ allPosts, allComments, allFiles }) {
 
     return (
         <div ref={containerRef} className="container bg-yellow-100 text-red-900 mx-auto my-8 p-4 shadow-lg rounded">
-            {creatingNew && (<button className="bg-green-500 text-white px-4 py-2 rounded w-full" onClick={handleCreateNewPost}>SAVE New Post</button>)}
-            {!creatingNew && (<button onClick={() => {
-                setCreatingNew(true);
-                setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon' });
-            }} className="bg-lime-500 px-4 py-2 rounded mb-4">Create New Post</button>)}
+            {creatingNew ? (
+                <div className="flex flex-col space-y-4">
+                    <input
+                        type="text"
+                        placeholder="Title"
+                        value={editFormData.title}
+                        onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                        className="p-2 border rounded"
+                    />
+                    <Select
+                        options={imageOptions}
+                        onChange={handleImageChange}
+                        value={imageOptions.find(option => option.value === editFormData.mediaId)}
+                        isClearable
+                    />
+                    <EditorClient
+                        initialContent={editFormData.content}
+                        onContentChange={(content) => setEditFormData({ ...editFormData, content })}
+                    />
+                    <input
+                        type="text"
+                        placeholder="Auteur"
+                        value={editFormData.auteur}
+                        onChange={(e) => setEditFormData({ ...editFormData, auteur: e.target.value })}
+                        className="p-2 border rounded"
+                    />
+                    <div className="flex space-x-4">
+                        <label>
+                            <input
+                                type="radio"
+                                value="publiée"
+                                checked={editFormData.etat === 'publiée'}
+                                onChange={(e) => setEditFormData({ ...editFormData, etat: e.target.value })}
+                            /> Publiée
+                        </label>
+                        <label>
+                            <input
+                                type="radio"
+                                value="brouillon"
+                                checked={editFormData.etat === 'brouillon'}
+                                onChange={(e) => setEditFormData({ ...editFormData, etat: e.target.value })}
+                            /> Brouillon
+                        </label>
+                    </div>
+                    <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleCreateNewPost}>SAVE New Post</button>
+                </div>
+            ) : (
+                <button onClick={() => {
+                    setCreatingNew(true);
+                    setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null });
+                    setSelectedPost(null);
+                }} className="bg-lime-500 px-4 py-2 rounded mb-4">Create New Post</button>
+            )}
 
             <div ref={containerRef} className="container bg-yellow-100 text-red-900 mx-auto my-8 p-4 shadow-lg rounded">
-                {creatingNew ? (
-                    <div className="flex flex-col space-y-4">
-                        <input
-                            type="text"
-                            placeholder="Title"
-                            value={editFormData.title}
-                            onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                            className="p-2 border rounded"
-                        />
-                        <EditorClient
-                            initialContent={editFormData.content}
-                            onContentChange={(content) => setEditFormData({ ...editFormData, content })}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Auteur"
-                            value={editFormData.auteur}
-                            onChange={(e) => setEditFormData({ ...editFormData, auteur: e.target.value })}
-                            className="p-2 border rounded"
-                        />
-                        <div className="flex space-x-4">
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="publiée"
-                                    checked={editFormData.etat === 'publiée'}
-                                    onChange={(e) => setEditFormData({ ...editFormData, etat: e.target.value })}
-                                /> Publiée
-                            </label>
-                            <label>
-                                <input
-                                    type="radio"
-                                    value="brouillon"
-                                    checked={editFormData.etat === 'brouillon'}
-                                    onChange={(e) => setEditFormData({ ...editFormData, etat: e.target.value })}
-                                /> Brouillon
-                            </label>
-                        </div>
-                        <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleCreateNewPost}>SAVE New Post</button>
-                    </div>
-                ) : (
-                    !editing && posts.map(post => renderPostFamily(post))
-                )}
-                {selectedPost && editing && renderPostFamily(selectedPost)}
+                {!creatingNew && !editing && posts.map(post => renderPostFamily(post))}
+                {(creatingNew || editing) && selectedPost && renderPostFamily(selectedPost)}
                 {error && <p className="text-red-500">{error}</p>}
             </div>
             {error && <p className="text-red-500">{error}</p>}
