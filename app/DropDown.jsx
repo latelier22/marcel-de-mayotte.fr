@@ -8,10 +8,7 @@ export default function Dropdown({ item }) {
     const toggle = () => {
         setIsOpen(old => !old);
     };
-
-    console.log("ITEM", item);
-    console.log("isOpen state:", isOpen);
-
+    
     return (
         <>
             <div className="relative">

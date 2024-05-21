@@ -1,6 +1,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  
 }
 
 datasource db {
@@ -13,7 +14,7 @@ model Photo {
   numero      BigInt         // numéro dans le catalogue - CAT
   dimensions  String?     // Les dimensions de la photo - DIM
   createdAt   DateTime    @default(now())
-  tags        Tag[]       // Relation many-to-many avec la table des tags - TAG
+  tags        Tag[]       
   url         String      // L'url de la photo
   name        String      // Nom original du fichier image - IMG
   height      Int         @default(0)

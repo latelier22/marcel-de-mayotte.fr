@@ -21,7 +21,7 @@ const Modal = ({ isOpen, onClose, title, textClose="Fermer", children }) => {
                     bottom: 0;
                     background-color: rgba(0, 0, 0, 0.7);
                     display: flex;
-                    align-items: center;
+                    align-items: start;
                     justify-content: center;
                     z-index : 100000;
                 }

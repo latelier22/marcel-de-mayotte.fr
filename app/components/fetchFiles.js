@@ -1,4 +1,4 @@
-import myFetch from "./myFech";
+import myFetch from "./myFetch";
 
 
 async function fetchFiles () {
@@ -15,8 +15,7 @@ async function fetchFiles () {
         // }));
 
         const files = strapiFiles;
-        
-        // console.log(files);
+       
 
     return files
 

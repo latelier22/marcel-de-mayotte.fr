@@ -2,7 +2,7 @@ import React from "react";
 import ListCitations from "./ListCitations";
 import TitleLine from "../../TitleLine";
 import Link from "next/link";
-import myFetch from "../../components/myFech"; // Importer la fonction myFetch
+import myFetch from "../../components/myFetch"; // Importer la fonction myFetch
 import fetchCitations from "../../components/fetchCitations";
 
 async function Page() {

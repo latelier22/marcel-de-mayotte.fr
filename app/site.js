@@ -32,7 +32,7 @@ export const menuItems = [
   { label: "Livres", route: "/livre" },
   { label: "Vidéos", route: "/video" },
 
-  { label: "Blog", route: "https://liberteegalitemagnegne.fr/" },
+  { label: "Blog", route: "/blog" },
   { label: "Contact", route: "/contact" },
 ];
 

@@ -1,17 +1,32 @@
-"use client"
+"use client";
 
-import myFetch from '../../components/myFech';
 import React, { useState, useEffect, useRef } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import myFetch from '../../components/myFetch';
 import DotLoaderSpinner from '../../components/spinners/DotLoaderSpinner';
 
-function ListFiles({ allFiles }) {
-    const [files, setFiles] = useState(allFiles.map(file => ({ ...file, tags: ["IMPORT","CATALOGUE COMPLET"], published: false })));
+function ListFiles({ allFiles, allPictures }) {
+    const [files, setFiles] = useState(allFiles.map(file => ({ ...file, tags: ["IMPORT", "CATALOGUE COMPLET"], published: false, imported: false, importedAt: null })));
     const [selectedFileIds, setSelectedFileIds] = useState([]);
     const [titles, setTitles] = useState({});
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef(null);
     const containerRef = useRef(null);
+
+    useEffect(() => {
+        markImportedFiles();
+    }, [allPictures]);
+
+    const markImportedFiles = () => {
+        setFiles(prevFiles => prevFiles.map(file => {
+            const picture = allPictures.find(p => p.fileId === file.id);
+            if (picture) {
+                return { ...file, imported: true, importedAt: picture.importedAt };
+            }
+            return file;
+        }));
+    };
 
     const handleFileClick = (fileId) => {
         setSelectedFileIds((prev) => {
@@ -77,7 +92,7 @@ function ListFiles({ allFiles }) {
             setIsUploading(true);
             const response = await myFetch('/api/upload', 'POST', formData, 'image upload');
             if (response) {
-                const newFiles = response.map(file => ({ ...file, tags: [], published: false }));
+                const newFiles = response.map(file => ({ ...file, tags: [], published: false, imported: false }));
                 setFiles((prevFiles) => [...newFiles, ...prevFiles]);
                 setIsUploading(false);
             }
@@ -111,84 +126,108 @@ function ListFiles({ allFiles }) {
     const handleImportImage = async (selectedFileIds) => {
         const selectedFiles = files.filter(file => selectedFileIds.includes(file.id));
         if (selectedFiles.length === 0) {
-            console.error("No files selected");
-            return;
+          console.error("No files selected");
+          return;
         }
-
+      
         for (const fileId of selectedFileIds) {
-            if (!titles[fileId]) {
-                console.error(`Title for file ID ${fileId} is not filled`);
-                return;
-            }
+          if (!titles[fileId]) {
+            console.error(`Title for file ID ${fileId} is not filled`);
+            return;
+          }
         }
-
+      
         try {
-            const photosData = selectedFiles.map(file => ({
-                numero: file.id,
-                name: file.name,
-                dimensions: `${file.width}x${file.height}`,
-                url: file.url,
-                width: file.width,
-                height: file.height,
-                title: titles[file.id],
-                description: file.description || '',
-                published: file.published || false,
-                tags: [...file.tags, 'CATALOGUE COMPLET']
-            }));
-
-            const response = await fetch('/api/importPhotos', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ photos: photosData })
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to import images");
-            }
-
-            const result = await response.json();
-            const photoIds = result.photoIds;
-
-            const tagResponse1 = await fetch('/api/updateTagInBulk', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    addTag: true,
-                    selectedPhotoIds: photoIds,
-                    selectedTag: 'IMPORT'
-                })
-            });
-
-            const resultTag1 = await tagResponse1.json();
-            console.log('Photos added and tagged successfully:', result, resultTag1);
-            const tagResponse2 = await fetch('/api/updateTagInBulk', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    addTag: true,
-                    selectedPhotoIds: photoIds,
-                    selectedTag: 'CATALOGUE COMPLET'
-                })
-            });
-
-            const resultTag2 = await tagResponse2.json();
-            console.log('Photos added and tagged successfully:', result, resultTag2);
+          const photosData = selectedFiles.map(file => ({
+            numero: file.id,
+            name: file.name,
+            dimensions: `${file.width}x${file.height}`,
+            url: `${file.url}?format=webp&width=800`,
+            width: file.width,
+            height: file.height,
+            title: titles[file.id],
+            description: file.description || '',
+            published: file.published || false,
+            tags: [...file.tags, 'CATALOGUE COMPLET']
+          }));
+      
+          const response = await fetch('/api/importPhotos', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ photos: photosData })
+          });
+      
+          if (!response.ok) {
+            throw new Error("Failed to import images");
+          }
+      
+          const result = await response.json();
+          const photoIds = result.photoIds;
+      
+          // Update pictures in Strapi with the imported status and photoId from Prisma
+          for (const [index, photoId] of photoIds.entries()) {
+            const fileId = selectedFiles[index].id;
+      
+            await myFetch('/api/pictures', 'POST', {
+              data: {
+                imported: true,
+                photoId: photoId,
+                fileId: fileId,
+                importedAt: new Date().toISOString(),
+                uploadedAt: selectedFiles[index].uploadedAt || new Date().toISOString()
+              }
+            }, 'import pictures');
+          }
+      
+          const tagResponse1 = await fetch('/api/updateTagInBulk', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              addTag: true,
+              selectedPhotoIds: photoIds,
+              selectedTag: 'IMPORT'
+            })
+          });
+      
+          const resultTag1 = await tagResponse1.json();
+          console.log('Photos added and tagged successfully:', result, resultTag1);
+          const tagResponse2 = await fetch('/api/updateTagInBulk', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              addTag: true,
+              selectedPhotoIds: photoIds,
+              selectedTag: 'CATALOGUE COMPLET'
+            })
+          });
+      
+          const resultTag2 = await tagResponse2.json();
+          console.log('Photos added and tagged successfully:', result, resultTag2);
         } catch (error) {
-            console.error("Failed to import images:", error);
+          console.error("Failed to import images:", error);
         }
-    };
-
+      };
+      
     const handleEditImage = (fileId) => {
         const file = files.find(f => f.id === fileId);
         console.log(`Editing image with ID: ${fileId}`, file);
         // Add your edit logic here
     };
+
+    const ImageWithFallback = ({ file }) => {
+        const thumbnailUrl = file.formats && file.formats.thumbnail ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.formats.thumbnail.url}` : `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.url}`;
+      
+        return (
+          <img src={thumbnailUrl} alt={file.name} style={{ width: 100, height: 'auto' }} />
+        );
+      };
+      
 
     return (
         <div ref={containerRef} className="container mx-auto my-8 p-4 shadow-lg rounded">
@@ -249,18 +288,21 @@ function ListFiles({ allFiles }) {
                         <th className="py-2">Height (px)</th>
                         <th className="py-2">Size </th>
                         <th className="py-2">Actions</th>
+                        <th className="py-2">Imported</th>
+
                     </tr>
                 </thead>
                 <tbody>
                     {files.slice().reverse().map(file => (
-                        <tr key={file.id} 
+                        <tr key={file.id}
                             className={`${selectedFileIds.includes(file.id) ? 'border-green-500 border-solid border-2 rounded-md' : ''
                                 } text-center cursor-pointer hover:bg-gray-800`}
                             onClick={() => handleFileClick(file.id)}
                         >
                             <td className="py-2">{file.id}</td>
                             <td className="py-2">
-                                <img src={`${process.env.NEXT_PUBLIC_STRAPI_URL}${file.url}`} alt={file.name} style={{ width: 100, height: 'auto' }} />
+                            <ImageWithFallback key={file.id} file={file} />
+
                             </td>
                             <td className="py-2 w-1/5">
                                 {file.name}
@@ -293,7 +335,7 @@ function ListFiles({ allFiles }) {
                                     checked={file.published}
                                     onClick={(e) => e.stopPropagation()}
                                     onChange={(e) => {
-                                        const updatedFiles = files.map(f => 
+                                        const updatedFiles = files.map(f =>
                                             f.id === file.id ? { ...f, published: e.target.checked } : f
                                         );
                                         setFiles(updatedFiles);
@@ -337,6 +379,14 @@ function ListFiles({ allFiles }) {
                                     </>
                                 )}
                             </td>
+                            <td className="py-2">
+                                {file.imported ? (
+                                    <span className="text-green-500 font-bold">Imported</span>
+                                ) : (
+                                    <span className="text-red-500 font-bold">Non Imported</span>
+                                )}
+                            </td>
+
                         </tr>
                     ))}
                 </tbody>
