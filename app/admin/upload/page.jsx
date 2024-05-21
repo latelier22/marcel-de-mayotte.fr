@@ -11,8 +11,8 @@ async function Page() {
         
     const files = await fetchFiles();
     const pictures = await fetchPictures();
-
-    // console.log("Page files", files)
+    console.log(files)
+    
     return (
         <>
             <div className="pt-64">

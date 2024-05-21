@@ -16,7 +16,7 @@ async function fetchFiles () {
 
         const files = strapiFiles;
         
-        // console.log(files);
+        console.log(files)
 
     return files
 

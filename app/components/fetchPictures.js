@@ -15,8 +15,6 @@ async function fetchPictures () {
              ...f.attributes
          }));
 
-        
-        console.log("pictures",pictures);
 
     return pictures
 

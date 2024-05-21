@@ -5,8 +5,9 @@ import myFetch from '../../components/myFetch';
 import EditorClient from './EditorClient'; // Ensure you import your editor correctly
 import Image from 'next/image';
 import getBaseUrl from '../../components/getBaseUrl';
+import Select from 'react-select';
 
-function ListPosts({ allPosts, allComments }) {
+function ListPosts({ allPosts, allComments, allFiles }) {
     const [posts, setPosts] = useState(allPosts);
     const [comments, setComments] = useState(allComments);
     const [selectedPost, setSelectedPost] = useState(null);
@@ -19,6 +20,8 @@ function ListPosts({ allPosts, allComments }) {
     const containerRef = useRef(null);
     const [creatingNew, setCreatingNew] = useState(false);
     const [lastModifiedPostId, setLastModifiedPostId] = useState(null);
+    const [images, setImages] = useState(allFiles);
+    const [selectedImageUrl, setSelectedImageUrl] = useState(editFormData.imageUrl);
 
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
@@ -29,10 +32,7 @@ function ListPosts({ allPosts, allComments }) {
 
     useEffect(() => {
         setPosts(groupPosts(allPosts, allComments));
-        console.log(posts)
     }, [allComments, allPosts]);
-
-
 
     const groupPosts = (posts, comments) => {
         if (!Array.isArray(comments)) return posts;
@@ -40,6 +40,13 @@ function ListPosts({ allPosts, allComments }) {
             ...post,
             comments: comments.filter(comment => comment.post === post.id).map(comment => comment.id)
         }));
+    };
+
+    const handleImageChange = (selectedOption) => {
+        const newImageUrl = selectedOption ? selectedOption.value : '';
+        console.log('Selected image URL:', newImageUrl);
+        setEditFormData({ ...editFormData, imageUrl: newImageUrl });
+        setSelectedImageUrl(newImageUrl);
     };
 
     const handleClickOutside = (event) => {
@@ -53,6 +60,7 @@ function ListPosts({ allPosts, allComments }) {
     const handlePostClick = (post) => {
         if (!editing) {
             setSelectedPost(post);
+            console.log("post", post);
             setEditFormData({ title: post.title, content: post.content, auteur: post.auteur, etat: post.etat });
         }
     };
@@ -60,7 +68,6 @@ function ListPosts({ allPosts, allComments }) {
     const handleEditPost = () => {
         setEditing(true);
     };
-
 
     const handleUpdatePost = async () => {
         if (!selectedPost) {
@@ -72,7 +79,7 @@ function ListPosts({ allPosts, allComments }) {
             const response = await myFetch(`/api/posts/${selectedPost.id}`, 'PUT', payload);
             const updatedPost = { id: response.data.id, ...response.data.attributes };
             const updatedPosts = posts.map(post => post.id === updatedPost.id ? updatedPost : post);
-            setPosts(updatedPosts); // Move the updated post to the top
+            setPosts(updatedPosts);
             setEditing(false);
             setLastModifiedPostId(updatedPost.id);
             setSelectedPost(null);
@@ -83,7 +90,6 @@ function ListPosts({ allPosts, allComments }) {
     };
 
     const handleDeletePost = async (postId) => {
-
         try {
             await myFetch(`/api/posts/${postId}`, 'DELETE', null, "delete post");
             const updatedPosts = posts.filter(post => post.id !== postId);
@@ -94,7 +100,6 @@ function ListPosts({ allPosts, allComments }) {
         }
     };
 
-
     const handleCreateNewPost = async () => {
         if (!editFormData.title || !editFormData.content || !editFormData.auteur) {
             setError('Please fill all fields for the new post.');
@@ -103,7 +108,6 @@ function ListPosts({ allPosts, allComments }) {
         const payload = { data: editFormData };
         try {
             const response = await myFetch('/api/posts', 'POST', payload);
-            // Normaliser le post comme dans fetchPosts
             const newPost = {
                 id: response.data.id,
                 imageUrl: response.data.attributes.medias && response.data.attributes.medias.data && response.data.attributes.medias.data.length > 0
@@ -118,7 +122,7 @@ function ListPosts({ allPosts, allComments }) {
                 publishedAt: response.data.attributes.publishedAt,
                 comments: response.data.attributes.comments && response.data.attributes.comments.data
                     ? response.data.attributes.comments.data.map(comment => comment.id)
-                    : []  // Assurez-vous que 'comments' est initialisé comme un tableau vide
+                    : []
             };
             setPosts([newPost, ...posts]);
             setLastModifiedPostId(newPost.id);
@@ -129,7 +133,6 @@ function ListPosts({ allPosts, allComments }) {
             setError('Failed to create new post due to a network error');
         }
     };
-
 
     const toggleComments = (postId) => {
         setShowComments(prev => ({
@@ -152,24 +155,19 @@ function ListPosts({ allPosts, allComments }) {
 
     const handleDeleteComment = async (commentId, myPost) => {
         try {
-            // Function to recursively find all child comment IDs
             const findAllChildIds = (id, allComments) => {
                 let childIds = allComments.filter(comment => comment.parent_comment === id).map(comment => comment.id);
                 return childIds.reduce((acc, childId) => acc.concat(childId, findAllChildIds(childId, allComments)), []);
             };
 
-            // Collect all IDs to delete (the comment itself and all its children)
             const idsToDelete = [commentId, ...findAllChildIds(commentId, comments)];
 
-            // Delete comments from the backend - assuming batch delete isn't supported, loop through each
             for (const id of idsToDelete) {
                 await myFetch(`/api/comments/${id}`, 'DELETE');
             }
 
-            // Update the comments state to remove the deleted comments
             setComments(prevComments => prevComments.filter(comment => !idsToDelete.includes(comment.id)));
 
-            // Update posts state to reflect the removal of comments
             setPosts(prevPosts => prevPosts.map(post => {
                 return {
                     ...post,
@@ -177,24 +175,22 @@ function ListPosts({ allPosts, allComments }) {
                 };
             }));
 
-            // Maintenir le focus sur le post parent du commentaire supprimé
             setSelectedPost(myPost);
             setLastModifiedPostId(myPost.id);
 
-            setError(''); // Clear any previous errors
+            setError('');
         } catch (error) {
             console.error('An error occurred while deleting the comment:', error);
             setError('Failed to delete comment due to a network error');
         }
     };
 
-
-
     const handleAddComment = (parentPost) => {
         setNewCommentData({ texte: '', auteur: '', etat: 'à valider', parentPostId: parentPost.id, parentCommentId: null });
         setShowNewCommentForm(true);
         setSelectedPost(parentPost);
     };
+
     const handleSaveNewComment = async () => {
         if (!newCommentData.texte || !newCommentData.auteur) {
             setError('Veuillez remplir tous les champs pour le nouveau commentaire.');
@@ -215,12 +211,9 @@ function ListPosts({ allPosts, allComments }) {
             const response = await myFetch('/api/comments', 'POST', payload);
             const addedComment = { id: response.data.id, ...response.data.attributes, child_comments: [] };
 
-            // Mettre à jour l'état des commentaires
             setComments(prevComments => {
-                // Add new comment to the comments list
                 const updatedComments = [...prevComments, addedComment];
 
-                // If the comment has a parent, add this comment's ID to the parent's child_comments array
                 if (newCommentData.parentCommentId) {
                     return updatedComments.map(comment => {
                         if (comment.id === newCommentData.parentCommentId) {
@@ -236,7 +229,6 @@ function ListPosts({ allPosts, allComments }) {
                 return updatedComments;
             });
 
-            // Update posts state to reflect new comment count or nesting
             setPosts(prevPosts => prevPosts.map(post => {
                 if (post.id === selectedPost.id) {
                     let newComments = [...post.comments];
@@ -253,7 +245,6 @@ function ListPosts({ allPosts, allComments }) {
 
             setNewCommentData({ texte: '', auteur: '', etat: 'à valider', parentPostId: null, parentCommentId: null });
             setShowNewCommentForm(false);
-            // setShowComments(true)
             setSelectedPost(selectedPost.id);
             setLastModifiedPostId(selectedPost.id);
         } catch (error) {
@@ -262,12 +253,10 @@ function ListPosts({ allPosts, allComments }) {
         }
     };
 
-
     const handleReplyComment = (parentComment) => {
         setNewCommentData({ texte: '', auteur: '', etat: 'à valider', parentPostId: selectedPost.id, parentCommentId: parentComment.id });
         setShowNewCommentForm(true);
     };
-
 
     function formatContent(content, maxLength) {
         if (!content) return '';
@@ -337,26 +326,37 @@ function ListPosts({ allPosts, allComments }) {
         return rootComments.map(comment => comment ? renderCommentTree(comment, allComments, post) : null);
     };
 
-
     const renderPostFamily = (post) => {
         const hasComments = post.comments && post.comments.length > 0;
         const commentCount = hasComments ? post.comments.length : 0;
-        const baseURL = post.imageUrl && getBaseUrl(post.imageUrl);
-        const fullImageUrl = post.imageUrl ? `${baseURL}${post.imageUrl}` : `https://placehold.co/600x400/EECC44/000000/png?font=monserrat&text=${encodeURIComponent(post.title)}`;
+        const baseURL = selectedImageUrl ? getBaseUrl(selectedImageUrl) : post.imageUrl && getBaseUrl(post.imageUrl);
+        const fullImageUrl = selectedImageUrl ? `${baseURL}${selectedImageUrl}`
+            : post.imageUrl ? `${baseURL}${post.imageUrl}`
+                : `https://placehold.co/600x400/EECC44/000000/png?font=monserrat&text=${encodeURIComponent(post.title)}`;
 
+        const imageOptions = images.map(image => {
+            const baseUrl = getBaseUrl(image.url);
+            const thumbnailUrl = `${baseUrl}${image.formats.thumbnail.url}`;
+            return {
+                value: image.url,
+                label: (
+                    <div className="flex items-center">
+                        <img src={thumbnailUrl} alt={image.name} width={50} height={50} className="object-cover mr-2" />
+                        <span>{image.name}</span>
+                    </div>
+                ),
+            };
+        });
 
         return (
             <div key={post.id} className={`p-4 mb-4 flex flex-col md:flex-row items-center cursor-pointer ${post.id === lastModifiedPostId ? 'bg-yellow-200' : ''} ${post === selectedPost ? 'border-green-500 border-solid border-2' : ''}`} onClick={() => handlePostClick(post)}>
-                <div className=''
-                style={{ minWidth: '15vw' }} 
-                >
+                <div className='' style={{ minWidth: '15vw' }}>
                     <Image
-                      src={fullImageUrl}
-                      className={`mb-5 w-96 h-96  object-cover object-center `}
+                        src={fullImageUrl}
+                        className={`mb-5 w-96 h-96 object-cover object-center`}
                         loading="lazy"
-                         width="300"
-                         height="300"
-
+                        width="300"
+                        height="300"
                     />
                 </div>
                 {editing && post === selectedPost ? (
@@ -367,6 +367,12 @@ function ListPosts({ allPosts, allComments }) {
                             value={editFormData.title}
                             onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
                             className="p-2 border rounded"
+                        />
+                        <Select
+                            options={imageOptions}
+                            onChange={handleImageChange}
+                            value={imageOptions.find(option => option.value === editFormData.imageUrl)}
+                            isClearable
                         />
                         <EditorClient
                             initialContent={editFormData.content}
@@ -447,14 +453,10 @@ function ListPosts({ allPosts, allComments }) {
             {creatingNew && (<button className="bg-green-500 text-white px-4 py-2 rounded w-full" onClick={handleCreateNewPost}>SAVE New Post</button>)}
             {!creatingNew && (<button onClick={() => {
                 setCreatingNew(true);
-                // Réinitialiser les données du formulaire
                 setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon' });
             }} className="bg-lime-500 px-4 py-2 rounded mb-4">Create New Post</button>)}
 
             <div ref={containerRef} className="container bg-yellow-100 text-red-900 mx-auto my-8 p-4 shadow-lg rounded">
-
-
-
                 {creatingNew ? (
                     <div className="flex flex-col space-y-4">
                         <input
@@ -496,8 +498,9 @@ function ListPosts({ allPosts, allComments }) {
                         <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleCreateNewPost}>SAVE New Post</button>
                     </div>
                 ) : (
-                    posts.map(post => renderPostFamily(post))
+                    !editing && posts.map(post => renderPostFamily(post))
                 )}
+                {selectedPost && editing && renderPostFamily(selectedPost)}
                 {error && <p className="text-red-500">{error}</p>}
             </div>
             {error && <p className="text-red-500">{error}</p>}

@@ -5,17 +5,15 @@ import myFetch from '../../components/myFetch';
 import ListPosts from "./ListPosts"
 import fetchPosts from "../../components/fetchPosts";
 import fetchComments from "../../components/fetchComments";
+import fetchFiles from "../../components/fetchFiles";
 
-
-    
-        
-
- async function Page () {
+async function Page () {
 
   const allComments = await fetchComments();
   const allPosts = await fetchPosts();
+  const allFiles = await fetchFiles();
 
-  
+  console.log("allfiles",allFiles)
 
   return (
     <>
@@ -25,7 +23,7 @@ import fetchComments from "../../components/fetchComments";
 
       {/* Liste des citations */}
       <div className="container mx-auto my-8 p-4 shadow-lg rounded">
-          <ListPosts allPosts={allPosts} allComments={allComments} />
+          <ListPosts allPosts={allPosts} allComments={allComments} allFiles={allFiles}/>
       </div>
     </>
   );
