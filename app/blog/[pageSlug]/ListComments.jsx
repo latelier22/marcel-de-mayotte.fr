@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useSession, signIn } from 'next-auth/react';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import myFetch from "../../components/myFetch";
 import Modal from '../../components/Modals/Modal'; // Assurez-vous que le chemin est correct
 
@@ -89,7 +91,12 @@ const ListComments = ({ post, postComments }) => {
   };
 
   const addComment = async (text, parentCommentId = null) => {
-    if (!text.trim() || !session) return;
+    if (!text.trim()) return;
+
+    if (!session) {
+      setShowModal(true);
+      return;
+    }
 
     const payload = {
       data: {
@@ -107,6 +114,8 @@ const ListComments = ({ post, postComments }) => {
       texte: response.data.attributes.texte,
       auteur: response.data.attributes.auteur,
       etat: response.data.attributes.etat,
+      createdAt: response.data.attributes.createdAt,
+      updatedAt: response.data.attributes.updatedAt,
       child_comments: [],
       parent_comment: parentCommentId
     };
@@ -163,9 +172,16 @@ const ListComments = ({ post, postComments }) => {
   };
 
   const renderCommentTree = (comment) => {
+    // Vérifiez si l'utilisateur est l'auteur du commentaire ou si le commentaire est validé
+    if (comment.etat === 'à valider' && (session?.user?.email !== comment.auteur)) {
+      return null; // Ne pas afficher le commentaire "à valider" si l'utilisateur n'est pas l'auteur
+    }
+
     const isEditing = editingCommentId === comment.id;
     const isReplying = replyingToId === comment.id;
     const canEdit = (comment.auteur === session?.user?.email) && (comment.etat === "à valider");
+
+    const formattedDate = format(new Date(comment.updatedAt), "EEEE dd MMM. yyyy 'à' HH'h'mm", { locale: fr });
 
     return (
       <div key={comment.id} className="mt-2 border-r-2 border-gray-400 pr-4">
@@ -180,6 +196,7 @@ const ListComments = ({ post, postComments }) => {
             <>
               <p className="text-lg">{comment.texte}</p>
               <p className="text-sm font-bold">— {comment.auteur} {comment.etat === 'à valider' && '(en attente de validation)'}</p>
+              <p className="text-xs italic">{formattedDate}</p>
             </>
           )}
           <div className="flex space-x-2 justify-end">
@@ -221,11 +238,13 @@ const ListComments = ({ post, postComments }) => {
     );
   };
 
+  
+
   return (
-    <div ref={containerRef} className='bg-yellow-200'>
-      <h3>Comments</h3>
-      {comments.map(comment => renderCommentTree(comment))}
-      {session && !editingCommentId && !replyingToId && (
+    <div ref={containerRef} className='bg-yellow-200 rounded-xl'>
+      <h3 className='text-2xl text-black p-4'>Commentaires</h3>
+            {comments.map(comment => renderCommentTree(comment))}
+      {!editingCommentId && !replyingToId && (
         <div className='flex flex-col items-end'>
           <textarea
             placeholder="Add a comment..."
@@ -239,7 +258,7 @@ const ListComments = ({ post, postComments }) => {
         </div>
       )}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Connexion requise">
-        <p>Vous devez être connecté pour répondre à un commentaire.</p>
+        <p>Vous devez être connecté pour poster ou répondre à un commentaire.</p>
         <button className="bg-blue-500 text-white px-4 py-2 rounded mt-2" onClick={() => signIn({ callbackUrl: window.location.href })}
         >
           Se connecter
