@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 export const dynamic = 'force-dynamic' // defaults to force-static
 import prisma from "../../../../prisma/prisma"
 
-export const dynamic = 'force-dynamic'
-
 export async function GET( req: NextRequest, context: {params: {tagId: string, address: string}}) {
 
 const tagId = context.params.tagId;
