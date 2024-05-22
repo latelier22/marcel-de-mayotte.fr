@@ -7,7 +7,14 @@ import myFetch from '../../components/myFetch';
 import DotLoaderSpinner from '../../components/spinners/DotLoaderSpinner';
 
 function ListFiles({ allFiles, allPictures }) {
-    const [files, setFiles] = useState(allFiles.map(file => ({ ...file, tags: ["IMPORT", "CATALOGUE COMPLET"], published: false, imported: false, importedAt: null })));
+    const [files, setFiles] = useState(allFiles.map(file => ({
+        ...file,
+        tags: ["IMPORT", "CATALOGUE COMPLET"],
+        published: false,
+        imported: false,
+        importedAt: null,
+        uploadedAt: new Date(file.updatedAt) // Assume the latest updated date is the uploaded date
+    })));
     const [selectedFileIds, setSelectedFileIds] = useState([]);
     const [titles, setTitles] = useState({});
     const [isUploading, setIsUploading] = useState(false);
@@ -16,13 +23,13 @@ function ListFiles({ allFiles, allPictures }) {
 
     useEffect(() => {
         markImportedFiles();
-    }, [allPictures]);
+    }, [allPictures, allFiles]);
 
     const markImportedFiles = () => {
         setFiles(prevFiles => prevFiles.map(file => {
             const picture = allPictures.find(p => p.fileId === file.id);
             if (picture) {
-                return { ...file, imported: true, importedAt: picture.importedAt };
+                return { ...file, imported: true, importedAt: new Date(picture.importedAt) };
             }
             return file;
         }));
@@ -66,6 +73,13 @@ function ListFiles({ allFiles, allPictures }) {
         setTitles(prevTitles => ({ ...prevTitles, ...updatedTitles }));
     };
 
+    const handleBulkPublishedCheckboxChange = (isChecked) => {
+        setFiles(prevFiles => prevFiles.map(file => ({
+            ...file,
+            published: selectedFileIds.includes(file.id) ? isChecked : file.published
+        })));
+    };
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -92,7 +106,13 @@ function ListFiles({ allFiles, allPictures }) {
             setIsUploading(true);
             const response = await myFetch('/api/upload', 'POST', formData, 'image upload');
             if (response) {
-                const newFiles = response.map(file => ({ ...file, tags: [], published: false, imported: false }));
+                const newFiles = response.map(file => ({
+                    ...file,
+                    tags: [],
+                    published: false,
+                    imported: false,
+                    uploadedAt: new Date(file.updatedAt)
+                }));
                 setFiles((prevFiles) => [...newFiles, ...prevFiles]);
                 setIsUploading(false);
             }
@@ -126,94 +146,146 @@ function ListFiles({ allFiles, allPictures }) {
     const handleImportImage = async (selectedFileIds) => {
         const selectedFiles = files.filter(file => selectedFileIds.includes(file.id));
         if (selectedFiles.length === 0) {
-          console.error("No files selected");
-          return;
-        }
-      
-        for (const fileId of selectedFileIds) {
-          if (!titles[fileId]) {
-            console.error(`Title for file ID ${fileId} is not filled`);
+            console.error("No files selected");
             return;
-          }
         }
-      
+
+        for (const fileId of selectedFileIds) {
+            if (!titles[fileId]) {
+                console.error(`Title for file ID ${fileId} is not filled`);
+                return;
+            }
+        }
+
         try {
-          const photosData = selectedFiles.map(file => ({
-            numero: file.id,
-            name: file.name,
-            dimensions: `${file.width}x${file.height}`,
-            url: `${file.url}?format=webp&width=800`,
-            width: file.width,
-            height: file.height,
-            title: titles[file.id],
-            description: file.description || '',
-            published: file.published || false,
-            tags: [...file.tags, 'CATALOGUE COMPLET']
-          }));
-      
-          const response = await fetch('/api/importPhotos', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ photos: photosData })
-          });
-      
-          if (!response.ok) {
-            throw new Error("Failed to import images");
-          }
-      
-          const result = await response.json();
-          const photoIds = result.photoIds;
-      
-          // Update pictures in Strapi with the imported status and photoId from Prisma
-          for (const [index, photoId] of photoIds.entries()) {
-            const fileId = selectedFiles[index].id;
-      
-            await myFetch('/api/pictures', 'POST', {
-              data: {
-                imported: true,
-                photoId: photoId,
-                fileId: fileId,
-                importedAt: new Date().toISOString(),
-                uploadedAt: selectedFiles[index].uploadedAt || new Date().toISOString()
-              }
-            }, 'import pictures');
-          }
-      
-          const tagResponse1 = await fetch('/api/updateTagInBulk', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              addTag: true,
-              selectedPhotoIds: photoIds,
-              selectedTag: 'IMPORT'
-            })
-          });
-      
-          const resultTag1 = await tagResponse1.json();
-          console.log('Photos added and tagged successfully:', result, resultTag1);
-          const tagResponse2 = await fetch('/api/updateTagInBulk', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              addTag: true,
-              selectedPhotoIds: photoIds,
-              selectedTag: 'CATALOGUE COMPLET'
-            })
-          });
-      
-          const resultTag2 = await tagResponse2.json();
-          console.log('Photos added and tagged successfully:', result, resultTag2);
+            const photosData = selectedFiles.map(file => ({
+                numero: file.id,
+                name: file.name,
+                dimensions: `${file.width}x${file.height}`,
+                url: `${file.url}?format=webp&width=800`,
+                width: file.width,
+                height: file.height,
+                title: titles[file.id],
+                description: file.description || '',
+                published: file.published || false,
+                tags: [...file.tags, 'CATALOGUE COMPLET']
+            }));
+
+            const response = await fetch('/api/importPhotos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ photos: photosData })
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to import images");
+            }
+
+            const result = await response.json();
+            const photoIds = result.photoIds;
+
+            // Update pictures in Strapi with the imported status and photoId from Prisma
+            for (const [index, photoId] of photoIds.entries()) {
+                const fileId = selectedFiles[index].id;
+
+                await myFetch('/api/pictures', 'POST', {
+                    data: {
+                        imported: true,
+                        photoId: photoId,
+                        fileId: fileId,
+                        importedAt: new Date().toISOString(),
+                        uploadedAt: selectedFiles[index].uploadedAt || new Date().toISOString()
+                    }
+                }, 'import pictures');
+            }
+
+            const tagResponse1 = await fetch('/api/updateTagInBulk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    addTag: true,
+                    selectedPhotoIds: photoIds,
+                    selectedTag: 'IMPORT'
+                })
+            });
+
+            const resultTag1 = await tagResponse1.json();
+            console.log('Photos added and tagged successfully:', result, resultTag1);
+            const tagResponse2 = await fetch('/api/updateTagInBulk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    addTag: true,
+                    selectedPhotoIds: photoIds,
+                    selectedTag: 'CATALOGUE COMPLET'
+                })
+            });
+
+            const resultTag2 = await tagResponse2.json();
+            console.log('Photos added and tagged successfully:', result, resultTag2);
+
+            // Update local state to reflect imported status
+            setFiles(prevFiles => prevFiles.map(file => {
+                if (selectedFileIds.includes(file.id)) {
+                    return { ...file, imported: true, importedAt: new Date() };
+                }
+                return file;
+            }));
+
         } catch (error) {
-          console.error("Failed to import images:", error);
+            console.error("Failed to import images:", error);
         }
-      };
-      
+    };
+
+    const handleCancelImport = async (fileId) => {
+        try {
+            // Trouver l'image correspondante dans allPictures
+            const picture = allPictures.find(p => p.fileId === fileId);
+            if (!picture) {
+                console.error(`No picture found for file ID ${fileId}`);
+                return;
+            }
+    
+            // Mettre à jour l'état imported à false dans Strapi
+            await myFetch(`/api/pictures/${picture.id}`, 'PUT', {
+                data: {
+                    imported: false,
+                    importedAt: null
+                }
+            }, 'cancel import');
+    
+            // Supprimer l'entrée de photo dans Prisma
+            const response = await fetch('/api/deletePhoto', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ photoId: picture.photoId })
+            });
+    
+            if (!response.ok) {
+                throw new Error("Failed to delete photo");
+            }
+    
+            // Mettre à jour l'état local pour refléter l'annulation de l'importation
+            setFiles(prevFiles => prevFiles.map(file => {
+                if (file.id === fileId) {
+                    return { ...file, imported: false, importedAt: null };
+                }
+                return file;
+            }));
+        } catch (error) {
+            console.error("Failed to cancel import:", error);
+        }
+    };
+    
+
     const handleEditImage = (fileId) => {
         const file = files.find(f => f.id === fileId);
         console.log(`Editing image with ID: ${fileId}`, file);
@@ -222,12 +294,11 @@ function ListFiles({ allFiles, allPictures }) {
 
     const ImageWithFallback = ({ file }) => {
         const thumbnailUrl = file.formats && file.formats.thumbnail ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.formats.thumbnail.url}` : `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.url}`;
-      
+
         return (
-          <img src={thumbnailUrl} alt={file.name} style={{ width: 100, height: 'auto' }} />
+            <img src={thumbnailUrl} alt={file.name} style={{ width: 100, height: 'auto' }} />
         );
-      };
-      
+    };
 
     return (
         <div ref={containerRef} className="container mx-auto my-8 p-4 shadow-lg rounded">
@@ -256,17 +327,22 @@ function ListFiles({ allFiles, allPictures }) {
                         <button onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteImages(selectedFileIds);
-                        }} className="bg-red-500 text-white px-4 py-2 rounded">
+                        }} className="bg-red-500 text-white px-4 py-2 rounded" disabled={selectedFileIds.some(fileId => files.find(file => file.id === fileId).imported)}>
                             Delete
                         </button>
-                        <button onClick={(e) => {
+                        {/* <button onClick={(e) => {
                             e.stopPropagation();
                             handleEditImage(selectedFileIds);
                         }} className="bg-blue-500 text-white px-4 py-2 rounded">
                             Edit
-                        </button>
+                        </button> */}
                     </>
                 )}
+                <input
+                    type="checkbox"
+                    className="ml-4"
+                    onChange={(e) => handleBulkPublishedCheckboxChange(e.target.checked)}
+                /> Publish All Selected
             </div>
             <table className="w-full">
                 <thead className="bg-red-900">
@@ -289,7 +365,6 @@ function ListFiles({ allFiles, allPictures }) {
                         <th className="py-2">Size </th>
                         <th className="py-2">Actions</th>
                         <th className="py-2">Imported</th>
-
                     </tr>
                 </thead>
                 <tbody>
@@ -301,8 +376,7 @@ function ListFiles({ allFiles, allPictures }) {
                         >
                             <td className="py-2">{file.id}</td>
                             <td className="py-2">
-                            <ImageWithFallback key={file.id} file={file} />
-
+                                <ImageWithFallback key={file.id} file={file} />
                             </td>
                             <td className="py-2 w-1/5">
                                 {file.name}
@@ -363,11 +437,23 @@ function ListFiles({ allFiles, allPictures }) {
                                                 e.stopPropagation();
                                                 handleDeleteImages([file.id]);
                                             }}
-                                            className="bg-red-500 text-white px-4 py-2 rounded"
+                                            className={`bg-red-500 text-white px-4 py-2 rounded ${file.imported ? 'opacity-50 cursor-not-allowed ' : ''}`}
+                                            disabled={file.imported}
                                         >
                                             Delete
                                         </button>
-                                        <button
+                                        {file.imported && (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleCancelImport(file.id);
+                                                }}
+                                                className="bg-yellow-500 text-white px-4 py-2 rounded"
+                                            >
+                                                Cancel Import
+                                            </button>
+                                        )}
+                                        {/* <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 handleEditImage(file.id);
@@ -375,7 +461,7 @@ function ListFiles({ allFiles, allPictures }) {
                                             className="bg-blue-500 text-white px-4 py-2 rounded"
                                         >
                                             Edit
-                                        </button>
+                                        </button> */}
                                     </>
                                 )}
                             </td>
@@ -386,7 +472,6 @@ function ListFiles({ allFiles, allPictures }) {
                                     <span className="text-red-500 font-bold">Non Imported</span>
                                 )}
                             </td>
-
                         </tr>
                     ))}
                 </tbody>
