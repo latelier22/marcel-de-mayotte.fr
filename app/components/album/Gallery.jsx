@@ -1067,6 +1067,8 @@ import EditableButton from "./buttons/EditableButton";
 
 import { useSelector } from "react-redux";
 
+import myFetch from "../../components/myFetch";
+
 const Gallery = ({ photos : initialPhotos, allTags }) => {
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState(new Set());
@@ -1425,6 +1427,20 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
 
   const handleDeleteButtonClick = async (photoId) => {
     try {
+      // Vérifier si la photo est importée
+      const strapiResponse = await myFetch(`/api/pictures?filters[photoId][$eq]=${photoId}`, 'GET', null, 'photo import status');
+      const picture = strapiResponse.data[0]; // On suppose qu'il n'y a qu'une seule photo avec cet ID
+  
+      // Si la photo est importée, mettre à jour son état pour refléter qu'elle n'est plus importée
+      if (picture && picture.attributes.imported) {
+        await myFetch(`/api/pictures/${picture.id}`, 'PUT', {
+          data: {
+            imported: false,
+          },
+        }, 'update photo import status');
+      }
+  
+      // Supprimer la photo
       const response = await fetch(`/api/deletePhoto`, {
         method: 'DELETE',
         headers: {
@@ -1439,20 +1455,12 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
   
       // Mettre à jour l'état des photos après suppression
       setPhotos((prevPhotos) => prevPhotos.filter((photo) => photo.id !== photoId));
-      toast.success("Photo deleted successfully!");
+      // toast.success("Photo deleted successfully!");
     } catch (error) {
       console.error("Delete failed:", error);
       toast.error("Failed to delete photo");
     }
   };
-  
-
-
-
-
-
-
-
 
   const handlePhotoClick = (e, photoId) => {
     if (isShowAdmin && isAdmin) {
