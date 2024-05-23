@@ -19,6 +19,8 @@ import { getServerSession } from 'next-auth';
 async function Page({ params }) {
   // const searchParams = useSearchParams();
 
+  
+
   const session = await getServerSession(authOptions);
 
   //   if (session) {
