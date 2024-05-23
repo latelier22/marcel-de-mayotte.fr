@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-export const dynamic = 'force-dynamic' // defaults to force-static
+
 import prisma from "../../../../prisma/prisma"
 
 export const dynamic = 'force-dynamic'
