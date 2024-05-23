@@ -11,7 +11,8 @@ async function Page() {
         
     const files = await fetchFiles();
     const pictures = await fetchPictures();
-    console.log(files)
+    // console.log(files)
+    console.log(pictures)
     
     return (
         <>

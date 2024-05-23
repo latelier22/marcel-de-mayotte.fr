@@ -1,6 +1,6 @@
 {
-  "name": "couvreur-loudeac",
-  "version": "0.1.0",
+  "name": "www.marcel-de-mayotte.fr",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "dev": "PORT=3977 next dev",
