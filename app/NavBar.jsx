@@ -13,7 +13,7 @@ import VisibilityToggleButton from "./components/album/icons/VisibilityToggleBut
 import ShowAdminToggleButton from "./components/album/icons/ShowAdminToggleButton"
 // import ShowAdminToggleButton from "./components/album/icons/AdminNavBarToggleButton"
 
-import Dropdown from "./Dropdown";
+import Dropdown from "./DropDown";
 
 const adminItems = [
 
