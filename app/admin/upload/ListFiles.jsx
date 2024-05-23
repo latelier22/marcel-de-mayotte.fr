@@ -15,6 +15,7 @@ function ListFiles({ allFiles, allPictures }) {
       imported: false,
       importedAt: null,
       uploadedAt: new Date(file.updatedAt), // Assume the latest updated date is the uploaded date
+      posts: [] // Initialize posts as an empty array
     }))
   );
   const [selectedFileIds, setSelectedFileIds] = useState([]);
@@ -25,6 +26,7 @@ function ListFiles({ allFiles, allPictures }) {
 
   useEffect(() => {
     markImportedFiles();
+    fetchPostsForFiles();
   }, [allPictures, allFiles]);
 
   const markImportedFiles = () => {
@@ -39,8 +41,16 @@ function ListFiles({ allFiles, allPictures }) {
     );
   };
 
+  const fetchPostsForFiles = async () => {
+    const updatedFiles = await Promise.all(files.map(async (file) => {
+      const response = await myFetch(`/api/posts?filters[medias][id][$eq]=${file.id}`, "GET", null, "fetch posts using media");
+      const postTitles = response.data.map((post) => post.attributes.title);
+      return { ...file, posts: postTitles };
+    }));
+    setFiles(updatedFiles);
+  };
+
   const handleFileClick = (fileId) => {
-    console.log(allPictures.filter((p) => p.fileId === fileId));
     setSelectedFileIds((prev) => {
       if (prev.includes(fileId)) {
         return prev.filter((id) => id !== fileId);
@@ -132,6 +142,7 @@ function ListFiles({ allFiles, allPictures }) {
           published: false,
           imported: false,
           uploadedAt: new Date(file.updatedAt),
+          posts: [] // Initialize posts as an empty array for new files
         }));
         setFiles((prevFiles) => [...newFiles, ...prevFiles]);
         setIsUploading(false);
@@ -185,8 +196,34 @@ function ListFiles({ allFiles, allPictures }) {
       setIsUploading(false);
     }
   };
-  
 
+  const handleDeleteButtonClick = async (fileId) => {
+    try {
+      // Vérifier si le fichier est utilisé dans des posts
+      const response = await myFetch(
+        `/api/posts?filters[medias][id][$eq]=${fileId}`,
+        "GET",
+        null,
+        "fetch posts using media"
+      );
+
+      if (response.data.length > 0) {
+        const postsUsingFile = response.data.map((post) => post.attributes.title);
+        alert(
+          `Cannot delete file. It is used in the following posts: ${postsUsingFile.join(
+            ", "
+          )}`
+        );
+        return;
+      }
+
+      // Supprimer le fichier
+      await handleDeleteImages([fileId]);
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert("Failed to delete file");
+    }
+  };
 
   const handleImportImage = async (selectedFileIds) => {
     const selectedFiles = files.filter((file) =>
@@ -353,6 +390,10 @@ function ListFiles({ allFiles, allPictures }) {
     // Add your edit logic here
   };
 
+  const renderPostsTitles = (file) => {
+    return file.posts.join(", ");
+  };
+
   const ImageWithFallback = ({ file }) => {
     const thumbnailUrl =
       file.formats && file.formats.thumbnail
@@ -428,12 +469,6 @@ function ListFiles({ allFiles, allPictures }) {
             >
               Delete
             </button>
-            {/* <button onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditImage(selectedFileIds);
-                        }} className="bg-blue-500 text-white px-4 py-2 rounded">
-                            Edit
-                        </button> */}
           </>
         )}
         <input
@@ -444,166 +479,158 @@ function ListFiles({ allFiles, allPictures }) {
         Publish All Selected
       </div>
       <table className="w-full">
-        <thead className="bg-red-900">
-          <tr className="text-center">
-            <th className="py-2">ID</th>
-            <th className="py-2">Image</th>
-            <th className="py-2 w-1/5">
-              Name
-              <input
-                className="ml-8"
-                type="checkbox"
-                onChange={(e) => handleBulkNameCheckboxChange(e.target.checked)}
-              />
-            </th>
-            <th className="py-2 w-1/5">Title</th>
-            <th className="py-2 w-1/5">Tags</th>
-            <th className="py-2">Published</th>
-            <th className="py-2">Width (px)</th>
-            <th className="py-2">Height (px)</th>
-            <th className="py-2">Size </th>
-            <th className="py-2">Actions</th>
-            <th className="py-2">Imported</th>
-          </tr>
-        </thead>
-        <tbody>
-          {files
-            .slice()
-            .reverse()
-            .map((file) => (
-              <tr
-                key={file.id}
-                className={`${
-                  selectedFileIds.includes(file.id)
-                    ? "border-green-500 border-solid border-2 rounded-md"
-                    : ""
-                } text-center cursor-pointer hover:bg-gray-800`}
-                onClick={() => handleFileClick(file.id)}
+  <thead className="bg-red-900">
+    <tr className="text-center">
+      <th className="py-2">ID</th>
+      <th className="py-2">Image</th>
+      <th className="py-2 w-1/5">
+        Name
+        <input
+          className="ml-8"
+          type="checkbox"
+          onChange={(e) => handleBulkNameCheckboxChange(e.target.checked)}
+        />
+      </th>
+      <th className="py-2 w-1/5">Title</th>
+      <th className="py-2 w-1/5">Tags</th>
+      <th className="py-2">Published</th>
+      <th className="py-2">Width (px)</th>
+      <th className="py-2">Height (px)</th>
+      <th className="py-2">Size </th>
+      <th className="py-2">Posts</th> {/* New Column */}
+      <th className="py-2">Actions</th>
+      <th className="py-2">Imported</th>
+    </tr>
+  </thead>
+  <tbody>
+    {files
+      .slice()
+      .reverse()
+      .map((file) => (
+        <tr
+          key={file.id}
+          className={`${
+            selectedFileIds.includes(file.id)
+              ? "border-green-500 border-solid border-2 rounded-md"
+              : ""
+          } text-center cursor-pointer hover:bg-gray-800`}
+          onClick={() => handleFileClick(file.id)}
+        >
+          <td className="py-2">{file.id}</td>
+          <td className="py-2">
+            <ImageWithFallback key={file.id} file={file} />
+          </td>
+          <td className="py-2 w-1/5">
+            {file.name}
+            <input
+              className="ml-8"
+              type="checkbox"
+              checked={
+                titles[file.id] === file.name.replace(/\.[^/.]+$/, "")
+              }
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) =>
+                handleNameCheckboxChange(file.id, e.target.checked)
+              }
+            />
+          </td>
+          <td className="py-2 w-1/5">
+            <input
+              type="text"
+              value={titles[file.id] || ""}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) =>
+                setTitles({ ...titles, [file.id]: e.target.value })
+              }
+              placeholder="Enter title"
+              className="w-full px-2 py-1 border rounded border-gold-700 bg-black text-gold-400"
+            />
+          </td>
+          <td className="py-2 w-1/5">
+            {file.tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-block bg-blue-500 text-white rounded-full px-2 py-1 text-xs font-bold mr-1"
               >
-                <td className="py-2">{file.id}</td>
-                <td className="py-2">
-                  <ImageWithFallback key={file.id} file={file} />
-                </td>
-                <td className="py-2 w-1/5">
-                  {file.name}
-                  <input
-                    className="ml-8"
-                    type="checkbox"
-                    checked={
-                      titles[file.id] === file.name.replace(/\.[^/.]+$/, "")
-                    }
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) =>
-                      handleNameCheckboxChange(file.id, e.target.checked)
-                    }
-                  />
-                </td>
-                <td className="py-2 w-1/5">
-                  <input
-                    type="text"
-                    value={titles[file.id] || ""}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) =>
-                      setTitles({ ...titles, [file.id]: e.target.value })
-                    }
-                    placeholder="Enter title"
-                    className="w-full px-2 py-1 border rounded border-gold-700 bg-black text-gold-400"
-                  />
-                </td>
-                <td className="py-2 w-1/5">
-                  {file.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-block bg-blue-500 text-white rounded-full px-2 py-1 text-xs font-bold mr-1"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </td>
-                <td className="py-2">
-                  <input
-                    type="checkbox"
-                    checked={file.published}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => {
-                      const updatedFiles = files.map((f) =>
-                        f.id === file.id
-                          ? { ...f, published: e.target.checked }
-                          : f
-                      );
-                      setFiles(updatedFiles);
-                    }}
-                  />
-                </td>
-                <td className="py-2">{file.width}</td>
-                <td className="py-2">{file.height}</td>
-                <td className="py-2">{file.size} ko</td>
-                <td className="py-2">
-                  {selectedFileIds.length === 1 &&
-                    selectedFileIds.includes(file.id) && (
-                      <>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleImportImage([file.id]);
-                          }}
-                          disabled={!titles[file.id]}
-                          className={`bg-green-500 text-white px-4 py-2 rounded ${
-                            !titles[file.id]
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                          }`}
-                        >
-                          Import
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteImages([file.id]);
-                          }}
-                          className={`bg-red-500 text-white px-4 py-2 rounded ${
-                            file.imported
-                              ? "opacity-50 cursor-not-allowed "
-                              : ""
-                          }`}
-                          disabled={file.imported}
-                        >
-                          Delete
-                        </button>
-                        {file.imported && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCancelImport(file.id);
-                            }}
-                            className="bg-yellow-500 text-white px-4 py-2 rounded"
-                          >
-                            Cancel Import
-                          </button>
-                        )}
-                        {/* <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleEditImage(file.id);
-                                            }}
-                                            className="bg-blue-500 text-white px-4 py-2 rounded"
-                                        >
-                                            Edit
-                                        </button> */}
-                      </>
-                    )}
-                </td>
-                <td className="py-2">
-                  {file.imported ? (
-                    <span className="text-green-500 font-bold">Imported</span>
-                  ) : (
-                    <span className="text-red-500 font-bold">Non Imported</span>
-                  )}
-                </td>
-              </tr>
+                {tag}
+              </span>
             ))}
-        </tbody>
-      </table>
+          </td>
+          <td className="py-2">
+            <input
+              type="checkbox"
+              checked={file.published}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                const updatedFiles = files.map((f) =>
+                  f.id === file.id ? { ...f, published: e.target.checked } : f
+                );
+                setFiles(updatedFiles);
+              }}
+            />
+          </td>
+          <td className="py-2">{file.width}</td>
+          <td className="py-2">{file.height}</td>
+          <td className="py-2">{file.size} ko</td>
+          <td className="py-2">{renderPostsTitles(file)}</td> {/* New Column Data */}
+          <td className="py-2">
+            {selectedFileIds.length === 1 &&
+              selectedFileIds.includes(file.id) && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleImportImage([file.id]);
+                    }}
+                    disabled={!titles[file.id]}
+                    className={`bg-green-500 text-white px-4 py-2 rounded ${
+                      !titles[file.id]
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    Import
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteButtonClick(file.id);
+                    }}
+                    className={`bg-red-500 text-white px-4 py-2 rounded ${
+                      file.imported
+                        ? "opacity-50 cursor-not-allowed "
+                        : ""
+                    }`}
+                    disabled={file.imported}
+                  >
+                    Delete
+                  </button>
+                  {file.imported && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancelImport(file.id);
+                      }}
+                      className="bg-yellow-500 text-white px-4 py-2 rounded"
+                    >
+                      Cancel Import
+                    </button>
+                  )}
+                </>
+              )}
+          </td>
+          <td className="py-2">
+            {file.imported ? (
+              <span className="text-green-500 font-bold">Imported</span>
+            ) : (
+              <span className="text-red-500 font-bold">Non Imported</span>
+            )}
+          </td>
+        </tr>
+      ))}
+  </tbody>
+</table>
+
     </div>
   );
 }
