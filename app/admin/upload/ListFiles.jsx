@@ -145,15 +145,38 @@ function ListFiles({ allFiles, allPictures }) {
   const handleDeleteImages = async (fileIds) => {
     try {
       setIsUploading(true);
-      const deletePromises = fileIds.map(fileId =>
-        myFetch(`/api/upload/files/${fileId}`, 'DELETE', null, 'image delete from upload folder')
+  
+      // Find associated pictures and delete them first
+      for (const fileId of fileIds) {
+        const pictureResponse = await myFetch(
+          `/api/pictures?filters[fileId][$eq]=${fileId}`,
+          "GET",
+          null,
+          "fetch picture"
+        );
+  
+        if (pictureResponse.data.length > 0) {
+          const pictureId = pictureResponse.data[0].id;
+  
+          await myFetch(
+            `/api/pictures/${pictureId}`,
+            "DELETE",
+            null,
+            "delete picture"
+          );
+        }
+      }
+  
+      // Then delete the files
+      const deletePromises = fileIds.map((fileId) =>
+        myFetch(`/api/upload/files/${fileId}`, "DELETE", null, "image delete from upload folder")
       );
   
       const responses = await Promise.all(deletePromises);
-      const successfulDeletes = responses.filter(response => response);
+      const successfulDeletes = responses.filter((response) => response);
   
       if (successfulDeletes.length) {
-        setFiles((prevFiles) => prevFiles.filter(file => !fileIds.includes(file.id)));
+        setFiles((prevFiles) => prevFiles.filter((file) => !fileIds.includes(file.id)));
       }
   
       setIsUploading(false);
@@ -162,6 +185,9 @@ function ListFiles({ allFiles, allPictures }) {
       setIsUploading(false);
     }
   };
+  
+
+
   const handleImportImage = async (selectedFileIds) => {
     const selectedFiles = files.filter((file) =>
       selectedFileIds.includes(file.id)
@@ -170,14 +196,14 @@ function ListFiles({ allFiles, allPictures }) {
       console.error("No files selected");
       return;
     }
-
+  
     for (const fileId of selectedFileIds) {
       if (!titles[fileId]) {
         console.error(`Title for file ID ${fileId} is not filled`);
         return;
       }
     }
-
+  
     try {
       const photosData = selectedFiles.map((file) => ({
         numero: file.id,
@@ -191,7 +217,8 @@ function ListFiles({ allFiles, allPictures }) {
         published: file.published || false,
         tags: [...file.tags, "CATALOGUE COMPLET"],
       }));
-
+  
+      // Make sure this is only called once per import action
       const response = await fetch("/api/importPhotos", {
         method: "POST",
         headers: {
@@ -199,18 +226,18 @@ function ListFiles({ allFiles, allPictures }) {
         },
         body: JSON.stringify({ photos: photosData }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to import images");
       }
-
+  
       const result = await response.json();
       const photoIds = result.photoIds;
-
-      // Update pictures in Strapi with the imported status and photoId from Prisma
+  
+      // Ensure the following loop does not create duplicates
       for (const [index, photoId] of photoIds.entries()) {
         const fileId = selectedFiles[index].id;
-
+  
         await myFetch(
           "/api/pictures",
           "POST",
@@ -227,7 +254,7 @@ function ListFiles({ allFiles, allPictures }) {
           "import pictures"
         );
       }
-
+  
       const tagResponse1 = await fetch("/api/updateTagInBulk", {
         method: "POST",
         headers: {
@@ -239,7 +266,7 @@ function ListFiles({ allFiles, allPictures }) {
           selectedTag: "IMPORT",
         }),
       });
-
+  
       const resultTag1 = await tagResponse1.json();
       console.log("Photos added and tagged successfully:", result, resultTag1);
       const tagResponse2 = await fetch("/api/updateTagInBulk", {
@@ -253,10 +280,10 @@ function ListFiles({ allFiles, allPictures }) {
           selectedTag: "CATALOGUE COMPLET",
         }),
       });
-
+  
       const resultTag2 = await tagResponse2.json();
       console.log("Photos added and tagged successfully:", result, resultTag2);
-
+  
       // Update local state to reflect imported status
       setFiles((prevFiles) =>
         prevFiles.map((file) => {
@@ -270,7 +297,7 @@ function ListFiles({ allFiles, allPictures }) {
       console.error("Failed to import images:", error);
     }
   };
-
+  
   const handleCancelImport = async (fileId) => {
     try {
       // Trouver l'image correspondante dans allPictures
