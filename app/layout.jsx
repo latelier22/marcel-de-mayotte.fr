@@ -24,6 +24,7 @@ const AppInitializer = ({ children }) => {
   useEffect(() => {
     const initializeMenus = async () => {
       const menuItems = await fetchMenus();
+      
       setMenus(menuItems);
     };
     initializeMenus();

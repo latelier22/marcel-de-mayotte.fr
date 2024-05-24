@@ -6,6 +6,7 @@ async function fetchMenus(id = null) {
 
   let { data: menuItems } = response;
 
+  console.log(response)
 
 
   // Restructurer les données pour obtenir un format plus simple
@@ -66,7 +67,7 @@ async function fetchMenus(id = null) {
     }
   });
 
-//   console.log('Sorted data:', JSON.stringify(menuItems, null, 2));
+console.log('Sorted data:', JSON.stringify(menuItems, null, 2));
 
   return menuItems; // Ajout du return
 }

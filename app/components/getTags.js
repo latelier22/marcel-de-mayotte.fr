@@ -31,7 +31,7 @@ async function getTags() {
       };
     })
 
-    console.log("tagsArray",tagsArray.slice(0,5))
+    // console.log("tagsArray",tagsArray.slice(0,5))
     return tagsArray;
   } catch (error) {
     console.error('Une erreur est survenue lors de la récupération des tags :', error);

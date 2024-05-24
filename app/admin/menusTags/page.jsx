@@ -11,8 +11,6 @@ import ManageTags from "./ManageTags";
 async function Page () {
 
   const allTags = await getTags();
-  const menuItems = await fetchMenus();
-
 
   // console.log("allTags",allTags.slice(0,3))
 
@@ -23,8 +21,7 @@ async function Page () {
       </div>
 
       <div className="container mx-auto my-8 p-4 shadow-lg rounded">
-          {/* <ManageTags allTags={allTags} /> */}
-          <ManageTags allTags={allTags} menuItems={menuItems}/>
+          <ManageTags allTags={allTags}/>
       </div>
 
     </>
