@@ -14,6 +14,10 @@ import Dropdown from "./DropDown";
 import { useSelector } from 'react-redux';
 
 const Navbar = ({ menuItems }) => {
+
+console.log("meniItems",menuItems)
+
+
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === 'admin';
   const isVisible = useSelector(state => state.visible.isVisible);
@@ -62,7 +66,7 @@ const Navbar = ({ menuItems }) => {
               {regularMenuItems.map((menuItem, index) => (
                 <li key={index} className={`${index > 0 ? "mb-2 " : ""}lg:mb-0 lg:pr-2`} data-te-nav-item-ref>
                   {menuItem.children && menuItem.children.length ? (
-                    <Dropdown  item={menuItem} />
+                    <Dropdown className="" item={menuItem} />
                   ) : (
                     <a
                       className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}

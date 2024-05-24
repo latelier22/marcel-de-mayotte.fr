@@ -13,7 +13,7 @@ async function getTags() {
 
 
     const tagsArray = allTags.map ((tag) => {
-      const { name, slug, photos } = tag;
+      const { name, slug, photos , mainTag, parentId} = tag;
       const count = photos.length; // Compter le nombre de photos associées à ce tag
       let url = null;
       if (photos.length > 0) {
@@ -24,12 +24,14 @@ async function getTags() {
       return {
         name,
         slug,
+        mainTag,
+        parentId,
         count,
         url: url, // Remplacer par l'URL de la photo aléatoire associée à ce tag
-        mainTag: false // Remplacer par true/false en fonction de la logique de votre application
-      };h
+      };
     })
 
+    console.log("tagsArray",tagsArray.slice(0,5))
     return tagsArray;
   } catch (error) {
     console.error('Une erreur est survenue lors de la récupération des tags :', error);
