@@ -1,23 +1,19 @@
+// app/components/NavbarClient.jsx
 "use client";
 
 import { useEffect } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-
 import { site } from "./site";
 import Link from "next/link";
-
 import VisibilityToggleButton from "./components/album/icons/VisibilityToggleButton";
 import ShowAdminToggleButton from "./components/album/icons/ShowAdminToggleButton";
-
 import Dropdown from "./DropDown";
 import { useSelector } from 'react-redux';
+import useMenuStore from 'store/useStore';
 
-const Navbar = ({ menuItems }) => {
-
-console.log("meniItems",menuItems)
-
-
+const NavbarClient = () => {
+  const menuItems = useMenuStore((state) => state.menuItems);
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === 'admin';
   const isVisible = useSelector(state => state.visible.isVisible);
@@ -63,8 +59,8 @@ console.log("meniItems",menuItems)
 
           <div className="hidden grow basis-[100%] items-center lg:!flex lg:basis-auto mx-auto" id="navbarSupportedContentY" data-te-collapse-item>
             <ul className="mx-auto flex flex-col lg:flex-row" data-te-navbar-nav-ref>
-              {regularMenuItems.map((menuItem, index) => (
-                <li key={index} className={`${index > 0 ? "mb-2 " : ""}lg:mb-0 lg:pr-2`} data-te-nav-item-ref>
+              {regularMenuItems.map((menuItem) => (
+                <li key={menuItem.id} className={`lg:mb-0 lg:pr-2`} data-te-nav-item-ref>
                   {menuItem.children && menuItem.children.length ? (
                     <Dropdown className="" item={menuItem} />
                   ) : (
@@ -131,4 +127,4 @@ console.log("meniItems",menuItems)
   );
 };
 
-export default Navbar;
+export default NavbarClient;

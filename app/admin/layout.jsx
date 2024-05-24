@@ -1,11 +1,6 @@
-"use client"
-
-
 import Navbar from "../NavBar";
 
-import AdminNavBar from "./AdminNavBar"
-
-export default async function AdminLayout({
+export default function AdminLayout({
   children
 }) 
 {

@@ -14,7 +14,7 @@ async function Page () {
   const menuItems = await fetchMenus();
 
 
-  console.log("allTags",allTags.slice(0,3))
+  // console.log("allTags",allTags.slice(0,3))
 
   return (
     <>

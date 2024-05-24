@@ -1,6 +1,8 @@
+// app/layout.jsx
+
 "use client"
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import './page.module.css';
@@ -8,16 +10,29 @@ import 'react-quill/dist/quill.snow.css';
 import { site } from './site';
 
 import { NextAuthProvider} from "utils/NextAuthProvider"
-import ReduxProvider, { Providers } from "./ReduxProvider";
+import ReduxProvider from "./ReduxProvider";
+import useMenuStore from './store/useStore';
+import fetchMenus from "./components/fetchMenus"; // Assurez-vous que le chemin est correct
 
 const inter = Inter({ subsets: ['latin'] });
 
 const siteMetadata = site;
 
-export default function RootLayout({
-  children
-}) 
-{
+const AppInitializer = ({ children }) => {
+  const setMenus = useMenuStore((state) => state.setMenus);
+
+  useEffect(() => {
+    const initializeMenus = async () => {
+      const menuItems = await fetchMenus();
+      setMenus(menuItems);
+    };
+    initializeMenus();
+  }, [setMenus]);
+
+  return children;
+};
+
+export default function RootLayout({ children }) {
   const siteTitle = siteMetadata.title;
   const siteDescription = siteMetadata.description;
   const title = `${siteTitle}`;
@@ -34,20 +49,16 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com"/>
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"/>
         <link href="https://fonts.googleapis.com/css2?family=BioRhyme:wght@200..800&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet"/>
-        
-              
       </head>
-      
-      <body className=" font-texte bg-white dark:bg-neutral-900">
-      
+      <body className="font-texte bg-white dark:bg-neutral-900">
         <ReduxProvider>
-      <NextAuthProvider>
-      
-      {children}
-      
-    </NextAuthProvider>
-    </ReduxProvider>
+          <NextAuthProvider>
+            <AppInitializer>
+              {children}
+            </AppInitializer>
+          </NextAuthProvider>
+        </ReduxProvider>
       </body>
     </html>
   );
-};
+}

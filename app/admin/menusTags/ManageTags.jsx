@@ -1,18 +1,22 @@
 "use client";
 import React, { useState } from 'react';
 
-const ManageTags = ({ allTags }) => {
-  const [tags, setTags] = useState(allTags);
+const ManageTags = ({ allTags, menuItems }) => {
+  // const [tags, setTags] = useState(allTags);
   // const [menus, setMenus] = useState(menuItems || []);
 
+  
   return (
+    <>
     <ul>
-  {tags.map(tag => (
+  {allTags.map(tag => (
     <li key={tag.slug}>
       {tag.name} MAINTAG {tag.mainTag ? 'Yes' : 'No'} {tag.parentId && tag.parentId.length > 0 && `parentId ${tag.parentId}`}
     </li>
   ))}
 </ul>
+
+</>
 
   );
 };
