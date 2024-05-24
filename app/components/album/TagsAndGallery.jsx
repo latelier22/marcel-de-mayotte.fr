@@ -9,12 +9,12 @@ import { useSelector } from "react-redux";
 
 const TagsAndGallery = ({ photos, allTags, progressionsTags, listeTags, tagCards, tagSlug }) => {
 
-    const storedPhotoIds = localStorage.getItem('selectedPhotoIds');
-  if (storedPhotoIds) {
-    console.log(JSON.parse(storedPhotoIds));
-    // Clear the local storage after reading
-    localStorage.removeItem('selectedPhotoIds');
-  }
+//     const storedPhotoIds = localStorage.getItem('selectedPhotoIds');
+//   if (storedPhotoIds) {
+//     console.log(JSON.parse(storedPhotoIds));
+//     // Clear the local storage after reading
+//     localStorage.removeItem('selectedPhotoIds');
+//   }
 
     const isShowAdmin = useSelector((state) => state.showAdmin.isShowAdmin);
     const { data: session } = useSession(); // Récupérer les données de session
