@@ -65,26 +65,28 @@ const TreeItem = React.forwardRef<
 /*
  * Fonction pour transformer les données de menu en une structure compatible avec TreeItems
  */
-const transformMenuItemsToTreeItems = (menuItems, parentId = '') => {
-  return menuItems.map((item, index) => ({
+const transformMenuItemsToTreeItems = (menuItems) => {
+  return menuItems.map((item) => ({
     id: item.id,
     value: item.label,
     route: item.route,
     order: item.order,
-    children: item.children ? transformMenuItemsToTreeItems(item.children, item.id) : [],
+    children: item.children ? transformMenuItemsToTreeItems(item.children) : [],
+    parent: item.parent,
   }));
 };
 
 /*
  * Fonction pour transformer les TreeItems en données de menu
  */
-const transformTreeItemsToMenuItems = (treeItems) => {
+const transformTreeItemsToMenuItems = (treeItems, parent = null) => {
   return treeItems.map((item, index) => ({
     id: item.id,
     label: item.value,
     route: item.route,
-    order: index, // Mise à jour de l'ordre ici
-    children: item.children ? transformTreeItemsToMenuItems(item.children) : [],
+    order: index,  // Assurez-vous que l'ordre est correctement mis à jour ici
+    children: item.children ? transformTreeItemsToMenuItems(item.children, item.id) : [],
+    parent: parent,
   }));
 };
 

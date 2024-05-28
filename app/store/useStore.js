@@ -13,28 +13,25 @@ const useMenuStore = create((set) => ({
 
     let { data: menuItems } = response;
 
-    // Fonction récursive pour transformer les données
-    const transformMenuItem = (item) => {
+    // Fonction récursive pour transformer les données et ajouter les parents
+    const transformMenuItem = (item, parentId = null) => {
       return {
         id: item.id,
         label: item.attributes?.label,
         route: item.attributes?.route,
         order: item.attributes?.order,
-        children: item.attributes?.children?.data.map(transformMenuItem) || [],
-        parent: item.attributes?.parent?.data?.id || null
+        parent: parentId,
+        children: item.attributes?.children?.data.map(child => transformMenuItem(child, item.id)) || []
       };
     };
 
     // Appliquer la transformation aux données du menu
-    menuItems = menuItems.map(transformMenuItem);
+    menuItems = menuItems.map(item => transformMenuItem(item));
 
     // Filtrer les éléments de menu pour ne garder que ceux sans parent
     const rootMenuItems = menuItems.filter(item => !item.parent);
 
     // Trier les éléments de menu par le champ "order"
-    rootMenuItems.sort((a, b) => a.order - b.order);
-
-    // Trier les sous-menus par le champ "order" également
     const sortChildren = (items) => {
       items.forEach(item => {
         if (item.children) {
@@ -44,20 +41,34 @@ const useMenuStore = create((set) => ({
       });
     };
 
+    rootMenuItems.sort((a, b) => a.order - b.order);
     sortChildren(rootMenuItems);
 
     set({ menuItems: rootMenuItems });
   },
   updateMenuItems: async (menus) => {
     try {
-      for (const menu of menus) {
-        await myFetch(`/api/menus/${menu.id}`, 'PUT', { data: menu });
+      const updateMenu = async (menu) => {
+        const payload = {
+          data: {
+            label: menu.label,
+            route: menu.route,
+            order: menu.order,
+            parent: menu.parent ? { id: menu.parent } : null,
+          },
+        };
+        await myFetch(`/api/menus/${menu.id}`, 'PUT', payload);
         if (menu.children && menu.children.length > 0) {
           for (const child of menu.children) {
-            await myFetch(`/api/menus/${child.id}`, 'PUT', { data: child });
+            await updateMenu(child);
           }
         }
+      };
+
+      for (const menu of menus) {
+        await updateMenu(menu);
       }
+
       console.log('Menus updated successfully');
     } catch (error) {
       console.error('Error updating menus:', error);
