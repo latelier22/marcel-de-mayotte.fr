@@ -5,6 +5,7 @@ import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-ki
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import useMenuStore from '../../store/useStore';
+import myFetch from '../../components/myFetch';
 
 import {
   SimpleTreeItemWrapper,
@@ -22,15 +23,22 @@ const ManageTags = () => {
     setItems(transformMenuItemsToTreeItems(menuItems));
   }, [menuItems]);
 
-  useEffect(() => {
-    console.log('Initial items:', items);
-  }, []);
-
   const handleItemsChanged = (updatedItems) => {
     setItems(updatedItems);
     const updatedMenuItems = transformTreeItemsToMenuItems(updatedItems);
     setMenus(updatedMenuItems);
+    persistMenus(updatedMenuItems);
     console.log('Updated menuItems in store:', updatedMenuItems); // Log the updated state
+  };
+
+  const persistMenus = async (menus) => {
+    const payload = { data: menus };
+    try {
+      await myFetch(`/api/menus/  `, 'PUT', payload);
+      console.log('Menus updated successfully.');
+    } catch (error) {
+      console.error('Failed to update menus:', error);
+    }
   };
 
   return (
@@ -53,17 +61,9 @@ const TreeItem = React.forwardRef<
   HTMLDivElement,
   TreeItemComponentProps<MinimalTreeItemData>
 >((props, ref) => {
-  const [sample, setSample] = useState('');
   return (
     <SimpleTreeItemWrapper {...props} ref={ref} className="bg-gray-200 text-black p-2 rounded">
       <div>{props.item.value}</div>
-      <input
-        value={sample}
-        onChange={(e) => {
-          setSample(e.target.value);
-        }}
-        className="mt-1 p-1 rounded border"
-      />
     </SimpleTreeItemWrapper>
   );
 });
@@ -71,11 +71,12 @@ const TreeItem = React.forwardRef<
 /*
  * Fonction pour transformer les données de menu en une structure compatible avec TreeItems
  */
-const transformMenuItemsToTreeItems = (menuItems, parentId = '') => {
-  return menuItems.map((item, index) => ({
-    id: generateHierarchicalId(parentId, index),
+const transformMenuItemsToTreeItems = (menuItems) => {
+  return menuItems.map((item) => ({
+    id: item.id,
     value: item.label,
-    children: item.children ? transformMenuItemsToTreeItems(item.children, generateHierarchicalId(parentId, index)) : [],
+    route: item.route,
+    children: item.children ? transformMenuItemsToTreeItems(item.children) : [],
   }));
 };
 
@@ -84,16 +85,11 @@ const transformMenuItemsToTreeItems = (menuItems, parentId = '') => {
  */
 const transformTreeItemsToMenuItems = (treeItems) => {
   return treeItems.map(item => ({
+    id: item.id,
     label: item.value,
+    route: item.route,
     children: item.children ? transformTreeItemsToMenuItems(item.children) : [],
   }));
-};
-
-/*
- * Fonction pour générer des identifiants hiérarchiques uniques
- */
-const generateHierarchicalId = (parentId, childId) => {
-  return parentId ? `${parentId}-${childId}` : `${childId}`;
 };
 
 export default ManageTags;

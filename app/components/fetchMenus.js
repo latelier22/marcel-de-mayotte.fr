@@ -1,75 +1,51 @@
 import myFetch from './myFetch';
 
 async function fetchMenus(id = null) {
-  const endpoint = id ? `/api/menus/${id}?populate=*` : `/api/menus?populate=children.children`;
+  const endpoint = id ? `/api/menus/${id}?populate=*` : `/api/menus?populate=*`;
   const response = await myFetch(endpoint, 'GET', null, 'menus');
 
   let { data: menuItems } = response;
 
-  console.log(response)
+  console.log(response);
 
-
-  // Restructurer les données pour obtenir un format plus simple
-  menuItems = menuItems.map(item => {
-   
-
-    const transformedItem = {
+  // Fonction récursive pour transformer les données
+  const transformMenuItem = (item) => {
+    return {
       id: item.id,
       label: item.attributes?.label,
       route: item.attributes?.route,
       order: item.attributes?.order,
-      children: item.attributes?.children ? item.attributes.children.map(child => {
-        
-
-        const transformedChild = {
-          id: child.id,
-          label: child.label,
-          route: child.route,
-          order: child.order,
-          children: child.children ? child.children.map(subChild => {
-            
-
-            const transformedSubChild = {
-              id: subChild.id,
-              label: subChild.label,
-              route: subChild.route,
-              order: subChild.order,
-            };
-
-            // console.log('Transformed subChild:', JSON.stringify(transformedSubChild, null, 2));
-            return transformedSubChild;
-          }) : []
-        };
-
-        // console.log('Transformed child:', JSON.stringify(transformedChild, null, 2));
-        return transformedChild;
-      }) : []
+      children: item.attributes?.children?.data.map(transformMenuItem) || [],
+      parent: item.attributes?.parent?.data?.id || null
     };
+  };
 
-    // console.log('Transformed item:', JSON.stringify(transformedItem, null, 2));
-    return transformedItem;
-  });
+  // Appliquer la transformation aux données du menu
+  menuItems = menuItems.map(transformMenuItem);
 
-//   console.log('Transformed data:', JSON.stringify(menuItems, null, 2));
+  // Filtrer les éléments de menu pour ne garder que ceux sans parent
+  const rootMenuItems = menuItems.filter(item => !item.attributes?.parent?.data);
+
+  
 
   // Trier les éléments de menu par le champ "order"
-  menuItems.sort((a, b) => a.order - b.order);
+  rootMenuItems.sort((a, b) => a.order - b.order);
 
   // Trier les sous-menus par le champ "order" également
-  menuItems.forEach(menuItem => {
-    if (menuItem.children) {
-      menuItem.children.sort((a, b) => a.order - b.order);
-      menuItem.children.forEach(child => {
-        if (child.children) {
-          child.children.sort((a, b) => a.order - b.order);
-        }
-      });
-    }
-  });
+  const sortChildren = (items) => {
+    items.forEach(item => {
+      if (item.children) {
+        item.children.sort((a, b) => a.order - b.order);
+        sortChildren(item.children);
+      }
+    });
+  };
 
-console.log('Sorted data:', JSON.stringify(menuItems, null, 2));
+  sortChildren(rootMenuItems);
 
-  return menuItems; // Ajout du return
+  console.log('Sorted data:', JSON.stringify(rootMenuItems, null, 2));
+
+  return rootMenuItems.filter( (item) => !item.parent); // Ajout du return
 }
 
 export default fetchMenus;
