@@ -1,18 +1,14 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import useMenuStore from '../../store/useStore';
 import {
   SimpleTreeItemWrapper,
   SortableTree,
   TreeItemComponentProps,
-  TreeItems,
 } from 'dnd-kit-sortable-tree';
+import NonSSRWrapper from '../../components/NonSSRWrapper';
 
-const ManageTags = () => {
+const ManageTags: React.FC = () => {
   const menuItems = useMenuStore((state) => state.menuItems);
   const fetchAndSetMenus = useMenuStore((state) => state.fetchAndSetMenus);
   const setMenus = useMenuStore((state) => state.setMenus);
@@ -24,29 +20,30 @@ const ManageTags = () => {
   }, []);
 
   useEffect(() => {
-    setItems(transformMenuItemsToTreeItems(menuItems));
-    console.log("items apres transform", items);
+    setItems(menuItems);
+    console.log("items after set", items);
   }, [menuItems]);
 
   const handleItemsChanged = async (updatedItems) => {
     setItems(updatedItems);
-    const updatedMenuItems = transformTreeItemsToMenuItems(updatedItems);
-    setMenus(updatedMenuItems);
-    await updateMenuItems(updatedMenuItems);
-    console.log('Updated menuItems in store and database:', updatedMenuItems); // Log the updated state
+    setMenus(updatedItems);
+    await updateMenuItems(updatedItems);
+    console.log('Updated menuItems in store and database:', updatedItems); // Log the updated state
   };
 
   return (
-    <SortableTree
-      items={items}
-      onItemsChanged={handleItemsChanged}
-      TreeItemComponent={TreeItem}
-    />
+    <NonSSRWrapper>
+      <SortableTree
+        items={items}
+        onItemsChanged={handleItemsChanged}
+        TreeItemComponent={TreeItem}
+      />
+    </NonSSRWrapper>
   );
 };
 
 type MinimalTreeItemData = {
-  value: string;
+  label: string;
 };
 
 /*
@@ -58,36 +55,11 @@ const TreeItem = React.forwardRef<
 >((props, ref) => {
   return (
     <SimpleTreeItemWrapper {...props} ref={ref} className="bg-gray-200 text-black p-2 rounded">
-      <div>{props.item.value}</div>
+      <div>{props.item.label}</div>
     </SimpleTreeItemWrapper>
   );
 });
 
-/*
- * Function to transform the menu items to tree items
- */
-const transformMenuItemsToTreeItems = (menuItems) => {
-  const transform = (item) => ({
-    ...item,
-    value: item.label,
-    children: item.children ? item.children.map(transform) : [],
-  });
-
-  return menuItems.map(transform);
-};
-
-/*
- * Function to transform tree items back to menu items
- */
-const transformTreeItemsToMenuItems = (treeItems, parent = null) => {
-  return treeItems.map((item, index) => ({
-    id: item.id,
-    label: item.value,
-    route: item.route,
-    order: index,  // Make sure the order is correctly updated here
-    children: item.children ? transformTreeItemsToMenuItems(item.children, item.id) : [],
-    parent: parent,
-  }));
-};
+TreeItem.displayName = 'TreeItem';
 
 export default ManageTags;
