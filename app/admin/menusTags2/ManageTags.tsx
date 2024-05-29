@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import useMenuStore from '../../store/useStore';
 import {
   SimpleTreeItemWrapper,
@@ -12,13 +12,14 @@ const ManageTags: React.FC = () => {
   const menuItems = useMenuStore((state) => state.menuItems);
   const fetchAndSetMenus = useMenuStore((state) => state.fetchAndSetMenus);
   const addMenuItem = useMenuStore((state) => state.addMenuItem);
+  const deleteMenuItem = useMenuStore((state) => state.deleteMenuItem);
   const [items, setItems] = useState([]);
   const [newLabel, setNewLabel] = useState('');
   const [newRoute, setNewRoute] = useState('/catalogue');
 
   useEffect(() => {
     fetchAndSetMenus();
-  }, []);
+  }, [fetchAndSetMenus]); // Ajout de la dépendance manquante
 
   useEffect(() => {
     setItems(transformMenuItemsToTreeItems(menuItems));
@@ -39,11 +40,6 @@ const ManageTags: React.FC = () => {
       parent: null,
     };
 
-
-    // ICI
-
-
-
     try {
       await addMenuItem(newItem);
       // Refetch and set the menus to update the state with the new item
@@ -55,6 +51,22 @@ const ManageTags: React.FC = () => {
       console.error('Failed to add new menu item:', error);
     }
   };
+
+  const handleDeleteItem = async (itemId) => {
+    try {
+      await deleteMenuItem(itemId);
+      // Refetch and set the menus to update the state after deletion
+      await fetchAndSetMenus();
+    } catch (error) {
+      console.error('Failed to delete menu item:', error);
+    }
+  };
+
+  const TreeItemComponent = forwardRef<HTMLDivElement, TreeItemComponentProps<MinimalTreeItemData>>((props, ref) => (
+    <TreeItem {...props} ref={ref} onRemove={() => handleDeleteItem(props.item.id)} />
+  ));
+
+  TreeItemComponent.displayName = 'TreeItemComponent';
 
   return (
     <NonSSRWrapper>
@@ -84,7 +96,7 @@ const ManageTags: React.FC = () => {
         <SortableTree
           items={items}
           onItemsChanged={handleItemsChanged}
-          TreeItemComponent={TreeItem}
+          TreeItemComponent={TreeItemComponent}
         />
       </div>
     </NonSSRWrapper>
@@ -93,18 +105,29 @@ const ManageTags: React.FC = () => {
 
 type MinimalTreeItemData = {
   value: string;
+  id: string;
+};
+
+type TreeItemProps = TreeItemComponentProps<MinimalTreeItemData> & {
+  onRemove: () => void;
 };
 
 /*
  * Here's the component that will render a single row of your tree
  */
-const TreeItem = React.forwardRef<
-  HTMLDivElement,
-  TreeItemComponentProps<MinimalTreeItemData>
->((props, ref) => {
+const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
   return (
-    <SimpleTreeItemWrapper {...props} ref={ref} className="bg-gray-200 text-black p-2 rounded">
+    <SimpleTreeItemWrapper {...props} ref={ref} className="bg-gray-200 text-black p-2 rounded flex justify-between items-center">
       <div>{props.item.value}</div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          props.onRemove();
+        }}
+        className="text-red-500 ml-4"
+      >
+        ✖
+      </button>
     </SimpleTreeItemWrapper>
   );
 });

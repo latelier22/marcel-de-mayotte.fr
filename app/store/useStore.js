@@ -102,6 +102,16 @@ const useMenuStore = create((set) => ({
       console.error('Error updating menus:', error);
     }
   },
+  deleteMenuItem: async (id) => {
+    try {
+      await myFetch(`/api/menus/${id}`, 'DELETE');
+      console.log('Menu item deleted successfully');
+      // Re-fetch the updated menus after deleting an item
+      await useMenuStore.getState().fetchAndSetMenus();
+    } catch (error) {
+      console.error('Error deleting menu item:', error);
+    }
+  },
 }));
 
 export default useMenuStore;
