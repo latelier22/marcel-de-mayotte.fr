@@ -72,6 +72,24 @@ const useMenuStore = create((set) => ({
       console.error('Failed to add new menu item:', error);
     }
   },
+  updateMenuItem: async (item) => {
+    const payload = {
+      data: {
+        label: item.label,
+        route: item.route,
+        order: item.order,
+        parent: item.parent ? { id: item.parent } : null,
+      },
+    };
+
+    try {
+      await myFetch(`/api/menus/${item.id}`, 'PUT', payload);
+      // Re-fetch the updated menus after updating the item
+      await useMenuStore.getState().fetchAndSetMenus();
+    } catch (error) {
+      console.error('Failed to update menu item:', error);
+    }
+  },
   updateMenuItems: async (menus) => {
     try {
       const updateMenu = async (menu) => {
@@ -102,16 +120,15 @@ const useMenuStore = create((set) => ({
       console.error('Error updating menus:', error);
     }
   },
-  deleteMenuItem: async (id) => {
+  deleteMenuItem: async (itemId) => {
     try {
-      await myFetch(`/api/menus/${id}`, 'DELETE');
-      console.log('Menu item deleted successfully');
-      // Re-fetch the updated menus after deleting an item
+      await myFetch(`/api/menus/${itemId}`, 'DELETE');
+      // Re-fetch the updated menus after deleting the item
       await useMenuStore.getState().fetchAndSetMenus();
     } catch (error) {
-      console.error('Error deleting menu item:', error);
+      console.error('Failed to delete menu item:', error);
     }
-  },
+  }
 }));
 
 export default useMenuStore;
