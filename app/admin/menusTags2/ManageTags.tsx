@@ -25,6 +25,7 @@ const ManageTags = () => {
 
   useEffect(() => {
     setItems(transformMenuItemsToTreeItems(menuItems));
+    console.log("items apres transform", items);
   }, [menuItems]);
 
   const handleItemsChanged = async (updatedItems) => {
@@ -63,28 +64,27 @@ const TreeItem = React.forwardRef<
 });
 
 /*
- * Fonction pour transformer les données de menu en une structure compatible avec TreeItems
+ * Function to transform the menu items to tree items
  */
 const transformMenuItemsToTreeItems = (menuItems) => {
-  return menuItems.map((item) => ({
-    id: item.id,
+  const transform = (item) => ({
+    ...item,
     value: item.label,
-    route: item.route,
-    order: item.order,
-    children: item.children ? transformMenuItemsToTreeItems(item.children) : [],
-    parent: item.parent,
-  }));
+    children: item.children ? item.children.map(transform) : [],
+  });
+
+  return menuItems.map(transform);
 };
 
 /*
- * Fonction pour transformer les TreeItems en données de menu
+ * Function to transform tree items back to menu items
  */
 const transformTreeItemsToMenuItems = (treeItems, parent = null) => {
   return treeItems.map((item, index) => ({
     id: item.id,
     label: item.value,
     route: item.route,
-    order: index,  // Assurez-vous que l'ordre est correctement mis à jour ici
+    order: index,  // Make sure the order is correctly updated here
     children: item.children ? transformTreeItemsToMenuItems(item.children, item.id) : [],
     parent: parent,
   }));

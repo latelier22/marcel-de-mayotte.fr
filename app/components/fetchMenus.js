@@ -8,33 +8,38 @@ async function fetchMenus(id = null) {
 
   console.log(response);
 
-  // Fonction récursive pour transformer les données
-  const transformMenuItem = (item) => {
-    return {
+  // Create a map of items by their ID
+  const itemMap = {};
+  menuItems.forEach((item) => {
+    itemMap[item.id] = {
       id: item.id,
       label: item.attributes?.label,
       route: item.attributes?.route,
       order: item.attributes?.order,
-      children: item.attributes?.children?.data.map(transformMenuItem) || [],
+      children: [],
       parent: item.attributes?.parent?.data?.id || null
     };
-  };
+  });
 
-  // Appliquer la transformation aux données du menu
-  menuItems = menuItems.map(transformMenuItem);
+  // Build the tree structure
+  menuItems.forEach((item) => {
+    const parentId = item.attributes?.parent?.data?.id;
+    if (parentId) {
+      if (!itemMap[parentId].children) {
+        itemMap[parentId].children = [];
+      }
+      itemMap[parentId].children.push(itemMap[item.id]);
+    }
+  });
 
-  // Filtrer les éléments de menu pour ne garder que ceux sans parent
-  const rootMenuItems = menuItems.filter(item => !item.attributes?.parent?.data);
-
-  
-
-  // Trier les éléments de menu par le champ "order"
+  // Filter and sort root items
+  const rootMenuItems = menuItems.filter(item => !item.attributes?.parent?.data).map(item => itemMap[item.id]);
   rootMenuItems.sort((a, b) => a.order - b.order);
 
-  // Trier les sous-menus par le champ "order" également
+  // Sort children by order
   const sortChildren = (items) => {
     items.forEach(item => {
-      if (item.children) {
+      if (item.children.length > 0) {
         item.children.sort((a, b) => a.order - b.order);
         sortChildren(item.children);
       }
@@ -43,9 +48,9 @@ async function fetchMenus(id = null) {
 
   sortChildren(rootMenuItems);
 
-  console.log('Sorted data:', JSON.stringify(rootMenuItems, null, 2));
+  console.log("rootMenuItems", rootMenuItems);
 
-  return rootMenuItems.filter( (item) => !item.parent); // Ajout du return
+  return rootMenuItems;
 }
 
 export default fetchMenus;

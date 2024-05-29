@@ -14,19 +14,25 @@ const useMenuStore = create((set) => ({
     let { data: menuItems } = response;
 
     // Fonction récursive pour transformer les données et ajouter les parents
-    const transformMenuItem = (item, parentId = null) => {
+    const transformMenuItem = (item) => {
       return {
         id: item.id,
         label: item.attributes?.label,
         route: item.attributes?.route,
         order: item.attributes?.order,
-        parent: parentId,
-        children: item.attributes?.children?.data.map(child => transformMenuItem(child, item.id)) || []
+        children: item.attributes?.children?.data.map(transformMenuItem) || [],
+        parent: item.attributes?.parent?.data?.id || null
       };
     };
 
     // Appliquer la transformation aux données du menu
-    menuItems = menuItems.map(item => transformMenuItem(item));
+    menuItems = menuItems.map(transformMenuItem);
+
+    // Créer une map des éléments de menu par ID pour faciliter l'assignation des enfants aux parents
+    const menuMap = {};
+    menuItems.forEach(item => {
+      menuMap[item.id] = item;
+    });
 
     // Filtrer les éléments de menu pour ne garder que ceux sans parent
     const rootMenuItems = menuItems.filter(item => !item.parent);
