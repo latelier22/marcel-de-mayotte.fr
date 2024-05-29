@@ -15,6 +15,7 @@ const ManageTags: React.FC = () => {
   const deleteMenuItem = useMenuStore((state) => state.deleteMenuItem);
   const updateMenuItem = useMenuStore((state) => state.updateMenuItem);
   const updateMenuItems = useMenuStore((state) => state.updateMenuItems);
+
   const [items, setItems] = useState([]);
   const [newLabel, setNewLabel] = useState('');
   const [newRoute, setNewRoute] = useState('/catalogue');
