@@ -3,10 +3,14 @@ import myFetch from '../components/myFetch'; // Assurez-vous que le chemin est c
 
 const useMenuStore = create((set) => ({
   menuItems: [],
+  
+  // Setter pour mettre à jour les menus
   setMenus: (menus) => {
-    console.log('Setting menus:', menus); // Log to see the updated state
+    console.log('Setting menus:', menus); // Log pour voir l'état mis à jour
     set({ menuItems: menus });
   },
+  
+  // Récupérer et définir les menus depuis l'API
   fetchAndSetMenus: async () => {
     const endpoint = `/api/menus?populate=*`;
     const response = await myFetch(endpoint, 'GET', null, 'menus');
@@ -52,6 +56,8 @@ const useMenuStore = create((set) => ({
 
     set({ menuItems: rootMenuItems });
   },
+
+  // Ajouter un élément de menu
   addMenuItem: async (newItem) => {
     const payload = {
       data: {
@@ -72,6 +78,29 @@ const useMenuStore = create((set) => ({
       console.error('Failed to add new menu item:', error);
     }
   },
+
+  // Mettre à jour un élément de menu
+  updateMenuItem: async (updatedItem) => {
+    const payload = {
+      data: {
+        label: updatedItem.label,
+        route: updatedItem.route,
+        order: updatedItem.order,
+        parent: updatedItem.parent ? { id: updatedItem.parent } : null,
+      },
+    };
+
+    try {
+      await myFetch(`/api/menus/${updatedItem.id}`, 'PUT', payload);
+      console.log('Menu item updated successfully');
+      // Re-fetch the updated menus after updating an item
+      await useMenuStore.getState().fetchAndSetMenus();
+    } catch (error) {
+      console.error('Error updating menu item:', error);
+    }
+  },
+
+  // Mettre à jour plusieurs éléments de menu
   updateMenuItems: async (menus) => {
     try {
       const updateMenu = async (menu) => {
@@ -102,6 +131,8 @@ const useMenuStore = create((set) => ({
       console.error('Error updating menus:', error);
     }
   },
+
+  // Supprimer un élément de menu
   deleteMenuItem: async (id) => {
     try {
       await myFetch(`/api/menus/${id}`, 'DELETE');

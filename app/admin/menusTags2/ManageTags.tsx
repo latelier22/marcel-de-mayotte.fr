@@ -20,7 +20,7 @@ const ManageTags: React.FC = () => {
 
   useEffect(() => {
     fetchAndSetMenus();
-  }, [fetchAndSetMenus]); // Ajout de la dépendance manquante
+  }, [fetchAndSetMenus]);
 
   useEffect(() => {
     setItems(transformMenuItemsToTreeItems(menuItems));
@@ -36,16 +36,14 @@ const ManageTags: React.FC = () => {
     const newItem = {
       label: newLabel,
       route: newRoute,
-      order: items.length, // Add the new item at the end
+      order: items.length,
       children: [],
       parent: null,
     };
 
     try {
       await addMenuItem(newItem);
-      // Refetch and set the menus to update the state with the new item
       await fetchAndSetMenus();
-      // Clear the input fields after adding the item
       setNewLabel('');
       setNewRoute('/catalogue');
     } catch (error) {
@@ -56,25 +54,40 @@ const ManageTags: React.FC = () => {
   const handleDeleteItem = async (itemId) => {
     try {
       await deleteMenuItem(itemId);
-      // Refetch and set the menus to update the state after deletion
       await fetchAndSetMenus();
     } catch (error) {
       console.error('Failed to delete menu item:', error);
     }
   };
 
+  const findItemById = (items, id) => {
+    for (let item of items) {
+      if (item.id === id) return item;
+      if (item.children) {
+        const found = findItemById(item.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
   const handleUpdateItem = async (itemId, newLabel, newRoute) => {
+    const item = findItemById(items, itemId);
+    if (!item) {
+      console.error(`Item with id ${itemId} not found`);
+      return;
+    }
+
     const updatedItem = {
       id: itemId,
       label: newLabel,
       route: newRoute,
-      order: items.find(item => item.id === itemId).order,
-      parent: items.find(item => item.id === itemId).parent,
+      order: item.order,
+      parent: item.parent,
     };
 
     try {
       await updateMenuItem(updatedItem);
-      // Refetch and set the menus to update the state with the updated item
       await fetchAndSetMenus();
     } catch (error) {
       console.error('Failed to update menu item:', error);
@@ -232,7 +245,7 @@ const transformTreeItemsToMenuItems = (treeItems, parent = null) => {
     id: item.id,
     label: item.value,
     route: item.route,
-    order: index,  // Make sure the order is correctly updated here
+    order: index,
     children: item.children ? transformTreeItemsToMenuItems(item.children, item.id) : [],
     parent: parent,
   }));
