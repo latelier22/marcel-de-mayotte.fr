@@ -52,6 +52,26 @@ const useMenuStore = create((set) => ({
 
     set({ menuItems: rootMenuItems });
   },
+  addMenuItem: async (newItem) => {
+    const payload = {
+      data: {
+        label: newItem.label,
+        route: newItem.route,
+        order: newItem.order,
+        parent: newItem.parent ? { id: newItem.parent } : null,
+      },
+    };
+
+    try {
+      const response = await myFetch('/api/menus', 'POST', payload, 'menu');
+      if (response && response.data) {
+        // Re-fetch the updated menus after adding a new item
+        await useMenuStore.getState().fetchAndSetMenus();
+      }
+    } catch (error) {
+      console.error('Failed to add new menu item:', error);
+    }
+  },
   updateMenuItems: async (menus) => {
     try {
       const updateMenu = async (menu) => {
@@ -76,6 +96,8 @@ const useMenuStore = create((set) => ({
       }
 
       console.log('Menus updated successfully');
+      // Re-fetch the updated menus after updating items
+      await useMenuStore.getState().fetchAndSetMenus();
     } catch (error) {
       console.error('Error updating menus:', error);
     }
