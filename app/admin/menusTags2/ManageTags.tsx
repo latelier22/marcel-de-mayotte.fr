@@ -7,8 +7,10 @@ import {
   TreeItemComponentProps,
 } from 'dnd-kit-sortable-tree';
 import NonSSRWrapper from '../../components/NonSSRWrapper';
+import { DndContext, useDraggable, useDroppable, closestCenter } from '@dnd-kit/core';
+import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 
-const ManageTags: React.FC = () => {
+const ManageTags: React.FC = ({ allTags }) => {
   const menuItems = useMenuStore((state) => state.menuItems);
   const fetchAndSetMenus = useMenuStore((state) => state.fetchAndSetMenus);
   const addMenuItem = useMenuStore((state) => state.addMenuItem);
@@ -16,6 +18,7 @@ const ManageTags: React.FC = () => {
   const updateMenuItem = useMenuStore((state) => state.updateMenuItem);
   const updateMenuItems = useMenuStore((state) => state.updateMenuItems);
   const [items, setItems] = useState([]);
+  const [tagItems, setTagItems] = useState([]);
   const [newLabel, setNewLabel] = useState('');
   const [newRoute, setNewRoute] = useState('/catalogue');
 
@@ -25,12 +28,17 @@ const ManageTags: React.FC = () => {
 
   useEffect(() => {
     setItems(transformMenuItemsToTreeItems(menuItems));
-  }, [menuItems]);
+    setTagItems(allTags.map(tag => ({ id: tag.slug, value: tag.name, children: [] })));
+  }, [menuItems, allTags]);
 
   const handleItemsChanged = async (updatedItems) => {
     setItems(updatedItems);
     const updatedMenuItems = transformTreeItemsToMenuItems(updatedItems);
     await updateMenuItems(updatedMenuItems);
+  };
+
+  const handleTagItemsChanged = async (updatedTagItems) => {
+    setTagItems(updatedTagItems);
   };
 
   const handleAddItem = async () => {
@@ -69,8 +77,8 @@ const ManageTags: React.FC = () => {
       id: itemId,
       label: newLabel,
       route: newRoute,
-      order: items.find(item => item.id === itemId).order,
-      parent: items.find(item => item.id === itemId).parent,
+      order: items.find((item) => item.id === itemId).order,
+      parent: items.find((item) => item.id === itemId).parent,
     };
 
     try {
@@ -99,35 +107,47 @@ const ManageTags: React.FC = () => {
 
   return (
     <NonSSRWrapper>
-      <div className="container mx-auto my-8 p-4 shadow-lg rounded">
-        <div className="flex flex-row justify-start items-center my-8 p-4 gap-2 text-black">
-          <input
-            type="text"
-            placeholder="Label"
-            value={newLabel}
-            onChange={(e) => setNewLabel(e.target.value)}
-            className="border p-2 rounded"
-          />
-          <input
-            type="text"
-            placeholder="Route"
-            value={newRoute}
-            onChange={(e) => setNewRoute(e.target.value)}
-            className="border p-2 rounded"
-          />
-          <button
-            onClick={handleAddItem}
-            className="bg-green-500 text-white px-4 py-2 rounded"
-          >
-            Add Item
-          </button>
+      <DndContext collisionDetection={closestCenter}>
+        <div className="container mx-auto my-8 p-4 shadow-lg rounded flex">
+          <div className="flex-grow">
+            <div className="flex flex-row justify-start items-center my-8 p-4 gap-2 text-black">
+              <input
+                type="text"
+                placeholder="Label"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                className="border p-2 rounded"
+              />
+              <input
+                type="text"
+                placeholder="Route"
+                value={newRoute}
+                onChange={(e) => setNewRoute(e.target.value)}
+                className="border p-2 rounded"
+              />
+              <button
+                onClick={handleAddItem}
+                className="bg-green-500 text-white px-4 py-2 rounded"
+              >
+                Add Item
+              </button>
+            </div>
+            <SortableTree
+              items={items}
+              onItemsChanged={handleItemsChanged}
+              TreeItemComponent={TreeItemComponent}
+            />
+          </div>
+          <div className="w-1/4 p-4 border-l">
+            <h2 className="text-lg font-bold mb-4">Tags</h2>
+            <SortableTree
+              items={tagItems}
+              onItemsChanged={handleTagItemsChanged}
+              TreeItemComponent={TagItemComponent}
+            />
+          </div>
         </div>
-        <SortableTree
-          items={items}
-          onItemsChanged={handleItemsChanged}
-          TreeItemComponent={TreeItemComponent}
-        />
-      </div>
+      </DndContext>
     </NonSSRWrapper>
   );
 };
@@ -135,13 +155,15 @@ const ManageTags: React.FC = () => {
 type MinimalTreeItemData = {
   value: string;
   id: string;
-  route: string;
+  route?: string;
 };
 
 type TreeItemProps = TreeItemComponentProps<MinimalTreeItemData> & {
   onRemove: () => void;
   onSave: (newLabel: string, newRoute: string) => void;
 };
+
+type TagItemProps = TreeItemComponentProps<MinimalTreeItemData>;
 
 /*
  * Here's the component that will render a single row of your tree
@@ -150,7 +172,7 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
   const { onRemove, onSave, ...restProps } = props;
   const [isEditing, setIsEditing] = useState(false);
   const [editedLabel, setEditedLabel] = useState(props.item.value);
-  const [editedRoute, setEditedRoute] = useState(props.item.route);
+  const [editedRoute, setEditedRoute] = useState(props.item.route || '');
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -164,7 +186,7 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
   const handleCancel = () => {
     setIsEditing(false);
     setEditedLabel(props.item.value);
-    setEditedRoute(props.item.route);
+    setEditedRoute(props.item.route || '');
   };
 
   return (
@@ -220,6 +242,16 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
 });
 
 TreeItem.displayName = 'TreeItem';
+
+const TagItemComponent = forwardRef<HTMLDivElement, TagItemProps>((props, ref) => {
+  return (
+    <SimpleTreeItemWrapper {...props} ref={ref} className="bg-blue-200 text-black p-2 rounded">
+      <div>{props.item.value}</div>
+    </SimpleTreeItemWrapper>
+  );
+});
+
+TagItemComponent.displayName = 'TagItemComponent';
 
 /*
  * Function to transform the menu items to tree items
