@@ -59,7 +59,7 @@ const ManageTags: React.FC = () => {
   return (
     <NonSSRWrapper>
       <div className="container mx-auto my-8 p-4 shadow-lg rounded">
-        <div className="flex flex-row justify-start items-center my-8 p-4 gap-2">
+        <div className="flex flex-row justify-start items-center my-8 p-4 gap-2 text-black">
           <input
             type="text"
             placeholder="Label"
