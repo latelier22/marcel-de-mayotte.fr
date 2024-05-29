@@ -13,6 +13,7 @@ const ManageTags: React.FC = () => {
   const fetchAndSetMenus = useMenuStore((state) => state.fetchAndSetMenus);
   const addMenuItem = useMenuStore((state) => state.addMenuItem);
   const deleteMenuItem = useMenuStore((state) => state.deleteMenuItem);
+  const updateMenuItem = useMenuStore((state) => state.updateMenuItem);
   const [items, setItems] = useState([]);
   const [newLabel, setNewLabel] = useState('');
   const [newRoute, setNewRoute] = useState('/catalogue');
@@ -62,8 +63,26 @@ const ManageTags: React.FC = () => {
     }
   };
 
+  const handleUpdateItem = async (itemId, newLabel, newRoute) => {
+    const updatedItem = {
+      id: itemId,
+      label: newLabel,
+      route: newRoute,
+      order: items.find(item => item.id === itemId).order,
+      parent: items.find(item => item.id === itemId).parent,
+    };
+
+    try {
+      await updateMenuItem(updatedItem);
+      // Refetch and set the menus to update the state with the updated item
+      await fetchAndSetMenus();
+    } catch (error) {
+      console.error('Failed to update menu item:', error);
+    }
+  };
+
   const TreeItemComponent = forwardRef<HTMLDivElement, TreeItemComponentProps<MinimalTreeItemData>>((props, ref) => (
-    <TreeItem {...props} ref={ref} onRemove={() => handleDeleteItem(props.item.id)} />
+    <TreeItem {...props} ref={ref} onRemove={() => handleDeleteItem(props.item.id)} onSave={(newLabel, newRoute) => handleUpdateItem(props.item.id, newLabel, newRoute)} />
   ));
 
   TreeItemComponent.displayName = 'TreeItemComponent';
@@ -106,28 +125,86 @@ const ManageTags: React.FC = () => {
 type MinimalTreeItemData = {
   value: string;
   id: string;
+  route: string;
 };
 
 type TreeItemProps = TreeItemComponentProps<MinimalTreeItemData> & {
   onRemove: () => void;
+  onSave: (newLabel: string, newRoute: string) => void;
 };
 
 /*
  * Here's the component that will render a single row of your tree
  */
 const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
+  const { onRemove, onSave, ...restProps } = props;
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedLabel, setEditedLabel] = useState(props.item.value);
+  const [editedRoute, setEditedRoute] = useState(props.item.route);
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSave = () => {
+    onSave(editedLabel, editedRoute);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditedLabel(props.item.value);
+    setEditedRoute(props.item.route);
+  };
+
   return (
-    <SimpleTreeItemWrapper {...props} ref={ref} className="bg-gray-200 text-black p-2 rounded flex justify-between items-center">
-      <div>{props.item.value}</div>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          props.onRemove();
-        }}
-        className="text-red-500 ml-4"
-      >
-        ✖
-      </button>
+    <SimpleTreeItemWrapper {...restProps} ref={ref} className="bg-gray-200 text-black p-2 rounded flex justify-between items-center">
+      {isEditing ? (
+        <div className="flex items-center">
+          <input
+            type="text"
+            value={editedLabel}
+            onChange={(e) => setEditedLabel(e.target.value)}
+            className="border p-1 rounded"
+          />
+          <input
+            type="text"
+            value={editedRoute}
+            onChange={(e) => setEditedRoute(e.target.value)}
+            className="border p-1 rounded"
+          />
+          <button onClick={handleSave} className="bg-blue-500 text-white px-2 py-1 rounded ml-2">
+            Save
+          </button>
+          <button onClick={handleCancel} className="bg-gray-500 text-white px-2 py-1 rounded ml-2">
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <>
+          <div>{props.item.value}</div>
+          <div className="flex items-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit();
+              }}
+              className="text-blue-500 ml-4"
+            >
+              ✎
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
+              className="text-red-500 ml-4"
+            >
+              ✖
+            </button>
+          </div>
+        </>
+      )}
     </SimpleTreeItemWrapper>
   );
 });
