@@ -13,6 +13,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
   const [titles, setTitles] = useState({});
   const [isUploading, setIsUploading] = useState(false);
   const [importedFilesCount, setImportedFilesCount] = useState(0);
+  const [cancelledFilesCount, setCancelledFilesCount] = useState(0);
   const fileInputRef = useRef(null);
   const containerRef = useRef(null);
 
@@ -173,9 +174,6 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
       setIsUploading(false);
     }
   };
-
-
-
 
   const handleDeleteImages = async (fileIds) => {
     try {
@@ -413,8 +411,17 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
           return file;
         })
       );
+
+      // Increment cancelledFilesCount
+      setCancelledFilesCount((prevCount) => prevCount + 1);
     } catch (error) {
       console.error("Failed to cancel import:", error);
+    }
+  };
+
+  const handleBulkCancelImport = async () => {
+    for (const fileId of selectedFileIds) {
+      await handleCancelImport(fileId);
     }
   };
 
@@ -452,37 +459,20 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
 
 
   return (
-    <div
-      ref={containerRef}
-      className="container mx-auto my-8 p-4 shadow-lg rounded"
-    >
+    <div ref={containerRef} className="container mx-auto my-8 p-4 shadow-lg rounded">
       <DotLoaderSpinner isLoading={isUploading} />
       <div className="flex flex-row justify-start items-center my-8 p-4 gap-2">
         <div className="bg-green-500 text-white px-4 py-2 rounded">
-          <button
-            onClick={() => fileInputRef.current.click()}
-            className="bg-green-500 text-white px-4 py-2 rounded"
-          >
+          <button onClick={() => fileInputRef.current.click()} className="bg-green-500 text-white px-4 py-2 rounded">
             Upload Image
           </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleUploadImage}
-            multiple
-          />
+          <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleUploadImage} multiple />
         </div>
         <button onClick={handleShowImported} className="bg-orange-500 text-white px-4 py-2 rounded">
           SHOW IMPORTED
         </button>
-        <button
-          onClick={handleSelectAll}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          {selectedFileIds.length === files.length
-            ? "Deselect All"
-            : "Select All"}
+        <button onClick={handleSelectAll} className="bg-blue-500 text-white px-4 py-2 rounded">
+          {selectedFileIds.length === files.length ? "Deselect All" : "Select All"}
         </button>
         {selectedFileIds.length >= 2 && (
           <>
@@ -492,9 +482,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
                 handleImportImage(selectedFileIds);
               }}
               disabled={!isMultiImportEnabled()}
-              className={`bg-green-500 text-white px-4 py-2 rounded ${
-                !isMultiImportEnabled() ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`bg-green-500 text-white px-4 py-2 rounded ${!isMultiImportEnabled() ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               Import
             </button>
@@ -513,16 +501,21 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
             </button>
           </>
         )}
-        <input
-          type="checkbox"
-          className="ml-4"
-          onChange={(e) => handleBulkPublishedCheckboxChange(e.target.checked)}
-        />{" "}
-        Publish All Selected
+        <input type="checkbox" className="ml-4" onChange={(e) => handleBulkPublishedCheckboxChange(e.target.checked)} /> Publish All Selected
+        {selectedFileIds.length > 0 && (
+          <button onClick={handleBulkCancelImport} className="bg-yellow-500 text-white px-4 py-2 rounded">
+            Cancel Import
+          </button>
+        )}
       </div>
       {importedFilesCount > 0 && (
         <div className="bg-green-200 text-green-800 text-center p-2 my-4 rounded">
           {importedFilesCount} fichiers ont bien été importés
+        </div>
+      )}
+      {cancelledFilesCount > 0 && (
+        <div className="bg-red-200 text-red-800 text-center p-2 my-4 rounded">
+          {cancelledFilesCount} fichiers ont bien été retirés du catalogue
         </div>
       )}
       <table className="w-full">
@@ -532,11 +525,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
             <th className="py-2">Image</th>
             <th className="py-2 w-1/5">
               Name
-              <input
-                className="ml-8"
-                type="checkbox"
-                onChange={(e) => handleBulkNameCheckboxChange(e.target.checked)}
-              />
+              <input className="ml-8" type="checkbox" onChange={(e) => handleBulkNameCheckboxChange(e.target.checked)} />
             </th>
             <th className="py-2 w-1/5">Title</th>
             <th className="py-2 w-1/5">Tags</th>
@@ -550,134 +539,67 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
           </tr>
         </thead>
         <tbody>
-          {files
-            .slice()
-            .reverse()
-            .map((file) => (
-              <tr
-                key={file.id}
-                className={`${
-                  selectedFileIds.includes(file.id)
-                    ? "border-green-500 border-solid border-2 rounded-md"
-                    : ""
-                } text-center cursor-pointer hover:bg-gray-800`}
-                onClick={() => handleFileClick(file.id)}
-              >
-                <td className="py-2">{file.id}</td>
-                <td className="py-2">
-                  <ImageWithFallback key={file.id} file={file} />
-                </td>
-                <td className="py-2 w-1/5">
-                  {file.name}
-                  <input
-                    className="ml-8"
-                    type="checkbox"
-                    checked={
-                      titles[file.id] === file.name.replace(/\.[^/.]+$/, "")
-                    }
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) =>
-                      handleNameCheckboxChange(file.id, e.target.checked)
-                    }
-                  />
-                </td>
-                <td className="py-2 w-1/5">
-                  <input
-                    type="text"
-                    value={titles[file.id] || ""}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) =>
-                      setTitles({ ...titles, [file.id]: e.target.value })
-                    }
-                    placeholder="Enter title"
-                    className="w-full px-2 py-1 border rounded border-gold-700 bg-black text-gold-400"
-                  />
-                </td>
-                <td className="py-2 w-1/5">
-                  {file.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-block bg-blue-500 text-white rounded-full px-2 py-1 text-xs font-bold mr-1"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </td>
-                <td className="py-2">
-                  <input
-                    type="checkbox"
-                    checked={file.published}
-                    onClick={(e) => e.stopPropagation()}
-                    onChange={(e) => {
-                      const updatedFiles = files.map((f) =>
-                        f.id === file.id
-                          ? { ...f, published: e.target.checked }
-                          : f
-                      );
-                      setFiles(updatedFiles);
-                    }}
-                  />
-                </td>
-                <td className="py-2">{file.width}</td>
-                <td className="py-2">{file.height}</td>
-                <td className="py-2">{file.size} ko</td>
-                <td className="py-2">{renderPostsTitles(file)}</td>{" "}
-                {/* New Column Data */}
-                <td className="py-2">
-                  {selectedFileIds.length === 1 &&
-                    selectedFileIds.includes(file.id) && (
-                      <>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleImportImage([file.id]);
-                          }}
-                          disabled={!titles[file.id] || file.imported}
-                          className={`bg-green-500 text-white px-4 py-2 rounded ${
-                            !titles[file.id]
-                              ? "opacity-50 cursor-not-allowed"
-                              : ""
-                          }`}
-                        >
-                          Import
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteButtonClick(file.id);
-                          }}
-                          className={`bg-red-500 text-white px-4 py-2 rounded ${
-                            file.imported
-                              ? "opacity-50 cursor-not-allowed "
-                              : ""
-                          }`}
-                          disabled={file.imported}
-                        >
-                          Delete
-                        </button>
-                        {file.imported && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCancelImport(file.id);
-                            }}
-                            className="bg-yellow-500 text-white px-4 py-2 rounded"
-                          >
-                            Cancel Import
-                          </button>
-                        )}
-                      </>
+          {files.slice().reverse().map((file) => (
+            <tr key={file.id} className={`${selectedFileIds.includes(file.id) ? "border-green-500 border-solid border-2 rounded-md" : ""} text-center cursor-pointer hover:bg-gray-800`} onClick={() => handleFileClick(file.id)}>
+              <td className="py-2">{file.id}</td>
+              <td className="py-2"><ImageWithFallback key={file.id} file={file} /></td>
+              <td className="py-2 w-1/5">
+                {file.name}
+                <input className="ml-8" type="checkbox" checked={titles[file.id] === file.name.replace(/\.[^/.]+$/, "")} onClick={(e) => e.stopPropagation()} onChange={(e) => handleNameCheckboxChange(file.id, e.target.checked)} />
+              </td>
+              <td className="py-2 w-1/5">
+                <input type="text" value={titles[file.id] || ""} onClick={(e) => e.stopPropagation()} onChange={(e) => setTitles({ ...titles, [file.id]: e.target.value })} placeholder="Enter title" className="w-full px-2 py-1 border rounded border-gold-700 bg-black text-gold-400" />
+              </td>
+              <td className="py-2 w-1/5">
+                {file.tags.map((tag) => (
+                  <span key={tag} className="inline-block bg-blue-500 text-white rounded-full px-2 py-1 text-xs font-bold mr-1">{tag}</span>
+                ))}
+              </td>
+              <td className="py-2">
+                <input type="checkbox" checked={file.published} onClick={(e) => e.stopPropagation()} onChange={(e) => {
+                  const updatedFiles = files.map((f) => f.id === file.id ? { ...f, published: e.target.checked } : f);
+                  setFiles(updatedFiles);
+                }} />
+              </td>
+              <td className="py-2">{file.width}</td>
+              <td className="py-2">{file.height}</td>
+              <td className="py-2">{file.size} ko</td>
+              <td className="py-2">{renderPostsTitles(file)}</td> {/* New Column Data */}
+              <td className="py-2">
+                {selectedFileIds.length === 1 && selectedFileIds.includes(file.id) && (
+                  <>
+                    <button onClick={(e) => {
+                      e.stopPropagation();
+                      handleImportImage([file.id]);
+                    }} disabled={!titles[file.id] || file.imported} className={`bg-green-500 text-white px-4 py-2 rounded ${!titles[file.id] ? "opacity-50 cursor-not-allowed" : ""}`}>
+                      Import
+                    </button>
+                    <button onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteButtonClick(file.id);
+                    }} className={`bg-red-500 text-white px-4 py-2 rounded ${file.imported ? "opacity-50 cursor-not-allowed " : ""}`} disabled={file.imported}>
+                      Delete
+                    </button>
+                    {file.imported && (
+                      <button onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancelImport(file.id);
+                      }} className="bg-yellow-500 text-white px-4 py-2 rounded">
+                        Cancel Import
+                      </button>
                     )}
-                </td>
-                <td className="py-2">
-                  {file.imported ? (
-                    <span className="text-green-500 font-bold">Imported</span>
-                  ) : (
-                    <span className="text-red-500 font-bold">Non Imported</span>
-                  )}
-                </td>
-              </tr>
-            ))}
+                  </>
+                )}
+              </td>
+              <td className="py-2">
+                {file.imported ? (
+                  <span className="text-green-500 font-bold">Imported</span>
+                ) : (
+                  <span className="text-red-500 font-bold">Non Imported</span>
+                )}
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
