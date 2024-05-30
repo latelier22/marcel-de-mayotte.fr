@@ -8,6 +8,7 @@ import {
 } from 'dnd-kit-sortable-tree';
 import NonSSRWrapper from '../../components/NonSSRWrapper';
 
+
 const ManageTags: React.FC = () => {
   const menuItems = useMenuStore((state) => state.menuItems);
   const fetchAndSetMenus = useMenuStore((state) => state.fetchAndSetMenus);
@@ -17,6 +18,7 @@ const ManageTags: React.FC = () => {
   const updateMenuItems = useMenuStore((state) => state.updateMenuItems);
   const [newLabel, setNewLabel] = useState('');
   const [newRoute, setNewRoute] = useState('/catalogue');
+  const [collapsedItems, setCollapsedItems] = useState({});
 
   useEffect(() => {
     fetchAndSetMenus();
@@ -54,6 +56,13 @@ const ManageTags: React.FC = () => {
     } catch (error) {
       console.error('Failed to delete menu item:', error);
     }
+  };
+
+  const handleCollapse = (itemId) => {
+    setCollapsedItems(prev => ({
+      ...prev,
+      [itemId]: !prev[itemId]
+    }));
   };
 
   const findItemById = (items, id) => {
@@ -98,6 +107,8 @@ const ManageTags: React.FC = () => {
       ref={ref}
       onRemove={() => handleDeleteItem(props.item.id)}
       onSave={(newLabel, newRoute) => handleUpdateItem(props.item.id, newLabel, newRoute)}
+      onCollapse={() => handleCollapse(props.item.id)}
+      collapsed={collapsedItems[props.item.id]}
     />
   ));
 
@@ -147,10 +158,12 @@ type MinimalTreeItemData = {
 type TreeItemProps = TreeItemComponentProps<MinimalTreeItemData> & {
   onRemove: () => void;
   onSave: (newLabel: string, newRoute: string) => void;
+  onCollapse: () => void;
+  collapsed: boolean;
 };
 
 const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
-  const { onRemove, onSave, ...restProps } = props;
+  const { onRemove, onSave, onCollapse, collapsed, ...restProps } = props;
   const [isEditing, setIsEditing] = useState(false);
   const [editedLabel, setEditedLabel] = useState(props.item.label);
   const [editedRoute, setEditedRoute] = useState(props.item.route);
@@ -199,6 +212,17 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
         </div>
       ) : (
         <>
+         {props.item.children && props.item.children.length > 0 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCollapse();
+                }}
+                className="text-black ml-4"
+              >
+                {collapsed ? '▶' : '▼'}
+              </button>
+            )}
           <div>{props.item.label}</div>
           <div className="flex items-center">
             <button
@@ -219,6 +243,7 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
             >
               ✖
             </button>
+           
           </div>
         </>
       )}
@@ -227,6 +252,8 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
 });
 
 TreeItem.displayName = 'TreeItem';
+
+export default ManageTags;
 
 /*
  * Function to transform tree items back to menu items
@@ -241,5 +268,3 @@ const transformTreeItemsToMenuItems = (treeItems, parent = null) => {
     parent: parent,
   }));
 };
-
-export default ManageTags;
