@@ -1,0 +1,67 @@
+import { create } from 'zustand';
+
+const useTagStore = create((set) => ({
+  tagItems: [],
+  fetchAndSetTags: async () => {
+    try {
+      const response = await fetch('/api/getTags');
+      const data = await response.json();
+      set({ tagItems: data });
+    } catch (error) {
+      console.error('Failed to fetch tags:', error);
+    }
+  },
+  addTagItem: async (newTag) => {
+    try {
+      const response = await fetch('/api/createTag', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTag),
+      });
+      const createdTag = await response.json();
+      set((state) => ({
+        tagItems: [...state.tagItems, createdTag],
+      }));
+    } catch (error) {
+      console.error('Failed to add tag item:', error);
+    }
+  },
+  deleteTagItem: async (tagId) => {
+    try {
+      await fetch(`/api/deleteTag`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: tagId }),
+      });
+      set((state) => ({
+        tagItems: state.tagItems.filter((tag) => tag.id !== tagId),
+      }));
+    } catch (error) {
+      console.error('Failed to delete tag item:', error);
+    }
+  },
+  updateTagItem: async (updatedTag) => {
+    try {
+      await fetch(`/api/editTag`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTag),
+      });
+      set((state) => ({
+        tagItems: state.tagItems.map((tag) =>
+          tag.id === updatedTag.id ? updatedTag : tag
+        ),
+      }));
+    } catch (error) {
+      console.error('Failed to update tag item:', error);
+    }
+  },
+}));
+
+export default useTagStore;
