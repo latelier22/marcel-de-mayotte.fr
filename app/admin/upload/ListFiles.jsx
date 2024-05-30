@@ -477,7 +477,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
           SHOW IMPORTED
         </button>
         <button
-          onClick={handleShowImported}
+          onClick={handleSelectAll}
           className="bg-blue-500 text-white px-4 py-2 rounded"
         >
           {selectedFileIds.length === files.length
