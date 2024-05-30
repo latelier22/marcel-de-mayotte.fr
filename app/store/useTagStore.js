@@ -11,16 +11,18 @@ const useTagStore = create((set) => ({
         console.error('Failed to fetch tags:', error);
       }
     },
-    addTagItem: async (newTag) => {
+    addTagItem: async (tagName, tagSlug) => {
       try {
-        const response = await fetch('/api/createTag', {
-          method: 'POST',
+        const response = await fetch("/api/createTag", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(newTag),
+          body: JSON.stringify({ tagName, tagSlug }),
         });
+  
         const createdTag = await response.json();
+        console.log("createdTag",createdTag)
         set((state) => ({
           tagItems: [...state.tagItems, createdTag],
         }));

@@ -26,9 +26,10 @@ const TagsTree: React.FC<{}> = () => {
       name: newTagName,
       slug: newTagName.toLowerCase().replace(/\s+/g, '-'),
     };
-
+    console.log("newTag", newTag)
     try {
-      await addTagItem(newTag);
+      const response = await addTagItem(newTag.name, newTag.slug);
+      console.log(response)
       setNewTagName('');
     } catch (error) {
       console.error('Failed to add new tag:', error);
@@ -53,7 +54,8 @@ const TagsTree: React.FC<{}> = () => {
     console.log("updatedTag",updatedTag)
 
     try {
-      await updateTagItem(updatedTag);
+      const response = await updateTagItem(updatedTag);
+      console.log(response)
     } catch (error) {
       console.error('Failed to update tag:', error);
     }
