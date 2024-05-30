@@ -14,7 +14,7 @@ const ManageTags: React.FC = () => {
   const addMenuItem = useMenuStore((state) => state.addMenuItem);
   const deleteMenuItem = useMenuStore((state) => state.deleteMenuItem);
   const updateMenuItem = useMenuStore((state) => state.updateMenuItem);
-  const [items, setItems] = useState([]);
+  const updateMenuItems = useMenuStore((state) => state.updateMenuItems);
   const [newLabel, setNewLabel] = useState('');
   const [newRoute, setNewRoute] = useState('/catalogue');
 
@@ -22,21 +22,17 @@ const ManageTags: React.FC = () => {
     fetchAndSetMenus();
   }, [fetchAndSetMenus]);
 
-  useEffect(() => {
-    setItems(transformMenuItemsToTreeItems(menuItems));
-  }, [menuItems]);
-
   const handleItemsChanged = async (updatedItems) => {
-    setItems(updatedItems);
     const updatedMenuItems = transformTreeItemsToMenuItems(updatedItems);
-    await useMenuStore.getState().updateMenuItems(updatedMenuItems);
+    await updateMenuItems(updatedMenuItems);
+    await fetchAndSetMenus();
   };
 
   const handleAddItem = async () => {
     const newItem = {
       label: newLabel,
       route: newRoute,
-      order: items.length,
+      order: menuItems.length,
       children: [],
       parent: null,
     };
@@ -72,18 +68,20 @@ const ManageTags: React.FC = () => {
   };
 
   const handleUpdateItem = async (itemId, newLabel, newRoute) => {
-    const item = findItemById(items, itemId);
+    const item = findItemById(menuItems, itemId);
     if (!item) {
       console.error(`Item with id ${itemId} not found`);
       return;
     }
 
+    if (item.label === newLabel && item.route === newRoute) {
+      return;
+    }
+
     const updatedItem = {
-      id: itemId,
+      ...item,
       label: newLabel,
       route: newRoute,
-      order: item.order,
-      parent: item.parent,
     };
 
     try {
@@ -95,7 +93,12 @@ const ManageTags: React.FC = () => {
   };
 
   const TreeItemComponent = forwardRef<HTMLDivElement, TreeItemComponentProps<MinimalTreeItemData>>((props, ref) => (
-    <TreeItem {...props} ref={ref} onRemove={() => handleDeleteItem(props.item.id)} onSave={(newLabel, newRoute) => handleUpdateItem(props.item.id, newLabel, newRoute)} />
+    <TreeItem
+      {...props}
+      ref={ref}
+      onRemove={() => handleDeleteItem(props.item.id)}
+      onSave={(newLabel, newRoute) => handleUpdateItem(props.item.id, newLabel, newRoute)}
+    />
   ));
 
   TreeItemComponent.displayName = 'TreeItemComponent';
@@ -126,7 +129,7 @@ const ManageTags: React.FC = () => {
           </button>
         </div>
         <SortableTree
-          items={items}
+          items={menuItems}
           onItemsChanged={handleItemsChanged}
           TreeItemComponent={TreeItemComponent}
         />
@@ -136,7 +139,7 @@ const ManageTags: React.FC = () => {
 };
 
 type MinimalTreeItemData = {
-  value: string;
+  label: string;
   id: string;
   route: string;
 };
@@ -146,45 +149,46 @@ type TreeItemProps = TreeItemComponentProps<MinimalTreeItemData> & {
   onSave: (newLabel: string, newRoute: string) => void;
 };
 
-/*
- * Here's the component that will render a single row of your tree
- */
 const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
   const { onRemove, onSave, ...restProps } = props;
   const [isEditing, setIsEditing] = useState(false);
-  const [editedLabel, setEditedLabel] = useState(props.item.value);
+  const [editedLabel, setEditedLabel] = useState(props.item.label);
   const [editedRoute, setEditedRoute] = useState(props.item.route);
 
   const handleEdit = () => {
     setIsEditing(true);
   };
 
-  const handleSave = () => {
+  const handleSave = (e) => {
+    e.stopPropagation();
     onSave(editedLabel, editedRoute);
     setIsEditing(false);
   };
 
-  const handleCancel = () => {
+  const handleCancel = (e) => {
+    e.stopPropagation();
     setIsEditing(false);
-    setEditedLabel(props.item.value);
+    setEditedLabel(props.item.label);
     setEditedRoute(props.item.route);
   };
 
   return (
     <SimpleTreeItemWrapper {...restProps} ref={ref} className="bg-gray-200 text-black p-2 rounded flex justify-between items-center">
       {isEditing ? (
-        <div className="flex items-center">
+        <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
           <input
             type="text"
             value={editedLabel}
             onChange={(e) => setEditedLabel(e.target.value)}
             className="border p-1 rounded"
+            onFocus={(e) => e.stopPropagation()} // Prevent exiting edit mode on click
           />
           <input
             type="text"
             value={editedRoute}
             onChange={(e) => setEditedRoute(e.target.value)}
             className="border p-1 rounded"
+            onFocus={(e) => e.stopPropagation()} // Prevent exiting edit mode on click
           />
           <button onClick={handleSave} className="bg-blue-500 text-white px-2 py-1 rounded ml-2">
             Save
@@ -195,7 +199,7 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
         </div>
       ) : (
         <>
-          <div>{props.item.value}</div>
+          <div>{props.item.label}</div>
           <div className="flex items-center">
             <button
               onClick={(e) => {
@@ -225,25 +229,12 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
 TreeItem.displayName = 'TreeItem';
 
 /*
- * Function to transform the menu items to tree items
- */
-const transformMenuItemsToTreeItems = (menuItems) => {
-  const transform = (item) => ({
-    ...item,
-    value: item.label,
-    children: item.children ? item.children.map(transform) : [],
-  });
-
-  return menuItems.map(transform);
-};
-
-/*
  * Function to transform tree items back to menu items
  */
 const transformTreeItemsToMenuItems = (treeItems, parent = null) => {
   return treeItems.map((item, index) => ({
     id: item.id,
-    label: item.value,
+    label: item.label,
     route: item.route,
     order: index,
     children: item.children ? transformTreeItemsToMenuItems(item.children, item.id) : [],

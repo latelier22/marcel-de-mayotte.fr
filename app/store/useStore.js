@@ -86,6 +86,7 @@ const useMenuStore = create((set) => ({
         label: updatedItem.label,
         route: updatedItem.route,
         order: updatedItem.order,
+        children : updatedItem.children,
         parent: updatedItem.parent ? { id: updatedItem.parent } : null,
       },
     };
