@@ -6,11 +6,61 @@ const useTagStore = create((set) => ({
       try {
         const response = await fetch('/api/getTags');
         const data = await response.json();
-        set({ tagItems: data });
+    
+        // Fonction récursive pour transformer les données et ajouter les parents
+        const transformTagItem = (item) => {
+          return {
+            id: item.id,
+            name: item.name,
+            slug: item.slug,
+            order: item.order,
+            children: item.childTags ? item.childTags.map(transformTagItem) : [],
+            parent: item.parentId || null
+          };
+        };
+    
+        // Appliquer la transformation aux données des tags
+        let tagItems = data.map(transformTagItem);
+    
+        // Créer une map des éléments de tags par ID pour faciliter l'assignation des enfants aux parents
+        const tagMap = {};
+        tagItems.forEach(item => {
+          tagMap[item.id] = item;
+        });
+    
+        // Construire l'arbre des tags
+        tagItems.forEach(item => {
+          if (item.parent) {
+            if (!tagMap[item.parent].children) {
+              tagMap[item.parent].children = [];
+            }
+            tagMap[item.parent].children.push(item);
+          }
+        });
+    
+        // Filtrer les éléments de tags pour ne garder que ceux sans parent
+        const rootTagItems = tagItems.filter(item => !item.parent);
+    
+        // Trier les éléments de tags par le champ "order"
+        const sortChildren = (items) => {
+          items.forEach(item => {
+            if (item.children) {
+              item.children.sort((a, b) => a.order - b.order);
+              sortChildren(item.children);
+            }
+          });
+        };
+    
+        rootTagItems.sort((a, b) => a.order - b.order);
+        sortChildren(rootTagItems);
+    
+        set({ tagItems: rootTagItems });
       } catch (error) {
         console.error('Failed to fetch tags:', error);
       }
-    },
+    }
+    ,
+    
     addTagItem: async (tagName, tagSlug) => {
       try {
         const response = await fetch("/api/createTag", {

@@ -18,7 +18,6 @@ const TagsTree: React.FC<{}> = () => {
 
   useEffect(() => {
     fetchAndSetTags();
-    console.log(tagItems)
   }, [fetchAndSetTags]);
 
   const handleAddTagItem = async () => {
@@ -26,10 +25,8 @@ const TagsTree: React.FC<{}> = () => {
       name: newTagName,
       slug: newTagName.toLowerCase().replace(/\s+/g, '-'),
     };
-    console.log("newTag", newTag)
     try {
-      const response = await addTagItem(newTag.name, newTag.slug);
-      console.log(response)
+      await addTagItem(newTag.name, newTag.slug);
       setNewTagName('');
     } catch (error) {
       console.error('Failed to add new tag:', error);
@@ -45,17 +42,13 @@ const TagsTree: React.FC<{}> = () => {
   };
 
   const handleUpdateTagItem = async (tagItem, newName) => {
-    console.log(tagItem.id, newName)
     const updatedTag = {
       id: tagItem.id,
       name: newName,
       slug: newName.toLowerCase().replace(/\s+/g, '-'),
     };
-    console.log("updatedTag",updatedTag)
-
     try {
-      const response = await updateTagItem(tagItem.name,updatedTag);
-      console.log(response)
+      await updateTagItem(tagItem.name, updatedTag);
     } catch (error) {
       console.error('Failed to update tag:', error);
     }
@@ -65,7 +58,7 @@ const TagsTree: React.FC<{}> = () => {
     <TreeItem
       {...props}
       ref={ref}
-      onRemove={() => handleDeleteTagItem(props.item.name,props.item.id)}
+      onRemove={() => handleDeleteTagItem(props.item.name, props.item.id)}
       onSave={(newName) => handleUpdateTagItem(props.item, newName)}
     />
   ));
@@ -104,6 +97,7 @@ type TagItemData = {
   name: string;
   id: string;
   slug: string;
+  order: number;
 };
 
 type TreeItemProps = TreeItemComponentProps<TagItemData> & {
@@ -152,6 +146,8 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
         </div>
       ) : (
         <>
+        <div>ID: {props.item.id} / </div>
+          <div> order({props.item.order}) / </div>
           <div>{props.item.name}</div>
           <div className="flex items-center">
             <button
