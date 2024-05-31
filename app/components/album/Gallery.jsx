@@ -1051,7 +1051,10 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
 
               return (
                 <>
-                  <div onClick={(e) => handlePhotoClick(e, photo.id)} style={{ ...wrapperStyle, border: getBorderStyle(photo), position: "relative", opacity: photo.published ? 1 : 0.2 }} title={photo.src}>
+                  <div onClick={(e) => handlePhotoClick(e, photo.id)} style={{ ...wrapperStyle, border: getBorderStyle(photo), position: "relative", opacity: photo.published ? 1 : 0.2,maxWidth: "33.33%", }
+                }
+                className="mb-4"
+                 title={photo.src}>
                     {zoomGallery >= 200 && (
                       <EditableButton
                         text={titles[photo.id] || ""}
