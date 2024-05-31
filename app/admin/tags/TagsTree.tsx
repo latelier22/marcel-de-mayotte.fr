@@ -44,17 +44,17 @@ const TagsTree: React.FC<{}> = () => {
     }
   };
 
-  const handleUpdateTagItem = async (tagId, newName) => {
-    console.log(tagId, newName)
+  const handleUpdateTagItem = async (tagItem, newName) => {
+    console.log(tagItem.id, newName)
     const updatedTag = {
-      id: tagId,
+      id: tagItem.id,
       name: newName,
       slug: newName.toLowerCase().replace(/\s+/g, '-'),
     };
     console.log("updatedTag",updatedTag)
 
     try {
-      const response = await updateTagItem(updatedTag);
+      const response = await updateTagItem(tagItem.name,updatedTag);
       console.log(response)
     } catch (error) {
       console.error('Failed to update tag:', error);
@@ -66,7 +66,7 @@ const TagsTree: React.FC<{}> = () => {
       {...props}
       ref={ref}
       onRemove={() => handleDeleteTagItem(props.item.name,props.item.id)}
-      onSave={(newName) => handleUpdateTagItem(props.item.id, newName)}
+      onSave={(newName) => handleUpdateTagItem(props.item, newName)}
     />
   ));
 

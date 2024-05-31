@@ -46,14 +46,18 @@ const useTagStore = create((set) => ({
         console.error('Failed to delete tag item:', error);
       }
     },
-    updateTagItem: async (updatedTag) => {
+    // const handleEditTag = async (oldTagName, newTagName) =>
+    updateTagItem: async (oldTagName, updatedTag) => {
+      const newTagName = updatedTag.name
+      console.log("oldTagName, newTagName",oldTagName, newTagName)
+      console.log("updatedTag",updatedTag)
       try {
         await fetch(`/api/editTag`, {
-          method: 'PUT',
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(updatedTag),
+          body: JSON.stringify({oldTagName, newTagName }),
         });
         set((state) => ({
           tagItems: state.tagItems.map((tag) =>
