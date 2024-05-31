@@ -34,7 +34,7 @@ async function Page  () {
             <Suspense fallback={<div className="flex justify-center items-center"><DotLoaderSpinner isLoading={true}/></div>}>
                {/* Liste des fichiers */}
                <div className="container mx-auto my-8 p-4 shadow-lg rounded">
-                   <ListVideos allFiles={files} />
+                   <ListVideos allFiles={files.filter(file => file.mime.startsWith("video/"))} />
                 </div>
             </Suspense>
         
