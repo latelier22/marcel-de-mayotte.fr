@@ -256,102 +256,35 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
     }
   };
 
-  const handleImportImage = async (selectedFileIds) => {
+  const handleImportVideos = async (selectedFileIds) => {
     const selectedFiles = files.filter((file) =>
       selectedFileIds.includes(file.id)
     );
+  
     if (selectedFiles.length === 0) {
       console.error("No files selected");
       return;
     }
-
+  
     for (const fileId of selectedFileIds) {
       if (!titles[fileId]) {
         console.error(`Title for file ID ${fileId} is not filled`);
         return;
       }
     }
-
+  
     try {
-      const photosData = selectedFiles.map((file) => ({
-        numero: file.id,
-        name: file.name,
-        dimensions: `${file.width}x${file.height}`,
-        url: `${file.url}?format=webp&width=800`,
-        width: file.width,
-        height: file.height,
-        title: titles[file.id],
-        description: file.description || "",
-        published: file.published || false,
-        tags: [...file.tags, "CATALOGUE COMPLET"],
-      }));
-
-      // Make sure this is only called once per import action
-      const response = await fetch("/api/importPhotos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ photos: photosData }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to import images");
+      for (const file of selectedFiles) {
+        const response = await myFetch(`/api/video/convert/${file.id}`, "GET", null, "convert video");
+  
+        if (!response.ok) {
+          throw new Error(`Failed to convert video with ID ${file.id}`);
+        }
+  
+        const result = await response.json();
+        console.log(result);
       }
-
-      const result = await response.json();
-      const photoIds = result.photoIds;
-
-      // Ensure the following loop does not create duplicates
-      for (const [index, photoId] of photoIds.entries()) {
-        const fileId = selectedFiles[index].id;
-
-        await myFetch(
-          "/api/pictures",
-          "POST",
-          {
-            data: {
-              imported: true,
-              photoId: photoId,
-              fileId: fileId,
-              importedAt: new Date().toISOString(),
-              uploadedAt:
-                selectedFiles[index].uploadedAt || new Date().toISOString(),
-            },
-          },
-          "import pictures"
-        );
-      }
-
-      const tagResponse1 = await fetch("/api/updateTagInBulk", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          addTag: true,
-          selectedPhotoIds: photoIds,
-          selectedTag: "IMPORT",
-        }),
-      });
-
-      const resultTag1 = await tagResponse1.json();
-      console.log("Photos added and tagged successfully:", result, resultTag1);
-      const tagResponse2 = await fetch("/api/updateTagInBulk", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          addTag: true,
-          selectedPhotoIds: photoIds,
-          selectedTag: "CATALOGUE COMPLET",
-        }),
-      });
-
-      const resultTag2 = await tagResponse2.json();
-      console.log("Photos added and tagged successfully:", result, resultTag2);
-
+  
       // Update local state to reflect imported status
       setFiles((prevFiles) =>
         prevFiles.map((file) => {
@@ -361,13 +294,14 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
           return file;
         })
       );
-
+  
       // Update importedFilesCount
       setImportedFilesCount(selectedFileIds.length);
     } catch (error) {
-      console.error("Failed to import images:", error);
+      console.error("Failed to import videos:", error);
     }
   };
+  
 
   const handleCancelImport = async (fileId) => {
     try {
@@ -466,7 +400,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
       <div className="flex flex-row justify-start items-center my-8 p-4 gap-2">
         <div className="bg-green-500 text-white px-4 py-2 rounded">
           <button onClick={() => fileInputRef.current.click()} className="bg-green-500 text-white px-4 py-2 rounded">
-            Upload Image
+            Upload Vidéo(s)
           </button>
           <input type="file" accept="video/*"  ref={fileInputRef} style={{ display: "none" }} onChange={handleUploadImage} multiple />
         </div>
@@ -481,12 +415,12 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleImportImage(selectedFileIds);
+                handleImportVideos(selectedFileIds);
               }}
               disabled={!isMultiImportEnabled()}
               className={`bg-green-500 text-white px-4 py-2 rounded ${!isMultiImportEnabled() ? "opacity-50 cursor-not-allowed" : ""}`}
             >
-              Import
+              IMPORT VIDEOS
             </button>
             <button
               onClick={(e) => {
@@ -572,7 +506,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
                   <>
                     <button onClick={(e) => {
                       e.stopPropagation();
-                      handleImportImage([file.id]);
+                      handleImportVideos([file.id]);
                     }} disabled={!titles[file.id] || file.imported} className={`bg-green-500 text-white px-4 py-2 rounded ${!titles[file.id] ? "opacity-50 cursor-not-allowed" : ""}`}>
                       Import
                     </button>
