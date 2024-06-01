@@ -53,6 +53,7 @@ const useMenuStore = create((set) => ({
 
     rootMenuItems.sort((a, b) => a.order - b.order);
     sortChildren(rootMenuItems);
+    console.log("rootMenuItems",)
 
     set({ menuItems: rootMenuItems });
   },

@@ -11,6 +11,7 @@ import ShowAdminToggleButton from "./components/album/icons/ShowAdminToggleButto
 import Dropdown from "./DropDown";
 import { useSelector } from 'react-redux';
 import useMenuStore from 'store/useStore';
+import Image from "next/image";
 
 const NavbarClient = () => {
   const menuItems = useMenuStore((state) => state.menuItems);
@@ -21,8 +22,8 @@ const NavbarClient = () => {
   const router = useRouter();
 
   // Séparer l'item ADMIN des autres items de menu
-  const regularMenuItems = menuItems.filter(item => item.label !== 'ADMIN');
-  const adminMenuItem = menuItems.find(item => item.label === 'ADMIN');
+  const regularMenuItems = menuItems.filter(item => item.route !== '/admin');
+  const adminMenuItem = menuItems.find(item => item.route === '/admin');
 
   useEffect(() => {
     const init = async () => {
@@ -35,10 +36,18 @@ const NavbarClient = () => {
   return (
     <>
       <nav className="z-40 md:fixed flex w-full items-center justify-between bg-neutral-200 py-2 text-white shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-black dark:text-gold-500 md:flex-wrap" data-te-navbar-ref>
-        <div className="flex w-full items-center px-3">
-          <a href="/" className="md:hidden ml-2">
-            <img src={site.logo.url} className="h-24 w-auto logo" alt="Accueil" />
+        <div className="flex flex-row w-full justify-center items-center px-3">
+          
+          <a href="/" className="md:hidden ml-2 h-24 w-auto">
+            <Image src={site.logo.url}
+             alt="Accueil"
+             width={24}
+             height={24}
+             />
           </a>
+
+        
+       
           <div className="flex items-center">
             <button
               className="border-0 bg-transparent px-2 text-xl leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-neutral-700 dark:hover:text-white dark:focus:text-white lg:hidden"
