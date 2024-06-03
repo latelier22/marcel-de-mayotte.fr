@@ -1,13 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import myFetch from "../../components/myFetch";
 import DotLoaderSpinner from "../../components/spinners/DotLoaderSpinner";
-
-import uploadVideo from "./uploadVideo"
 
 function ListFiles({ allFiles, allPictures, allPosts }) {
   const [files, setFiles] = useState([]);
