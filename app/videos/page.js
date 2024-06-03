@@ -12,7 +12,7 @@ const Page = () => {
   const pageTitle = page.title;
   const pageDescription = page.description;
   return (
-    <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
+   <>
       <Navbar />
       <HeaderSimple  siteTitle ={site.title} title={pageTitle}/>
 
@@ -21,7 +21,7 @@ const Page = () => {
 
 
       <Footer />
-    </RootLayout>
+      </>
   );
 };
 
