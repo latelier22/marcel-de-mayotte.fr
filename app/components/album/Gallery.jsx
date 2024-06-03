@@ -43,7 +43,6 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
   const [lastSelection, setLastSelection] = useState([]);
   const [photos, setPhotos] = useState(initialPhotos);
   const [allMyTags, setAllMyTags] = useState(allTags);
-  const [mainTags, setMainTags]= useState([]);
   const [selectedTag, setSelectedTag] = useState("");
   const [showTagModal, setShowTagModal] = useState(false);
   const [showRecentsModal, setShowRecentsModal] = useState(false);
@@ -122,35 +121,9 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
       });
     });
 
-    const tagCounts = photos.reduce((acc, photo) => {
-      photo.tags.forEach((tag) => {
-        if (!acc[tag.name]) {
-          acc[tag.name] = 0;
-        }
-        acc[tag.name]++;
-      });
-      return acc;
-    }, {});
-
-    const sortedUsedTags = Array.from(usedTags)
-      .map((tagName) => {
-        const tag = allMyTags.find((t) => t.name === tagName);
-        return { ...tag, count: tagCounts[tagName] || 0 };
-      });
-
-    // Initialiser mainTags
-    const newMainTags = sortedUsedTags.filter(tag => tag.mainTag === true).sort((a, b) => b.count - a.count);
-    const nonMainTags = sortedUsedTags.filter(tag => !tag.mainTag).sort((a, b) => a.name.localeCompare(b.name));
-
-    // Concaténer mainTags en haut suivi de nonMainTags
-    const finalSortedTags = [...newMainTags, ...nonMainTags];
-
-    setUnusedTags(allMyTags.filter(tag => !usedTags.has(tag.name)).map(tag => tag.name));
-    setAllMyTags(finalSortedTags);
-    setMainTags(newMainTags); // Mettre à jour l'état mainTags
-    console.log(mainTags)
-  }, [allMyTags, photos]);
-
+    const newUnusedTags = allMyTags.filter((tag) => !usedTags.has(tag.name)).map((tag) => tag.name).sort();
+    setUnusedTags(newUnusedTags);
+  }, [allMyTags, photos, isShowAdmin]);
 
   const isTagNameExist = (tagName) => {
     return allMyTags.some((tag) => tag.name === tagName);
@@ -293,25 +266,8 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
         });
       }
     });
-  
-    // Convert the Set to an array
-    const tagsArray = Array.from(tags);
-  
-    // Sort the tags with mainTag = true at the top and then alphabetically
-    return tagsArray.sort((a, b) => {
-      const aTag = allMyTags.find(tag => tag.name === a);
-      const bTag = allMyTags.find(tag => tag.name === b);
-  
-      if (aTag.mainTag && !bTag.mainTag) {
-        return -1;
-      } else if (!aTag.mainTag && bTag.mainTag) {
-        return 1;
-      } else {
-        return a.localeCompare(b);
-      }
-    });
-  }, [photos, isVisible, allMyTags]);
-  
+    return Array.from(tags);
+  }, [photos, isVisible]);
 
   const tagCounts = useMemo(() => {
     const counts = {};
@@ -340,23 +296,41 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
     return { counts, selectedCounts };
   }, [photos, selectedPhotoIds]);
 
-  useEffect(() => {
-    const newTagStatus = {};
-    if (selectedPhotoIds.length === 0) {
-      localTags.forEach((tag) => {
-        newTagStatus[tag] = "bg-neutral-500";
-      });
-    } else {
-      localTags.forEach((tag) => {
-        const isTagInAll = selectedPhotoIds.every((id) => photos.find((photo) => photo.id === id)?.tags.some((t) => t.name === tag));
-        const isTagInSome = selectedPhotoIds.some((id) => photos.find((photo) => photo.id === id)?.tags.some((t) => t.name === tag));
+ useEffect(() => {
+  const newTagStatus = {};
+  if (selectedPhotoIds.length === 0) {
+    localTags.forEach((tag) => {
+      newTagStatus[tag] = "bg-neutral-500";
+    });
+  } else {
+    localTags.forEach((tag) => {
+      const isTagInAll = selectedPhotoIds.every((id) => photos.find((photo) => photo.id === id)?.tags.some((t) => t.name === tag));
+      const isTagInSome = selectedPhotoIds.some((id) => photos.find((photo) => photo.id === id)?.tags.some((t) => t.name === tag));
 
-        newTagStatus[tag] = isTagInAll ? "bg-green-500" : isTagInSome ? "bg-orange-500" : "bg-red-500";
-      });
-    }
-    setTagStatus(newTagStatus);
-    console.log(newTagStatus);
-  }, [selectedPhotoIds, photos, localTags]);
+      newTagStatus[tag] = isTagInAll ? "bg-green-500" : isTagInSome ? "bg-orange-500" : "bg-red-500";
+    });
+  }
+
+  // Sort tags so that mainTags are first, followed by other tags alphabetically
+  const sortedTagStatus = Object.fromEntries(
+    Object.entries(newTagStatus).sort((a, b) => {
+      const tagA = allMyTags.find((t) => t.name === a[0]);
+      const tagB = allMyTags.find((t) => t.name === b[0]);
+
+      if (tagA.mainTag && !tagB.mainTag) {
+        return -1;
+      } else if (!tagA.mainTag && tagB.mainTag) {
+        return 1;
+      } else {
+        return a[0].localeCompare(b[0]);
+      }
+    })
+  );
+
+  setTagStatus(sortedTagStatus);
+  console.log(sortedTagStatus);
+}, [selectedPhotoIds, photos, localTags, allMyTags]);
+
 
   const handleTagClick = (tag) => {
     setSelectedTag(tag);
@@ -898,19 +872,18 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
                 Restaurer la sélection ({lastSelection.length})
               </button>
             </div>
-            {Object.entries(tagStatus).map(([tag, color]) => (
-             <button
-             className={`${color} `}
-             key={tag}
-             style={{ margin: "5px" }}
-             onClick={() => handleTagClick(tagName)}
-           >
-                <div className="flex items-center justify-between flex-wrap py-2 px-4">
-                  <div className="flex-wrap text-center">{tag}{tag.mainTag}</div>
-                  <div className="flex-none">{tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}</div>
-                </div>
-              </button>
-            ))}
+            {Object.entries(tagStatus).map(([tag, color]) => {
+  const tagInfo = allMyTags.find(t => t.name === tag);
+  const borderClass = tagInfo && tagInfo.mainTag ? 'border-white border-4' : '';
+  return (
+    <button className={`${color} ${borderClass}`} key={tag} style={{ margin: "5px" }} onClick={() => handleTagClick(tag)}>
+      <div className="flex items-center justify-between flex-wrap py-2 px-4">
+        <div className="flex-wrap text-center">{tag}</div>
+        <div className="flex-none">{tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}</div>
+      </div>
+    </button>
+  );
+})}
 
             <div className="flex flex-row justify-around ">
               <div>
