@@ -441,7 +441,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
     const thumbnailUrl =
       file.formats && file.formats.thumbnail
         ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.formats.thumbnail.url}`
-        : `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.url}`;
+        : `https://placehold.co/100x50/EECC44/000000/png?font=monserrat&text=Importer pour voir miniature`;
 
     return (
       <img

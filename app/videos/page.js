@@ -1,6 +1,5 @@
 import Navbar from "../NavBar";
 import Footer from "../Footer";
-import RootLayout from "../layout";
 import Cards from "../Cards";
 import HeaderSimple from "../headerSimple";
 import { Pages, site } from "../site";
