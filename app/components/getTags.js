@@ -12,8 +12,8 @@ async function getTags() {
     });
 
 
-    const tagsArray = allTags.map ((tag) => {
-      const { name, slug, photos , mainTag, parentId} = tag;
+    const tagsArray = allTags.map((tag) => {
+      const { name, slug, photos, mainTag, parentId } = tag;
       const count = photos.length; // Compter le nombre de photos associées à ce tag
       let url = null;
       if (photos.length > 0) {
@@ -29,9 +29,11 @@ async function getTags() {
         count,
         url: url, // Remplacer par l'URL de la photo aléatoire associée à ce tag
       };
-    })
+    });
 
-    // console.log("tagsArray",tagsArray.slice(0,5))
+    // Trier les tags par ordre alphabétique basé sur le nom
+    tagsArray.sort((a, b) => a.name.localeCompare(b.name));
+
     return tagsArray;
   } catch (error) {
     console.error('Une erreur est survenue lors de la récupération des tags :', error);

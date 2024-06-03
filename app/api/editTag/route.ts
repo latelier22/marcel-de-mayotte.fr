@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import prisma from "../../../prisma/prisma";
 
 export async function POST(request) {
-  const { oldTagName, newTagName } = await request.json();
-console.log("oldTagName, newTagName",oldTagName, newTagName)
+  const { oldTagName, updatedTag} = await request.json();
+console.log("oldTagName, newTagName",oldTagName, updatedTag)
   try {
     // Trouver le tag par son ancien nom
     const tag = await prisma.tag.findUnique({
@@ -33,11 +33,12 @@ console.log("oldTagName, newTagName",oldTagName, newTagName)
         id: tag.id
       },
       data: {
-        name: newTagName
+        name: updatedTag.name, 
+        mainTag : updatedTag.mainTag
       }
     });
 
-    return NextResponse.json({ success: true, message: `Tag name updated from '${oldTagName}' to '${newTagName}' successfully.` });
+    return NextResponse.json({ success: true, message: `Tag name updated from '${oldTagName}' to '${updatedTag.name}' successfully.` });
   } catch (error) {
     console.error("Error in updating tag name:", error);
     return NextResponse.json({

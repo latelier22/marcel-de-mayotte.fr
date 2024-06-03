@@ -15,7 +15,8 @@ const useTagStore = create((set) => ({
             slug: item.slug,
             order: item.order,
             children: item.childTags ? item.childTags.map(transformTagItem) : [],
-            parent: item.parentId || null
+            parent: item.parentId || null,
+            mainTag : item.mainTag
           };
         };
     
@@ -99,7 +100,8 @@ const useTagStore = create((set) => ({
     // const handleEditTag = async (oldTagName, newTagName) =>
     updateTagItem: async (oldTagName, updatedTag) => {
       const newTagName = updatedTag.name
-      console.log("oldTagName, newTagName",oldTagName, newTagName)
+      const newMaintag = updatedTag.mainTag
+      // console.log("oldTagName, newTagName",oldTagName, newTagName)
       console.log("updatedTag",updatedTag)
       try {
         await fetch(`/api/editTag`, {
@@ -107,7 +109,7 @@ const useTagStore = create((set) => ({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({oldTagName, newTagName }),
+          body: JSON.stringify({oldTagName, updatedTag }),
         });
         set((state) => ({
           tagItems: state.tagItems.map((tag) =>

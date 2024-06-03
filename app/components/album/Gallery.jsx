@@ -43,6 +43,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
   const [lastSelection, setLastSelection] = useState([]);
   const [photos, setPhotos] = useState(initialPhotos);
   const [allMyTags, setAllMyTags] = useState(allTags);
+  const [mainTags, setMainTags]= useState([]);
   const [selectedTag, setSelectedTag] = useState("");
   const [showTagModal, setShowTagModal] = useState(false);
   const [showRecentsModal, setShowRecentsModal] = useState(false);
@@ -121,9 +122,35 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
       });
     });
 
-    const newUnusedTags = allMyTags.filter((tag) => !usedTags.has(tag.name)).map((tag) => tag.name).sort();
-    setUnusedTags(newUnusedTags);
-  }, [allMyTags, photos, isShowAdmin]);
+    const tagCounts = photos.reduce((acc, photo) => {
+      photo.tags.forEach((tag) => {
+        if (!acc[tag.name]) {
+          acc[tag.name] = 0;
+        }
+        acc[tag.name]++;
+      });
+      return acc;
+    }, {});
+
+    const sortedUsedTags = Array.from(usedTags)
+      .map((tagName) => {
+        const tag = allMyTags.find((t) => t.name === tagName);
+        return { ...tag, count: tagCounts[tagName] || 0 };
+      });
+
+    // Initialiser mainTags
+    const newMainTags = sortedUsedTags.filter(tag => tag.mainTag === true).sort((a, b) => b.count - a.count);
+    const nonMainTags = sortedUsedTags.filter(tag => !tag.mainTag).sort((a, b) => a.name.localeCompare(b.name));
+
+    // Concaténer mainTags en haut suivi de nonMainTags
+    const finalSortedTags = [...newMainTags, ...nonMainTags];
+
+    setUnusedTags(allMyTags.filter(tag => !usedTags.has(tag.name)).map(tag => tag.name));
+    setAllMyTags(finalSortedTags);
+    setMainTags(newMainTags); // Mettre à jour l'état mainTags
+    console.log(mainTags)
+  }, [allMyTags, photos]);
+
 
   const isTagNameExist = (tagName) => {
     return allMyTags.some((tag) => tag.name === tagName);
@@ -266,8 +293,25 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
         });
       }
     });
-    return Array.from(tags);
-  }, [photos, isVisible]);
+  
+    // Convert the Set to an array
+    const tagsArray = Array.from(tags);
+  
+    // Sort the tags with mainTag = true at the top and then alphabetically
+    return tagsArray.sort((a, b) => {
+      const aTag = allMyTags.find(tag => tag.name === a);
+      const bTag = allMyTags.find(tag => tag.name === b);
+  
+      if (aTag.mainTag && !bTag.mainTag) {
+        return -1;
+      } else if (!aTag.mainTag && bTag.mainTag) {
+        return 1;
+      } else {
+        return a.localeCompare(b);
+      }
+    });
+  }, [photos, isVisible, allMyTags]);
+  
 
   const tagCounts = useMemo(() => {
     const counts = {};
@@ -855,9 +899,14 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
               </button>
             </div>
             {Object.entries(tagStatus).map(([tag, color]) => (
-              <button className={`${color} `} key={tag} style={{ margin: "5px" }} onClick={() => handleTagClick(tag)}>
+             <button
+             className={`${color} `}
+             key={tag}
+             style={{ margin: "5px" }}
+             onClick={() => handleTagClick(tagName)}
+           >
                 <div className="flex items-center justify-between flex-wrap py-2 px-4">
-                  <div className="flex-wrap text-center">{tag}</div>
+                  <div className="flex-wrap text-center">{tag}{tag.mainTag}</div>
                   <div className="flex-none">{tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}</div>
                 </div>
               </button>

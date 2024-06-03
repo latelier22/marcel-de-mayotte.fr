@@ -24,6 +24,7 @@ const TagsTree: React.FC<{}> = () => {
     const newTag = {
       name: newTagName,
       slug: newTagName.toLowerCase().replace(/\s+/g, '-'),
+      mainTag: false, // Default value for new tag
     };
     try {
       await addTagItem(newTag.name, newTag.slug);
@@ -41,11 +42,12 @@ const TagsTree: React.FC<{}> = () => {
     }
   };
 
-  const handleUpdateTagItem = async (tagItem, newName) => {
+  const handleUpdateTagItem = async (tagItem, newName, newMainTag) => {
     const updatedTag = {
       id: tagItem.id,
       name: newName,
       slug: newName.toLowerCase().replace(/\s+/g, '-'),
+      mainTag: newMainTag,
     };
     try {
       await updateTagItem(tagItem.name, updatedTag);
@@ -59,7 +61,7 @@ const TagsTree: React.FC<{}> = () => {
       {...props}
       ref={ref}
       onRemove={() => handleDeleteTagItem(props.item.name, props.item.id)}
-      onSave={(newName) => handleUpdateTagItem(props.item, newName)}
+      onSave={(newName, newMainTag) => handleUpdateTagItem(props.item, newName, newMainTag)}
     />
   ));
 
@@ -98,32 +100,39 @@ type TagItemData = {
   id: string;
   slug: string;
   order: number;
+  mainTag: boolean; // Ajouter cette ligne
 };
 
 type TreeItemProps = TreeItemComponentProps<TagItemData> & {
   onRemove: () => void;
-  onSave: (newName: string) => void;
+  onSave: (newName: string, newMainTag: boolean) => void;
 };
 
 const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
   const { onRemove, onSave, ...restProps } = props;
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(props.item.name);
+  const [editedMainTag, setEditedMainTag] = useState(props.item.mainTag);
 
   const handleEdit = () => {
     setIsEditing(true);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.stopPropagation();
-    onSave(editedName);
-    setIsEditing(false);
+    try {
+      await onSave(editedName, editedMainTag);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to save tag:', error);
+    }
   };
 
   const handleCancel = (e) => {
     e.stopPropagation();
     setIsEditing(false);
     setEditedName(props.item.name);
+    setEditedMainTag(props.item.mainTag);
   };
 
   return (
@@ -137,6 +146,14 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
             className="border p-1 rounded"
             onFocus={(e) => e.stopPropagation()} // Prevent exiting edit mode on click
           />
+          <input
+            type="checkbox"
+            checked={editedMainTag}
+            onChange={(e) => setEditedMainTag(e.target.checked)}
+            className="ml-2"
+            onClick={(e) => e.stopPropagation()} // Prevent exiting edit mode on click
+          />
+          <label className="ml-1">Main Tag</label>
           <button onClick={handleSave} className="bg-blue-500 text-white px-2 py-1 rounded ml-2">
             Save
           </button>
@@ -146,10 +163,17 @@ const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>((props, ref) => {
         </div>
       ) : (
         <>
-        <div>ID: {props.item.id} / </div>
+          <div>ID: {props.item.id} / </div>
           <div> order({props.item.order}) / </div>
           <div>{props.item.name}</div>
           <div className="flex items-center">
+            <input
+              type="checkbox"
+              checked={props.item.mainTag}
+              disabled
+              className="ml-2"
+            />
+            <label className="ml-1">Main Tag</label>
             <button
               onClick={(e) => {
                 e.stopPropagation();

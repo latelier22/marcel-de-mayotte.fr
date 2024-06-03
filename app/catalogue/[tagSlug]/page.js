@@ -89,7 +89,7 @@ async function Page({ params }) {
 
 
   const tagCards = progressionsTags.slice(1, progressionsTags.length).map((tag) => ({
-    title: tag.name,
+    title: tag.name.replace("Progression ",""),
     text: "",
     button: "",
     buttonColor: "bg-gold-500",
