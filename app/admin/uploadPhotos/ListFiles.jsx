@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import myFetch from "../../components/myFetch";
 import DotLoaderSpinner from "../../components/spinners/DotLoaderSpinner";
+import FileTags from "./FileTags";
+import FileTagsClient from "./FileTagsClient";
 
 function ListFiles({ allFiles, allPictures, allPosts }) {
   const [files, setFiles] = useState([]);
@@ -28,13 +30,12 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
     console.log(allPictures.slice().reverse().slice(0, 10));
     const updatedFiles = allFiles.map((file) => {
       const picture = allPictures.find((p) => p.fileId === file.id);
-      if (file.id === 280) {
-        console.log(picture);
-      }
+     
       return {
         ...file,
-        tags: ["IMPORT", "CATALOGUE COMPLET"],
+        tags: [],
         published: false,
+        photoId: picture ? picture.photoId : null,
         imported: picture ? picture.imported : false,
         importedAt: picture ? picture.importedAt : null,
         uploadedAt: new Date(file.updatedAt),
@@ -43,7 +44,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
     });
 
     setFiles(updatedFiles);
-    console.log(files.slice().reverse().slice(0, 3));
+    console.log(files.slice().reverse());
     fetchPostsForFiles(updatedFiles);
   };
 
@@ -665,14 +666,20 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
                 />
               </td>
               <td className="py-2 w-1/5">
-                {file.tags.map((tag) => (
+
+              <td className="py-2 w-1/5">
+                {file.photoId}
+  {file.imported && file.photoId && file.tags.length >0 ? (<FileTagsClient fileTags={fileTags} />): 'No tags'}
+</td>
+
+                {/* {file.tags.map((tag) => (
                   <span
                     key={tag}
                     className="inline-block bg-blue-500 text-white rounded-full px-2 py-1 text-xs font-bold mr-1"
                   >
                     {tag}
                   </span>
-                ))}
+                ))} */}
               </td>
               <td className="py-2">
                 <input
