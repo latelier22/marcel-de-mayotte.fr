@@ -57,13 +57,13 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
   const isActive = !isAdmin || (isAdmin && !isShowAdmin);
   const [searchTerm, setSearchTerm] = useState("");
   const containerRef = useRef(null);
-  const [zoomGallery, setZoomGallery] = useState(350);
+  const [zoomGallery, setZoomGallery] = useState(250);
   const [tagName, setTagName] = useState("");
   const [tagAction, setTagAction] = useState("");
   const [newTagName, setNewTagName] = useState("");
   const [unusedTags, setUnusedTags] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [photosPerPage, setPhotosPerPage] = useState(25);
+  const [photosPerPage, setPhotosPerPage] = useState(100);
   const [recentPhotos, setRecentPhotos] = useState(new Set());
 
   const handleRestoreSelection = () => {
@@ -120,10 +120,28 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
         usedTags.add(tag.name);
       });
     });
-
-    const newUnusedTags = allMyTags.filter((tag) => !usedTags.has(tag.name)).map((tag) => tag.name).sort();
-    setUnusedTags(newUnusedTags);
+  
+    const newUnusedTags = allMyTags
+      .filter((tag) => !usedTags.has(tag.name))
+      .reduce(
+        (acc, tag) => {
+          if (tag.mainTag) {
+            acc.mainTags.push(tag);
+          } else {
+            acc.otherTags.push(tag);
+          }
+          return acc;
+        },
+        { mainTags: [], otherTags: [] }
+      );
+  
+    newUnusedTags.mainTags.sort((a, b) => a.name.localeCompare(b.name));
+    newUnusedTags.otherTags.sort((a, b) => a.name.localeCompare(b.name));
+  
+    setUnusedTags([...newUnusedTags.mainTags, ...newUnusedTags.otherTags]);
   }, [allMyTags, photos, isShowAdmin]);
+  
+  
 
   const isTagNameExist = (tagName) => {
     return allMyTags.some((tag) => tag.name === tagName);
@@ -974,12 +992,20 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
                 <div>
                   <h4 className="text-lg text-center font-semibold">Autres Tags</h4>
                   <div className="mt-4 flex flex-wrap">
-                    {unusedTags.map((tag) => (
-                      <button className="flex items-center flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2" key={tag} onClick={() => handleTagClick(tag)}>
-                        {tag}
-                      </button>
-                    ))}
-                  </div>
+    {unusedTags.map((tag) => 
+    {
+      console.log(tag)
+      return(
+      <button
+        className={`flex flex-col w-full items-center justify-between flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2 ${tag.mainTag ? 'border-4  border-black' : ''}`}
+        key={tag.id}
+        onClick={() => handleTagClick(tag.name)}
+      >
+        {tag.name}
+      </button>
+    )
+})}
+  </div>
                 </div>
               </div>
               <PublishedModal isOpen={showPublishedModal} onClose={() => setShowPublishedModal(false)} title="Modification des Images publiées">
