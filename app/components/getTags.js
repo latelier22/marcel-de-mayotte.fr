@@ -6,6 +6,7 @@ async function getTags() {
     let allTags = await prisma.tag.findMany({
 
       include: {
+        
         photos: true // Inclure les photos associées à chaque tag
       }
       
@@ -13,7 +14,7 @@ async function getTags() {
 
 
     const tagsArray = allTags.map((tag) => {
-      const { name, slug, photos, mainTag, parentId } = tag;
+      const { id, name, slug, photos, mainTag, parentId } = tag;
       const count = photos.length; // Compter le nombre de photos associées à ce tag
       let url = null;
       if (photos.length > 0) {
@@ -22,6 +23,7 @@ async function getTags() {
         url = photos[randomIndex].url; // URL de la photo aléatoire
       }
       return {
+        id,
         name,
         slug,
         mainTag,

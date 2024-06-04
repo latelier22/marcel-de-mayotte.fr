@@ -29,7 +29,7 @@ import { useSelector } from "react-redux";
 
 import myFetch from "../../components/myFetch";
 
-const Gallery = ({ photos : initialPhotos, allTags }) => {
+const Gallery = ({ photos: initialPhotos, allTags }) => {
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
@@ -120,7 +120,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
         usedTags.add(tag.name);
       });
     });
-  
+
     const newUnusedTags = allMyTags
       .filter((tag) => !usedTags.has(tag.name))
       .reduce(
@@ -134,14 +134,14 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
         },
         { mainTags: [], otherTags: [] }
       );
-  
+
     newUnusedTags.mainTags.sort((a, b) => a.name.localeCompare(b.name));
     newUnusedTags.otherTags.sort((a, b) => a.name.localeCompare(b.name));
-  
+
     setUnusedTags([...newUnusedTags.mainTags, ...newUnusedTags.otherTags]);
   }, [allMyTags, photos, isShowAdmin]);
-  
-  
+
+
 
   const isTagNameExist = (tagName) => {
     return allMyTags.some((tag) => tag.name === tagName);
@@ -314,40 +314,40 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
     return { counts, selectedCounts };
   }, [photos, selectedPhotoIds]);
 
- useEffect(() => {
-  const newTagStatus = {};
-  if (selectedPhotoIds.length === 0) {
-    localTags.forEach((tag) => {
-      newTagStatus[tag] = "bg-neutral-500";
-    });
-  } else {
-    localTags.forEach((tag) => {
-      const isTagInAll = selectedPhotoIds.every((id) => photos.find((photo) => photo.id === id)?.tags.some((t) => t.name === tag));
-      const isTagInSome = selectedPhotoIds.some((id) => photos.find((photo) => photo.id === id)?.tags.some((t) => t.name === tag));
+  useEffect(() => {
+    const newTagStatus = {};
+    if (selectedPhotoIds.length === 0) {
+      localTags.forEach((tag) => {
+        newTagStatus[tag] = "bg-neutral-500";
+      });
+    } else {
+      localTags.forEach((tag) => {
+        const isTagInAll = selectedPhotoIds.every((id) => photos.find((photo) => photo.id === id)?.tags.some((t) => t.name === tag));
+        const isTagInSome = selectedPhotoIds.some((id) => photos.find((photo) => photo.id === id)?.tags.some((t) => t.name === tag));
 
-      newTagStatus[tag] = isTagInAll ? "bg-green-500" : isTagInSome ? "bg-orange-500" : "bg-red-500";
-    });
-  }
+        newTagStatus[tag] = isTagInAll ? "bg-green-500" : isTagInSome ? "bg-orange-500" : "bg-red-500";
+      });
+    }
 
-  // Sort tags so that mainTags are first, followed by other tags alphabetically
-  const sortedTagStatus = Object.fromEntries(
-    Object.entries(newTagStatus).sort((a, b) => {
-      const tagA = allMyTags.find((t) => t.name === a[0]);
-      const tagB = allMyTags.find((t) => t.name === b[0]);
+    // Sort tags so that mainTags are first, followed by other tags alphabetically
+    const sortedTagStatus = Object.fromEntries(
+      Object.entries(newTagStatus).sort((a, b) => {
+        const tagA = allMyTags.find((t) => t.name === a[0]);
+        const tagB = allMyTags.find((t) => t.name === b[0]);
 
-      if (tagA.mainTag && !tagB.mainTag) {
-        return -1;
-      } else if (!tagA.mainTag && tagB.mainTag) {
-        return 1;
-      } else {
-        return a[0].localeCompare(b[0]);
-      }
-    })
-  );
+        if (tagA.mainTag && !tagB.mainTag) {
+          return -1;
+        } else if (!tagA.mainTag && tagB.mainTag) {
+          return 1;
+        } else {
+          return a[0].localeCompare(b[0]);
+        }
+      })
+    );
 
-  setTagStatus(sortedTagStatus);
-  console.log(sortedTagStatus);
-}, [selectedPhotoIds, photos, localTags, allMyTags]);
+    setTagStatus(sortedTagStatus);
+    console.log(sortedTagStatus);
+  }, [selectedPhotoIds, photos, localTags, allMyTags]);
 
 
   const handleTagClick = (tag) => {
@@ -426,7 +426,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
       // Vérifier si la photo est importée
       const strapiResponse = await myFetch(`/api/pictures?filters[photoId][$eq]=${photoId}`, 'GET', null, 'photo import status');
       const picture = strapiResponse.data[0]; // On suppose qu'il n'y a qu'une seule photo avec cet ID
-  
+
       // Si la photo est importée, mettre à jour son état pour refléter qu'elle n'est plus importée
       if (picture && picture.attributes.imported) {
         await myFetch(`/api/pictures/${picture.id}`, 'PUT', {
@@ -435,7 +435,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
           },
         }, 'update photo import status');
       }
-  
+
       // Supprimer la photo
       const response = await fetch(`/api/deletePhoto`, {
         method: 'DELETE',
@@ -444,11 +444,11 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
         },
         body: JSON.stringify({ photoId }),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to delete the photo");
       }
-  
+
       // Mettre à jour l'état des photos après suppression
       setPhotos((prevPhotos) => prevPhotos.filter((photo) => photo.id !== photoId));
       // toast.success("Photo deleted successfully!");
@@ -469,7 +469,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
 
     photos.forEach((photo) => {
       if (selectedPhotoIds.includes(photo.id)) {
-       console.log(photo.tags)
+        console.log(photo.tags)
       }
     });
 
@@ -487,7 +487,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
 
   useEffect(() => {
     console.log("Selected Photo IDs:", selectedPhotoIds);
-    
+
   }, [selectedPhotoIds]);
 
   const handleTagSelection = (tagId) => {
@@ -644,7 +644,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
   const togglePublished = async (photoId, published) => {
 
 
-    console.log( "tog pub : ",photoId, published, paginatedPhotos)
+    console.log("tog pub : ", photoId, published, paginatedPhotos)
 
     const newPhotos = photos.map((photo) => {
       if (photo.id === photoId) {
@@ -653,7 +653,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
       return photo;
     });
 
-    console.log("recheche photo par id ", newPhotos.filter( (p) => p.id === photoId))
+    console.log("recheche photo par id ", newPhotos.filter((p) => p.id === photoId))
 
     setPhotos(newPhotos);
 
@@ -702,9 +702,9 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
       }
       return photo;
     });
-  
+
     setPhotos(newPhotos);
-  
+
     try {
       const response = await fetch(`/api/updatePublishedsBulk`, {
         method: "POST",
@@ -713,11 +713,11 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
         },
         body: JSON.stringify({ selectedPhotoIds, makePublished }),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to update Published in bulk");
       }
-  
+
       toast.success("Published updated successfully in bulk!");
     } catch (error) {
       console.error("An error occurred while updating Published in bulk:", error);
@@ -730,7 +730,7 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
       );
     }
   };
-  
+
 
   const handleToggleRecents = () => {
     const selectedPhotos = photos.filter((photo) => selectedPhotoIds.includes(photo.id));
@@ -874,6 +874,38 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
     }
   };
 
+
+  const handleToggleMainTag = async (tagId) => {
+    console.log("tagId",tagId)
+    try {
+      const response = await fetch(`/api/toggleMainTag/${tagId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Failed to toggle main tag status");
+      }
+  
+      // Update the tag's mainTag status in state
+      setAllMyTags((prevTags) =>
+        prevTags.map((tag) =>
+          tag.id === tagId ? { ...tag, mainTag: !tag.mainTag } : tag
+        )
+      );
+      // toast.success("Tag updated successfully!");
+    } catch (error) {
+      console.error("Failed to toggle main tag status:", error);
+      // toast.error("Failed to update tag status.");
+    }
+  };
+  
+
+
   return (
     <>
       <div ref={containerRef} className="z-[2]" style={{ display: "flex" }}>
@@ -891,17 +923,25 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
               </button>
             </div>
             {Object.entries(tagStatus).map(([tag, color]) => {
-  const tagInfo = allMyTags.find(t => t.name === tag);
-  const borderClass = tagInfo && tagInfo.mainTag ? 'border-white border-4' : '';
-  return (
-    <button className={`${color} ${borderClass}`} key={tag} style={{ margin: "5px" }} onClick={() => handleTagClick(tag)}>
-      <div className="flex items-center justify-between flex-wrap py-2 px-4">
-        <div className="flex-wrap text-center">{tag}</div>
-        <div className="flex-none">{tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}</div>
-      </div>
-    </button>
-  );
-})}
+              const tagInfo = allMyTags.find(t => t.name === tag);
+              const borderClass = tagInfo && tagInfo.mainTag ? 'border-white border-4' : '';
+              return (
+                <div className="flex items-center justify-between" key={tag}>
+                  <button className={`${color} ${borderClass} w-[95%]`} style={{ margin: "5px" }} onClick={() => handleTagClick(tag)}>
+                    <div className="flex items-center justify-between flex-wrap py-2 px-4">
+                      <div className="flex-wrap text-center">{tag}</div>
+                      <div className="flex-none">{tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}</div>
+                    </div>
+                  </button>
+                  <input
+                    type="checkbox"
+                    checked={tagInfo ? tagInfo.mainTag : false}
+                    onChange={() => handleToggleMainTag(tagInfo.id)}
+                    className="ml-2"
+                  />
+                </div>
+              );
+            })}
 
             <div className="flex flex-row justify-around ">
               <div>
@@ -991,21 +1031,26 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
 
                 <div>
                   <h4 className="text-lg text-center font-semibold">Autres Tags</h4>
-                  <div className="mt-4 flex flex-wrap">
-    {unusedTags.map((tag) => 
-    {
-      console.log(tag)
-      return(
-      <button
-        className={`flex flex-col w-full items-center justify-between flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2 ${tag.mainTag ? 'border-4  border-black' : ''}`}
-        key={tag.id}
-        onClick={() => handleTagClick(tag.name)}
-      >
-        {tag.name}
-      </button>
-    )
-})}
-  </div>
+                  <div className="mt-4 flex flex-col">
+                    {unusedTags.map((tag) => {
+                      return (
+                        <div className="flex items-center justify-between" key={tag.id}>
+                          <button
+                            className={`flex flex-col w-[95%] items-center justify-between flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2 ${tag.mainTag ? 'border-4  border-black' : ''}`}
+                            onClick={() => handleTagClick(tag.name)}
+                          >
+                            {tag.name}
+                          </button>
+                          <input
+                            type="checkbox"
+                            checked={tag.mainTag}
+                            onChange={() => handleToggleMainTag(tag.id)}
+                            className="ml-2"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
               <PublishedModal isOpen={showPublishedModal} onClose={() => setShowPublishedModal(false)} title="Modification des Images publiées">
@@ -1099,10 +1144,10 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
 
               return (
                 <>
-                  <div onClick={(e) => handlePhotoClick(e, photo.id)} style={{ ...wrapperStyle, border: getBorderStyle(photo), position: "relative", opacity: photo.published ? 1 : 0.2,maxWidth: "33.33%", }
-                }
-                className="mb-4"
-                 title={photo.src}>
+                  <div onClick={(e) => handlePhotoClick(e, photo.id)} style={{ ...wrapperStyle, border: getBorderStyle(photo), position: "relative", opacity: photo.published ? 1 : 0.2, maxWidth: "33.33%", }
+                  }
+                    className="mb-4"
+                    title={photo.src}>
                     {zoomGallery >= 200 && (
                       <EditableButton
                         text={titles[photo.id] || ""}
@@ -1120,14 +1165,14 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
                         <Heart isOpen={favorites.has(photo.id)} />
                       </button>
                     )}
-                    {zoomGallery >= 200 && isAdmin && isShowAdmin && !photo.published && isVisible &&(
+                    {zoomGallery >= 200 && isAdmin && isShowAdmin && !photo.published && isVisible && (
                       <button onClick={(e) => { e.stopPropagation(); setIndex(-1); handleDeleteButtonClick(photo.id); }} className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}>
                         <Trash isOpen={true} />
                       </button>
                     )}
                     {zoomGallery >= 200 && isAdmin && isShowAdmin && photo.published && (
                       <button onClick={(e) => { e.stopPropagation(); setIndex(-1); handleTagButtonClick(photo.id); }} className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}>
-                        <Htag isOpen={true} /> 
+                        <Htag isOpen={true} />
                       </button>
                     )}
                     {zoomGallery >= 200 && isAdmin && isShowAdmin && (
@@ -1146,14 +1191,14 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
               );
             }}
           />
-          <Lightbox open={isActive && index >= 0} 
-          index={index}
-           close={() => setIndex(-1)} 
-           slides={paginatedPhotos} 
-           render={{ slide: NextJsImage }}
+          <Lightbox open={isActive && index >= 0}
+            index={index}
+            close={() => setIndex(-1)}
+            slides={paginatedPhotos}
+            render={{ slide: NextJsImage }}
             plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
             zoom={{
-               maxZoomPixelRatio : 3,
+              maxZoomPixelRatio: 3,
               // zoomInMultiplier,
               // doubleTapDelay,
               // doubleClickDelay,
@@ -1161,9 +1206,9 @@ const Gallery = ({ photos : initialPhotos, allTags }) => {
               // keyboardMoveDistance,
               // wheelZoomDistanceFactor,
               // pinchZoomDistanceFactor,
-              scrollToZoom : true ,
+              scrollToZoom: true,
             }}
-             />
+          />
           <ToastContainer />
           <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button className={`p-2 rounded-sm ${currentPage === 1 ? "bg-neutral-500 text-neutral-700" : "bg-neutral-700 text-white"}`} onClick={goToPreviousPage} disabled={currentPage === 1}>
