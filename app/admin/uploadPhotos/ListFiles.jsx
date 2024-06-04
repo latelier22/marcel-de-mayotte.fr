@@ -24,8 +24,10 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
   }, [allPictures, allFiles]);
 
   const initializeFiles = () => {
+    console.log(allPictures.slice().reverse().slice(0,10))
     const updatedFiles = allFiles.map((file) => {
       const picture = allPictures.find((p) => p.fileId === file.id);
+      if (file.id === 284) {console.log(picture)}
       return {
         ...file,
         tags: ["IMPORT", "CATALOGUE COMPLET"],
@@ -36,7 +38,9 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
         posts: [], // Initialize posts as an empty array
       };
     });
+    
     setFiles(updatedFiles);
+    console.log(files.slice().reverse().slice(0,3))
     fetchPostsForFiles(updatedFiles);
   };
 
