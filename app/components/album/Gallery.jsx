@@ -72,6 +72,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   const [files, setFiles] = useState([]);
   const [selectedFileIds, setSelectedFileIds] = useState([]);
   const [importedFilesCount, setImportedFilesCount] = useState(0);
+  // Htag
+  const [openTagDiv, setOpenTagDiv] = useState(null);
+  const [showOtherTags, setShowOtherTags] = useState(false);
 
   const router = useRouter();
 
@@ -79,6 +82,50 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   const localTag = allMyTags.filter((t) => t.slug === tagSlug);
   const tagSlugName = localTag && localTag[0].name;
   console.log("tagSlugName", localTag, tagSlugName);
+
+  const toggleTagDiv = (photoId) => {
+    setOpenTagDiv((prevId) => (prevId === photoId ? null : photoId));
+    setSelectedPhotoIds([photoId]); 
+  };
+
+  const handleTagClickForPhoto = async (action, photoId, tagName) => {
+    
+    console.log("clic",photoId, tagName)
+    setSelectedPhotoIds([photoId]); // Select the clicked photo
+    
+    // Call your function to add the tag
+    await updateTagInBulk(action, tagName);
+
+    
+  };
+
+  const handleRemoveTagForPhoto = async (photoId, tagName) => {
+    // Call your function to remove the tag
+    await updateTagInBulk(false, tagName);
+  
+    // Update local state to reflect the removed tag
+    setPhotos((prevPhotos) =>
+      prevPhotos.map((photo) => {
+        if (photo.id === photoId) {
+          return {
+            ...photo,
+            tags: photo.tags.filter((tag) => tag.name !== tagName),
+          };
+        }
+        return photo;
+      })
+    );
+  
+    // Update localTags to remove the tag from used tags if it's no longer used
+    // const photoTagNames = photos.flatMap(photo => photo.tags.map(tag => tag.name));
+    // setLocalTags(localTags.filter(tag => photoTagNames.includes(tag)));
+  };
+  
+  const getNonPhotoUsedTags = (photo) => {
+    const photoTagNames = photo.tags.map(tag => tag.name);
+    return localTags.filter(tag => !photoTagNames.includes(tag));
+  };
+  
 
   const handleRestoreSelection = () => {
     setSelectedPhotoIds(lastSelection);
@@ -1759,21 +1806,74 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           <Trash isOpen={true} />
                         </button>
                       )}
-                    {zoomGallery >= 200 &&
-                      isAdmin &&
-                      isShowAdmin &&
-                      photo.published && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIndex(-1);
-                            handleTagButtonClick(photo.id);
-                          }}
-                          className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
-                        >
-                          <Htag isOpen={true} />
-                        </button>
-                      )}
+                    {zoomGallery >= 200 && isAdmin && isShowAdmin && photo.published && (
+  <>
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        toggleTagDiv(photo.id);
+      }}
+      className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+    >
+      <Htag isOpen={true} />
+    </button>
+    {openTagDiv === photo.id && (
+      <div
+        className="bg-white p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
+        style={{ top: '100%', left: '0', right: '0', maxHeight: '300px' }}
+      >
+        <div>
+          {photo.tags.map((tag) => (
+            <span key={tag.id} 
+            onClick={(e) => {
+              e.stopPropagation();
+              // handleTagClickForPhoto(false, photo.id, tag.name);
+              handleRemoveTagForPhoto(photo.id, tag.name);
+            }}
+            className="inline-block bg-green-500 m-1 p-1 rounded relative">
+              {tag.name}
+              <span
+                
+                className="absolute top-0 right-0 cursor-pointer text-red-500 font-bold"
+              >
+                &times;
+              </span>
+            </span>
+          ))}
+        </div>
+        <div>
+          {getNonPhotoUsedTags(photo).map((tag) => (
+            <span
+              key={tag}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleTagClickForPhoto(true, photo.id, tag);
+              }}
+              className="inline-block bg-gray-300 m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+        <div>
+          {unusedTags.map((tag) => (
+            <span
+              key={tag.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleTagClickForPhoto(true, photo.id, tag.name);
+              }}
+              className="inline-block bg-gray-300 m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+            >
+              {tag.name}
+            </span>
+          ))}
+        </div>
+      </div>
+    )}
+  </>
+)}
+
                     {zoomGallery >= 200 && isAdmin && isShowAdmin && (
                       <button
                         onClick={(e) => {
