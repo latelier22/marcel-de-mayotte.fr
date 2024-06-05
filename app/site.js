@@ -165,7 +165,7 @@ export const Pages = {
         text: "En cours d'écriture",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/livre/5",
+        link: "/blog/41",
         url: "livre-5.png",
         alt: "Mémoires de Marcel Séjour",
         nbPages :"18",
@@ -319,11 +319,7 @@ export const Pages = {
         link: "/videos/8",
         url: "video-8.png",
         alt: "Le peintre mahorais, Marcel Sejour, sort un livre sur ses 25 ans de peinture (liberté, égalité, magnégné)",
-      },
-
-  
-
-      
+      }, 
     ]
   },
   tutos: {
