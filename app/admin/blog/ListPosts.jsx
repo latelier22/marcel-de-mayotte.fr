@@ -12,7 +12,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
     const [comments, setComments] = useState(allComments);
     const [selectedPost, setSelectedPost] = useState(null);
     const [editing, setEditing] = useState(false);
-    const [editFormData, setEditFormData] = useState({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null });
+    const [editFormData, setEditFormData] = useState({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null, slug: '' });
     const [newCommentData, setNewCommentData] = useState({ texte: '', auteur: '', etat: 'à valider', parentPostId: null });
     const [showComments, setShowComments] = useState({});
     const [showNewCommentForm, setShowNewCommentForm] = useState(false);
@@ -43,6 +43,14 @@ function ListPosts({ allPosts, allComments, allFiles }) {
         }));
     };
 
+    const generateSlug = (title) => {
+        return title
+            .toLowerCase()
+            .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
+            .replace(/\s+/g, '-') // Replace spaces with -
+            .replace(/-+/g, '-'); // Replace multiple - with single -
+    };
+
     const handleImageChange = (selectedOption) => {
         const newMediaId = selectedOption ? selectedOption.value : null;
         console.log('Selected media ID:', newMediaId);
@@ -63,7 +71,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             setSelectedPost(post);
             const mediaId = post.medias && post.medias.data && post.medias.data.length > 0 ? post.medias.data[0].id : null;
             const mediaUrl = mediaId ? post.medias.data[0].attributes.url : '';
-            setEditFormData({ title: post.title, content: post.content, auteur: post.auteur, etat: post.etat, mediaId: mediaId });
+            setEditFormData({ title: post.title, content: post.content, auteur: post.auteur, etat: post.etat, mediaId: mediaId, slug: post.slug });
             setSelectedImageUrl(mediaUrl);
         }
     };
@@ -127,6 +135,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
         const payload = {
             data: {
                 ...editFormData,
+                slug: generateSlug(editFormData.title), // Generate slug from title
                 medias: { id: editFormData.mediaId }
             }
         };
@@ -138,6 +147,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             const newPostResponse = await myFetch(`/api/posts/${newPostId}?populate=*`, 'GET');
             const newPost = {
                 id: newPostResponse.data.id,
+                slug : newPostResponse.data.slug,
                 imageUrl: newPostResponse.data.attributes.medias && newPostResponse.data.attributes.medias.data && newPostResponse.data.attributes.medias.data.length > 0
                     ? newPostResponse.data.attributes.medias.data[0].attributes.url
                     : null,
@@ -157,7 +167,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             setPosts([newPost, ...posts]);
             setLastModifiedPostId(newPost.id);
             setCreatingNew(false);
-            setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null });
+            setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null, slug: '' });
             setSelectedImageUrl(mediaUrl); // Mise à jour de l'image
             setSelectedPost(newPost); // Mettre à jour le post sélectionné pour montrer le nouveau post
         } catch (error) {
@@ -401,7 +411,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
                             type="text"
                             placeholder="Titre"
                             value={editFormData.title}
-                            onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                            onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value, slug: generateSlug(e.target.value) })}
                             className="p-2 border rounded"
                         />
                         <Select
@@ -492,7 +502,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
                         type="text"
                         placeholder="Title"
                         value={editFormData.title}
-                        onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                        onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value, slug: generateSlug(e.target.value) })}
                         className="p-2 border rounded"
                     />
                     <Select
@@ -535,7 +545,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             ) : (
                 <button onClick={() => {
                     setCreatingNew(true);
-                    setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null });
+                    setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null, slug: '' });
                     setSelectedPost(null);
                 }} className="bg-lime-500 px-4 py-2 rounded mb-4">Create New Post</button>
             )}
