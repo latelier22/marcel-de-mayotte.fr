@@ -1568,67 +1568,70 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <DotLoaderSpinner isLoading={isUploading} />
-          <div className="flex flex-row justify-start items-center my-8 p-4 gap-2">
-            <div className=" px-4 py-2 rounded">
-              <button
-                onClick={() => fileInputRef.current.click()}
-                className="bg-green-500 text-white px-4 py-2 rounded"
-              >
-                Upload Image
-              </button>
+          {isAdmin && isShowAdmin && (
+            <div className="">
+              <DotLoaderSpinner isLoading={isUploading} />
+              <div className="flex flex-wrap justify-start items-center my-8 p-4 gap-2">
+                <div className=" px-4 py-2 rounded">
+                  <button
+                    onClick={() => fileInputRef.current.click()}
+                    className="bg-green-500 text-white px-4 py-2 rounded"
+                  >
+                    Upload Image
+                  </button>
 
-              <button
-                onClick={handleFileSelectAll}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                {selectedFileIds.length === files.length
-                  ? "Deselect All"
-                  : "Select All"}
-              </button>
+                  <button
+                    onClick={handleFileSelectAll}
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                  >
+                    {selectedFileIds.length === files.length
+                      ? "Deselect All"
+                      : "Select All"}
+                  </button>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleImportImage(selectedFileIds);
-                }}
-                disabled={!selectedFileIds.length > 0}
-                className={`bg-orange-500 text-white px-4 py-2 rounded ${
-                  !selectedFileIds.length > 0
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
-              >
-                Import
-              </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                style={{ display: "none" }}
-                onChange={handleUploadImage}
-                multiple
-              />
-            </div>
-            {files.map((file) => (
-              <div
-                key={file.id}
-                className={`${
-                  selectedFileIds.includes(file.id)
-                    ? "border-green-500 border-solid border-2 rounded-md"
-                    : ""
-                } text-center cursor-pointer hover:bg-gray-800`}
-                onClick={() => handleFileClick(file.id)}
-              >
-                <ImageWithFallback key={file.id} file={file} />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleImportImage(selectedFileIds);
+                    }}
+                    disabled={!selectedFileIds.length > 0}
+                    className={`bg-orange-500 text-white px-4 py-2 rounded ${
+                      !selectedFileIds.length > 0
+                        ? "opacity-50 cursor-not-allowed"
+                        : ""
+                    }`}
+                  >
+                    Import
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                    onChange={handleUploadImage}
+                    multiple
+                  />
+                </div>
+                {files.map((file) => (
+                  <div
+                    key={file.id}
+                    className={`${
+                      selectedFileIds.includes(file.id)
+                        ? "border-green-500 border-solid border-2 rounded-md"
+                        : ""
+                    } text-center cursor-pointer hover:bg-gray-800`}
+                    onClick={() => handleFileClick(file.id)}
+                  >
+                    <ImageWithFallback key={file.id} file={file} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          {importedFilesCount > 0 && (
-            <div className="bg-green-200 text-green-800 text-center p-2 my-4 rounded">
-              {importedFilesCount} fichiers ont bien été importés
+              {importedFilesCount > 0 && (
+                <div className="bg-green-200 text-green-800 text-center p-2 my-4 rounded">
+                  {importedFilesCount} fichiers ont bien été importés
+                </div>
+              )}
             </div>
           )}
-
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
             <button
               className={`p-2 rounded-sm ${
