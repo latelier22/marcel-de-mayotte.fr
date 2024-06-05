@@ -75,6 +75,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   // Htag
   const [openTagDiv, setOpenTagDiv] = useState(null);
   const [showOtherTags, setShowOtherTags] = useState(false);
+const [tagSearch, setTagSearch] = useState("");
+const [editingTag, setEditingTag] = useState(null);
+const [isEditingTag, setIsEditingTag] = useState(false);
+
+
 
   const router = useRouter();
 
@@ -82,6 +87,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   const localTag = allMyTags.filter((t) => t.slug === tagSlug);
   const tagSlugName = localTag && localTag[0].name;
   console.log("tagSlugName", localTag, tagSlugName);
+
+  const filteredTags = (tags) => {
+    if (!tagSearch) return tags;
+    return tags.filter(tag => tag && tag.name && tag.name.toLowerCase().includes(tagSearch.toLowerCase()));
+  };
+  
+
 
   const toggleTagDiv = (photoId) => {
     setOpenTagDiv((prevId) => (prevId === photoId ? null : photoId));
@@ -1806,7 +1818,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           <Trash isOpen={true} />
                         </button>
                       )}
-                    {zoomGallery >= 200 && isAdmin && isShowAdmin && photo.published && (
+{zoomGallery >= 200 && isAdmin && isShowAdmin && photo.published && (
   <>
     <button
       onClick={(e) => {
@@ -1822,52 +1834,90 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
         className="bg-white p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
         style={{ top: '100%', left: '0', right: '0', maxHeight: '300px' }}
       >
+        <input
+          type="text"
+          placeholder="Search tags..."
+          value={tagSearch}
+          onChange={(e) => {
+            setTagSearch(e.target.value);
+            if (e.target.value) {
+              setShowOtherTags(true); // Automatically show other tags when typing
+            } else {
+              setShowOtherTags(false); // Hide other tags if search input is cleared
+            }
+          }}
+          className="mb-2 p-2 border border-gray-300 rounded w-full text-black"
+        />
         <div>
           {photo.tags.map((tag) => (
-            <span key={tag.id} 
-            onClick={(e) => {
-              e.stopPropagation();
-              // handleTagClickForPhoto(false, photo.id, tag.name);
-              handleRemoveTagForPhoto(photo.id, tag.name);
-            }}
-            className="inline-block bg-green-500 m-1 p-1 rounded relative">
+            <span
+              key={tag.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRemoveTagForPhoto(photo.id, tag.name);
+              }}
+              className="inline-block bg-green-500 m-1 p-1 rounded relative"
+            >
               {tag.name}
-              <span
-                
-                className="absolute top-0 right-0 cursor-pointer text-red-500 font-bold"
-              >
+              <span className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
+                style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 &times;
               </span>
             </span>
           ))}
         </div>
         <div>
-          {getNonPhotoUsedTags(photo).map((tag) => (
-            <span
-              key={tag}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleTagClickForPhoto(true, photo.id, tag);
-              }}
-              className="inline-block bg-gray-300 m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-        <div>
-          {unusedTags.map((tag) => (
+          {filteredTags(getNonPhotoUsedTags(photo, allMyTags)).map((tag) => (
             <span
               key={tag.id}
               onClick={(e) => {
                 e.stopPropagation();
-                handleTagClickForPhoto(true, photo.id, tag.name);
+                handleTagClickForPhoto(photo.id, tag.name);
               }}
               className="inline-block bg-gray-300 m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
             >
               {tag.name}
+              <span
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingTag(tag);
+                  setIsEditingTag(true);
+                }}
+                className="ml-2 text-blue-500 cursor-pointer"
+              >
+                &#9998;
+              </span>
             </span>
           ))}
+        </div>
+        {showOtherTags && (
+          <div>
+            {filteredTags(unusedTags).map((tag) => (
+              <span
+                key={tag.id}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleTagClickForPhoto(photo.id, tag.name);
+                }}
+                className="inline-block bg-gray-300 m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+              >
+                {tag.name}
+              </span>
+            ))}
+          </div>
+        )}
+        <div className="mt-2">
+          {tagSearch && !allMyTags.some(tag => tag.name.toLowerCase() === tagSearch.toLowerCase()) && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleAddTag(tagSearch);
+              }}
+              className="bg-green-500 text-white px-2 py-1 rounded m-1"
+            >
+              Create Tag "{tagSearch}"
+            </button>
+          )}
         </div>
       </div>
     )}
