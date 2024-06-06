@@ -6,7 +6,7 @@ const useMenuStore = create((set) => ({
   
   // Setter pour mettre à jour les menus
   setMenus: (menus) => {
-    // console.log('Setting menus:', menus); // Log pour voir l'état mis à jour
+   
     set({ menuItems: menus });
   },
   

@@ -7,13 +7,7 @@ async function fetchFiles () {
 
 
         const strapiFiles = response;
-        // console.log("FROM FETCHFILES strapifiles", strapiFiles);
-
-        // const files = strapiFiles.map(f => ({
-        //     id: f.id,
-        //     ...f.attributes
-        // }));
-
+     
         const files = strapiFiles;
        
 

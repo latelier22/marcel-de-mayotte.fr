@@ -101,7 +101,7 @@ const useTagStore = create((set) => ({
     updateTagItem: async (oldTagName, updatedTag) => {
       const newTagName = updatedTag.name
       const newMaintag = updatedTag.mainTag
-      // console.log("oldTagName, newTagName",oldTagName, newTagName)
+      
       console.log("updatedTag",updatedTag)
       try {
         await fetch(`/api/editTag`, {

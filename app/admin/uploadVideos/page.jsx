@@ -13,7 +13,7 @@ async function Page() {
     const files = await fetchFiles();
     const pictures = await fetchPictures();
     const posts = await fetchPosts();
-    // console.log(files)
+   
     console.log(pictures.slice(0,5))
     
     return (

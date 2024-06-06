@@ -48,7 +48,6 @@ async function fetchMenus(id = null) {
 
   sortChildren(rootMenuItems);
 
-  // console.log("rootMenuItems", rootMenuItems);
 
   return rootMenuItems;
 }

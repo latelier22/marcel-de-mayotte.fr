@@ -22,10 +22,6 @@ async function Accueil () {
 
   const citations = await getCitations({onlyPublished});
 
-  // console.log(citations)
-
-  // const publishedCitations = citations.filter(citation => citation.etat === "publiée")
-  // console.log ("FILTER PUBLIEE", publishedCitations)
 
   return (
    <main>

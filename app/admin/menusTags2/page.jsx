@@ -12,7 +12,7 @@ async function Page () {
 
   const allTags = await getTags();
 
-  // console.log("allTags",allTags.slice(0,3))
+
 
   return (
     <>

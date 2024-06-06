@@ -29,7 +29,7 @@ async function myFetch(endpoint, method, body, entity) {
         }
 
         const data = await response.json();
-        // console.log("data", data);
+       
         return data;
     } catch (error) {
         console.error(`An error occurred while fetching ${entity}:`, error);

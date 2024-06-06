@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 // Définissez l'état initial de votre slice.
 const initialState = {
-  isVisible: false,
+  isVisible: true,
 };
 
 const visibleSlice = createSlice({
