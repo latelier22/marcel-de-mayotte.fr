@@ -80,6 +80,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   // Htag
   const [openTagDiv, setOpenTagDiv] = useState(null);
   const [showOtherTags, setShowOtherTags] = useState(false);
+  const [photoTagSearch, setPhotoTagSearch] = useState("");
   const [tagSearch, setTagSearch] = useState("");
   const tagDivRef = useRef(null);
 
@@ -113,12 +114,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     tagSlug === "favoris" ? "CATALOGUE COMPLET" : localTag[0]?.name || "";
 
   const filteredTags = (tags) => {
-    if (!tagSearch) return tags;
+    if (!photoTagSearch) return tags;
     return tags.filter(
       (tag) =>
         tag &&
         tag.name &&
-        tag.name.toLowerCase().includes(tagSearch.toLowerCase())
+        tag.name.toLowerCase().includes(photoTagSearch.toLowerCase())
     );
   };
 
@@ -133,7 +134,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
 
     // Call your function to add the tag
     await updateTagInBulk(true, tagName);
-    setTagSearch("");
+    setPhotoTagSearch("");
   };
 
   async function handleCreateTagandUpdate(tagName, photoId) {
@@ -442,6 +443,34 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   const mainUnusedTags = unusedTags.filter((tag) => tag.mainTag);
   const otherUnusedTags = unusedTags.filter((tag) => !tag.mainTag);
 
+
+
+  const filteredMainUsedTags = mainUsedTags.filter((tag) =>
+    tag.name.toLowerCase().includes(tagSearch.toLowerCase())
+  );
+  const filteredOtherUsedTags = otherUsedTags.filter((tag) =>
+    tag.toLowerCase().includes(tagSearch.toLowerCase())
+  );
+  const filteredMainUnusedTags = mainUnusedTags.filter((tag) =>
+    tag.name.toLowerCase().includes(tagSearch.toLowerCase())
+  );
+  const filteredOtherUnusedTags = otherUnusedTags.filter((tag) =>
+    tag.name.toLowerCase().includes(tagSearch.toLowerCase())
+  );
+
+  useEffect(() => {
+    if (tagSearch.length > 0) {
+      setShowOtherUsedTags(true);
+      setShowOtherUnusedTags(true);
+    } else {
+      setShowOtherUsedTags(false);
+      setShowOtherUnusedTags(false);
+    }
+  }, [tagSearch]);
+  
+
+
+
   const tagCounts = useMemo(() => {
     const counts = {};
     const selectedCounts = {};
@@ -493,8 +522,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
         newTagStatus[tag] = isTagInAll
           ? "bg-green-500"
           : isTagInSome
-          ? "bg-orange-500"
-          : "bg-red-500";
+            ? "bg-orange-500"
+            : "bg-red-500";
       });
     }
 
@@ -1392,13 +1421,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     <>
       <div ref={containerRef} className="z-[2]" style={{ display: "flex" }}>
         {isAdmin && isShowAdmin && (
+
+
           <div
-            className="flex flex-col pt-16 px-16 text-white bg-neutral-600 top-0 h-screen max-h-full overflow-y-auto "
+            className="flex flex-col pt-16 px-16 text-white bg-neutral-600 top-0 h-[100vh] max-h-full overflow-y-auto "
             style={{ width: "20%" }}
           >
-            <div className="flex flex-row justify-around ">
+             <h2 className="font-bold text-center mb-4">SELECTION DES PHOTOS</h2>
+
+            <div className="flex flex-col justify-around ">
               <button
-                className="rounded-md w-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                className="rounded-md  bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
                 onClick={handleSelectAll}
               >
                 Select All ({numberOfPublishedPhotos})
@@ -1411,11 +1444,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
               </button>
               <button
                 onClick={handleRestoreSelection}
-                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${
-                  !lastSelection.length
+                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${!lastSelection.length
                     ? "bg-neutral-200 hover:bg-neutral-200"
                     : "bg-green-700 hover:bg-green-500 text-black"
-                }`}
+                  }`}
                 disabled={!lastSelection.length}
               >
                 Restaurer la sélection ({lastSelection.length})
@@ -1423,9 +1455,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
             </div>
 
             <div className="flex flex-col">
+              <h2 className="font-bold text-center my-4">Recherche des TAGS</h2>
+              <input
+                type="text"
+                placeholder="Search tags..."
+                value={tagSearch}
+                onChange={(e) => setTagSearch(e.target.value)}
+                className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
+              />
               <div className="p-2 border-white border-2">
-                <h2 className="font-bold text-center mb-4">TAGS utilisés dans la page</h2>
-                {mainUsedTags.map((tag) => {
+                <h2 className="font-bold text-center my-4">TAGS utilisés dans la page</h2>
+                {filteredMainUsedTags.map((tag) => {
                   const color = tagStatus[tag.name];
                   return (
                     <div
@@ -1463,13 +1503,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                 >
                   <div className="flex items-center">Autres Tags utilisés</div>
                   <div>
-                    {otherUsedTags.length} {showOtherUsedTags ? "▲" : "▼"}
+                    {filteredOtherUsedTags.length} {showOtherUsedTags ? "▲" : "▼"}
                   </div>
                 </button>
 
                 {showOtherUsedTags && (
                   <div className="flex flex-col mt-4">
-                    {otherUsedTags.map((tag) => {
+                    {filteredOtherUsedTags.map((tag) => {
                       const color = tagStatus[tag];
                       return (
                         <div
@@ -1505,10 +1545,309 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                   </div>
                 )}
               </div>
+              <div className="flex flex-row justify-around ">
+                <div>
 
+
+                  <div className="flex-flex-row">
+                    <button
+                      className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                      onClick={handleToggleFavorites}
+                    >
+                      <Heart isOpen={true} />
+                    </button>
+                    <button
+                      className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                      onClick={handleToggleRecents}
+                    >
+                      <Star isOpen={true} />
+                    </button>
+                    <button
+                      className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                      onClick={handleTogglePublisheds}
+                    >
+                      <Eye isOpen={true} />
+                    </button>
+
+                    <button
+                      className={`bg-gray-500 border-4 rounded-md ${isShowUpload
+                          ? "border-green-500 hover:border-green-700"
+                          : ""
+                        } text-white font-bold py-2 px-4 m-2`}
+                      onClick={() => setIsShowUpload(!isShowUpload)}
+                      title={
+                        isShowUpload
+                          ? "Masquer l'interface pour Ajouter des photos"
+                          : "Cliquer pour afficher l'interface d'ajouter de photos"
+                      }
+                    >
+                      <Upload isOpen={isShowUpload} />
+                    </button>
+
+                    <button
+                      className={`bg-gray-500 border-2 rounded-md ${canDeleteSelection
+                          ? "border-red-500 hover:border-red-700"
+                          : " cursor-not-allowed"
+                        } text-white font-bold py-2 px-4 m-2`}
+                      onClick={
+                        canDeleteSelection
+                          ? openDeleteConfirmationModal
+                          : undefined
+                      }
+                      title={
+                        canDeleteSelection
+                          ? "Supprimer la sélection"
+                          : "La sélection contient des images publiées, dépubliez-les avant de pouvoir les supprimer"
+                      }
+                      disabled={!canDeleteSelection}
+                    >
+                      <Trash isOpen={canDeleteSelection} />
+                    </button>
+                  </div>
+
+                  <div className="flex flex-col" style={{ margin: "20px 0" }}>
+                    <input
+                      type="text"
+                      placeholder="Enter tag name"
+                      value={tagName}
+                      onChange={(e) => setTagName(e.target.value)}
+                      className="input-tag-name text-black p-4"
+                    />
+                    <button
+                      onClick={() => openModal("add")}
+                      disabled={!tagName.trim() || isTagNameExist(tagName)}
+                      className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName)
+                          ? `bg-green-700`
+                          : `bg-green-500  hover:bg-green-300`
+                        }  text-white font-bold py-2 px-4 m-2`}
+                      title={
+                        !tagName.trim()
+                          ? "Entrez un nom pour un nouveau tag."
+                          : allMyTags.some((tag) => tag.name === tagName)
+                            ? "Ce tag existe déjà!"
+                            : "Ajouter un tag"
+                      }
+                    >
+                      Add Tag
+                    </button>
+
+                    <button
+                      onClick={() => openModal("delete")}
+                      disabled={!tagName.trim() || !isTagNameExist(tagName)}
+                      className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
+                      title={
+                        !tagName.trim()
+                          ? "Entrez le nom du tag à supprimer."
+                          : !tagName.trim() || !isTagNameExist(tagName)
+                            ? "Ce tag n'existe pas!"
+                            : "Supprimer un tag"
+                      }
+                    >
+                      Delete Tag
+                    </button>
+
+                    <button
+                      onClick={() => openModal("edit")}
+                      disabled={!tagName.trim() || !isTagNameExist(tagName)}
+                      className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                      title={
+                        !tagName.trim()
+                          ? "Entrez le nom du tag à éditer."
+                          : !tagName.trim() || !isTagNameExist(tagName)
+                            ? "Ce tag n'existe pas!"
+                            : "Éditer un tag"
+                      }
+                    >
+                      Edit Tag
+                    </button>
+                  </div>
+
+                  <TagCrudModal
+                    isOpen={showTagCrudModal}
+                    onClose={() => setShowTagCrudModal(false)}
+                    title={`${tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
+                      } Tag`}
+                  >
+                    <p className="p-8">
+                      Are you sure you want to {tagAction} the tag &quot;{tagName}
+                      &quot;?
+                    </p>
+                    {tagAction === "add" && (
+                      <button
+                        className="bg-lime-600 rounded-md p-2 m-4 items-end"
+                        onClick={() => {
+                          closeModal();
+                          handleAddTag(tagName);
+                        }}
+                      >
+                        Confirm Add
+                      </button>
+                    )}
+
+                    {tagAction === "delete" && (
+                      <button
+                        className="bg-lime-600 rounded-md p-2 m-4 items-end"
+                        onClick={() => {
+                          closeModal();
+                          handleDeleteTag(tagName);
+                        }}
+                      >
+                        Confirm Delete
+                      </button>
+                    )}
+
+                    {tagAction === "edit" && (
+                      <>
+                        <input
+                          type="text"
+                          placeholder="New tag name"
+                          value={newTagName}
+                          onChange={(e) => setNewTagName(e.target.value)}
+                        />
+                        <button
+                          className="bg-lime-600 rounded-md p-2 m-4 items-end"
+                          onClick={() => {
+                            handleEditTag(tagName, newTagName);
+                            closeModal();
+                          }}
+                        >
+                          Confirm Edit
+                        </button>
+                      </>
+                    )}
+                  </TagCrudModal>
+
+                  {/* <div>
+                  <h4 className="text-lg text-center font-semibold">
+                    Autres Tags
+                  </h4>
+                  <div className="mt-4 flex flex-col">
+                    {unusedTags.map((tag) => {
+                      return (
+                        <div
+                          className="flex items-center justify-between"
+                          key={tag.id}
+                        >
+                          <button
+                            className={`flex flex-col w-[95%] items-center justify-between flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2 ${
+                              tag.mainTag ? "border-4  border-black" : ""
+                            }`}
+                            onClick={() => handleTagClick(tag.name)}
+                          >
+                            {tag.name}
+                          </button>
+                          <input
+                            type="checkbox"
+                            checked={tag.mainTag}
+                            onChange={() => handleToggleMainTag(tag.id)}
+                            className="ml-2"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div> */}
+                </div>
+                <PublishedModal
+                  isOpen={showPublishedModal}
+                  onClose={() => setShowPublishedModal(false)}
+                  title="Modification des Images publiées"
+                >
+                  <p>{modalContent}</p>
+                  <button
+                    className="bg-neutral-300 rounded-md p-4 m-2"
+                    onClick={() => applyPublishedsChange(true)}
+                  >
+                    Ajouter la sélection aux Images publiées
+                  </button>
+                  <button
+                    className="bg-neutral-300 rounded-md p-4 m-2"
+                    onClick={() => applyPublishedsChange(false)}
+                  >
+                    Retirer la sélection des Images publiées
+                  </button>
+                </PublishedModal>
+                <RecentsModal
+                  isOpen={showRecentsModal}
+                  onClose={() => setShowRecentsModal(false)}
+                  title="Modification des Récents"
+                >
+                  <p>{modalContent}</p>
+                  <button
+                    className="bg-neutral-300 rounded-md p-4 m-2"
+                    onClick={() => applyRecentsChange(true)}
+                  >
+                    Ajouter la sélection aux Récents
+                  </button>
+                  <button
+                    className="bg-neutral-300 rounded-md p-4 m-2"
+                    onClick={() => applyRecentsChange(false)}
+                  >
+                    Retirer la sélection des Récents
+                  </button>
+                </RecentsModal>
+                <FavoriteModal
+                  isOpen={showFavoriteModal}
+                  onClose={() => setShowFavoriteModal(false)}
+                  title="Modification des Favoris"
+                >
+                  <p>{modalContent}</p>
+                  <button
+                    className="bg-neutral-300 rounded-md p-4 m-2"
+                    onClick={() => applyFavoritesChange(true)}
+                  >
+                    Ajouter la sélection aux favoris
+                  </button>
+                  <button
+                    className="bg-neutral-300 rounded-md p-4 m-2"
+                    onClick={() => applyFavoritesChange(false)}
+                  >
+                    Retirer la sélection des favoris
+                  </button>
+                </FavoriteModal>
+                <TagModal
+                  isOpen={showTagModal}
+                  onClose={() => setShowTagModal(false)}
+                  title="Modification des Tags"
+                >
+                  <p>{modalContent}</p>
+                  <button
+                    className="bg-neutral-300 rounded-md p-4 m-2"
+                    onClick={() => applyTagChange(true)}
+                  >
+                    Ajouter ce tag à la sélection
+                  </button>
+                  <button
+                    className="bg-neutral-300 rounded-md p-4 m-2"
+                    onClick={() => applyTagChange(false)}
+                  >
+                    Retirer ce tag de la sélection
+                  </button>
+                </TagModal>
+                <DeleteConfirmationModal
+                  isOpen={showDeleteConfirmationModal}
+                  onClose={closeDeleteConfirmationModal}
+                  title="Attention !"
+                  textClose="Annuler"
+                >
+                  <p>Voulez-vous définitivement supprimer la sélection ?</p>
+                  <div className="flex justify-around mt-4">
+                    <button
+                      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                      onClick={handleConfirmDelete}
+                    >
+                      Confirmer
+                    </button>
+                  </div>
+                </DeleteConfirmationModal>
+
+                <div>
+                  <ToastContainer position="top-center" autoClose={5000} />
+                </div>
+              </div>
               <div className="p-2 my-2 border-black border-2">
-              <h2 className="font-bold text-center mb-4">TAGS NON utilisés dans la page</h2>
-                {mainUnusedTags.map((tag) => (
+                <h2 className="font-bold text-center mb-4">TAGS NON utilisés dans la page</h2>
+                {filteredMainUnusedTags.map((tag) => (
                   <div
                     className="flex items-center justify-between"
                     key={tag.id}
@@ -1539,13 +1878,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                     Autres Tags non utilisés
                   </div>
                   <div>
-                    {otherUnusedTags.length} {showOtherUnusedTags ? "▲" : "▼"}
+                    {filteredOtherUnusedTags.length} {showOtherUnusedTags ? "▲" : "▼"}
                   </div>
                 </button>
 
                 {showOtherUnusedTags && (
                   <div className="flex flex-col mt-4">
-                    {otherUnusedTags.map((tag) => (
+                    {filteredOtherUnusedTags.map((tag) => (
                       <div
                         className="flex items-center justify-between"
                         key={tag.id}
@@ -1574,308 +1913,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
               </div>
             </div>
 
-            <div className="flex flex-row justify-around ">
-              <div>
-                <div className="flex-flex-row">
-                  <button
-                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-                    onClick={handleToggleFavorites}
-                  >
-                    <Heart isOpen={true} />
-                  </button>
-                  <button
-                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-                    onClick={handleToggleRecents}
-                  >
-                    <Star isOpen={true} />
-                  </button>
-                  <button
-                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-                    onClick={handleTogglePublisheds}
-                  >
-                    <Eye isOpen={true} />
-                  </button>
 
-                  <button
-                    className={`bg-gray-500 border-4 rounded-md ${
-                      isShowUpload
-                        ? "border-green-500 hover:border-green-700"
-                        : ""
-                    } text-white font-bold py-2 px-4 m-2`}
-                    onClick={() => setIsShowUpload(!isShowUpload)}
-                    title={
-                      isShowUpload
-                        ? "Masquer l'interface pour Ajouter des photos"
-                        : "Cliquer pour afficher l'interface d'ajouter de photos"
-                    }
-                  >
-                    <Upload isOpen={isShowUpload} />
-                  </button>
-
-                  <button
-                    className={`bg-gray-500 border-2 rounded-md ${
-                      canDeleteSelection
-                        ? "border-red-500 hover:border-red-700"
-                        : " cursor-not-allowed"
-                    } text-white font-bold py-2 px-4 m-2`}
-                    onClick={
-                      canDeleteSelection
-                        ? openDeleteConfirmationModal
-                        : undefined
-                    }
-                    title={
-                      canDeleteSelection
-                        ? "Supprimer la sélection"
-                        : "La sélection contient des images publiées, dépubliez-les avant de pouvoir les supprimer"
-                    }
-                    disabled={!canDeleteSelection}
-                  >
-                    <Trash isOpen={canDeleteSelection} />
-                  </button>
-                </div>
-
-                <div style={{ margin: "20px 0" }}>
-                  <input
-                    type="text"
-                    placeholder="Enter tag name"
-                    value={tagName}
-                    onChange={(e) => setTagName(e.target.value)}
-                    className="input-tag-name text-black p-4"
-                  />
-                  <button
-                    onClick={() => openModal("add")}
-                    disabled={!tagName.trim() || isTagNameExist(tagName)}
-                    className={`rounded-md ${
-                      !tagName.trim() || isTagNameExist(tagName)
-                        ? `bg-green-700`
-                        : `bg-green-500  hover:bg-green-300`
-                    }  text-white font-bold py-2 px-4 m-2`}
-                    title={
-                      !tagName.trim()
-                        ? "Entrez un nom pour un nouveau tag."
-                        : allMyTags.some((tag) => tag.name === tagName)
-                        ? "Ce tag existe déjà!"
-                        : "Ajouter un tag"
-                    }
-                  >
-                    Add Tag
-                  </button>
-
-                  <button
-                    onClick={() => openModal("delete")}
-                    disabled={!tagName.trim() || !isTagNameExist(tagName)}
-                    className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
-                    title={
-                      !tagName.trim()
-                        ? "Entrez le nom du tag à supprimer."
-                        : !tagName.trim() || !isTagNameExist(tagName)
-                        ? "Ce tag n'existe pas!"
-                        : "Supprimer un tag"
-                    }
-                  >
-                    Delete Tag
-                  </button>
-
-                  <button
-                    onClick={() => openModal("edit")}
-                    disabled={!tagName.trim() || !isTagNameExist(tagName)}
-                    className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
-                    title={
-                      !tagName.trim()
-                        ? "Entrez le nom du tag à éditer."
-                        : !tagName.trim() || !isTagNameExist(tagName)
-                        ? "Ce tag n'existe pas!"
-                        : "Éditer un tag"
-                    }
-                  >
-                    Edit Tag
-                  </button>
-                </div>
-
-                <TagCrudModal
-                  isOpen={showTagCrudModal}
-                  onClose={() => setShowTagCrudModal(false)}
-                  title={`${
-                    tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
-                  } Tag`}
-                >
-                  <p className="p-8">
-                    Are you sure you want to {tagAction} the tag &quot;{tagName}
-                    &quot;?
-                  </p>
-                  {tagAction === "add" && (
-                    <button
-                      className="bg-lime-600 rounded-md p-2 m-4 items-end"
-                      onClick={() => {
-                        closeModal();
-                        handleAddTag(tagName);
-                      }}
-                    >
-                      Confirm Add
-                    </button>
-                  )}
-
-                  {tagAction === "delete" && (
-                    <button
-                      className="bg-lime-600 rounded-md p-2 m-4 items-end"
-                      onClick={() => {
-                        closeModal();
-                        handleDeleteTag(tagName);
-                      }}
-                    >
-                      Confirm Delete
-                    </button>
-                  )}
-
-                  {tagAction === "edit" && (
-                    <>
-                      <input
-                        type="text"
-                        placeholder="New tag name"
-                        value={newTagName}
-                        onChange={(e) => setNewTagName(e.target.value)}
-                      />
-                      <button
-                        className="bg-lime-600 rounded-md p-2 m-4 items-end"
-                        onClick={() => {
-                          handleEditTag(tagName, newTagName);
-                          closeModal();
-                        }}
-                      >
-                        Confirm Edit
-                      </button>
-                    </>
-                  )}
-                </TagCrudModal>
-
-                {/* <div>
-                  <h4 className="text-lg text-center font-semibold">
-                    Autres Tags
-                  </h4>
-                  <div className="mt-4 flex flex-col">
-                    {unusedTags.map((tag) => {
-                      return (
-                        <div
-                          className="flex items-center justify-between"
-                          key={tag.id}
-                        >
-                          <button
-                            className={`flex flex-col w-[95%] items-center justify-between flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2 ${
-                              tag.mainTag ? "border-4  border-black" : ""
-                            }`}
-                            onClick={() => handleTagClick(tag.name)}
-                          >
-                            {tag.name}
-                          </button>
-                          <input
-                            type="checkbox"
-                            checked={tag.mainTag}
-                            onChange={() => handleToggleMainTag(tag.id)}
-                            className="ml-2"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div> */}
-              </div>
-              <PublishedModal
-                isOpen={showPublishedModal}
-                onClose={() => setShowPublishedModal(false)}
-                title="Modification des Images publiées"
-              >
-                <p>{modalContent}</p>
-                <button
-                  className="bg-neutral-300 rounded-md p-4 m-2"
-                  onClick={() => applyPublishedsChange(true)}
-                >
-                  Ajouter la sélection aux Images publiées
-                </button>
-                <button
-                  className="bg-neutral-300 rounded-md p-4 m-2"
-                  onClick={() => applyPublishedsChange(false)}
-                >
-                  Retirer la sélection des Images publiées
-                </button>
-              </PublishedModal>
-              <RecentsModal
-                isOpen={showRecentsModal}
-                onClose={() => setShowRecentsModal(false)}
-                title="Modification des Récents"
-              >
-                <p>{modalContent}</p>
-                <button
-                  className="bg-neutral-300 rounded-md p-4 m-2"
-                  onClick={() => applyRecentsChange(true)}
-                >
-                  Ajouter la sélection aux Récents
-                </button>
-                <button
-                  className="bg-neutral-300 rounded-md p-4 m-2"
-                  onClick={() => applyRecentsChange(false)}
-                >
-                  Retirer la sélection des Récents
-                </button>
-              </RecentsModal>
-              <FavoriteModal
-                isOpen={showFavoriteModal}
-                onClose={() => setShowFavoriteModal(false)}
-                title="Modification des Favoris"
-              >
-                <p>{modalContent}</p>
-                <button
-                  className="bg-neutral-300 rounded-md p-4 m-2"
-                  onClick={() => applyFavoritesChange(true)}
-                >
-                  Ajouter la sélection aux favoris
-                </button>
-                <button
-                  className="bg-neutral-300 rounded-md p-4 m-2"
-                  onClick={() => applyFavoritesChange(false)}
-                >
-                  Retirer la sélection des favoris
-                </button>
-              </FavoriteModal>
-              <TagModal
-                isOpen={showTagModal}
-                onClose={() => setShowTagModal(false)}
-                title="Modification des Tags"
-              >
-                <p>{modalContent}</p>
-                <button
-                  className="bg-neutral-300 rounded-md p-4 m-2"
-                  onClick={() => applyTagChange(true)}
-                >
-                  Ajouter ce tag à la sélection
-                </button>
-                <button
-                  className="bg-neutral-300 rounded-md p-4 m-2"
-                  onClick={() => applyTagChange(false)}
-                >
-                  Retirer ce tag de la sélection
-                </button>
-              </TagModal>
-              <DeleteConfirmationModal
-                isOpen={showDeleteConfirmationModal}
-                onClose={closeDeleteConfirmationModal}
-                title="Attention !"
-                textClose="Annuler"
-              >
-                <p>Voulez-vous définitivement supprimer la sélection ?</p>
-                <div className="flex justify-around mt-4">
-                  <button
-                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                    onClick={handleConfirmDelete}
-                  >
-                    Confirmer
-                  </button>
-                </div>
-              </DeleteConfirmationModal>
-
-              <div>
-                <ToastContainer position="top-center" autoClose={5000} />
-              </div>
-            </div>
           </div>
         )}
         <div
@@ -1920,11 +1958,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                       handleImportImage(selectedFileIds);
                     }}
                     disabled={!selectedFileIds.length > 0}
-                    className={`bg-orange-500 text-white px-4 py-2 rounded ${
-                      !selectedFileIds.length > 0
+                    className={`bg-orange-500 text-white px-4 py-2 rounded ${!selectedFileIds.length > 0
                         ? "opacity-50 cursor-not-allowed"
                         : ""
-                    }`}
+                      }`}
                   >
                     Import
                   </button>
@@ -1939,11 +1976,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                 {files.map((file) => (
                   <div
                     key={file.id}
-                    className={`${
-                      selectedFileIds.includes(file.id)
+                    className={`${selectedFileIds.includes(file.id)
                         ? "border-green-500 border-solid border-2 rounded-md"
                         : ""
-                    } text-center cursor-pointer hover:bg-gray-800`}
+                      } text-center cursor-pointer hover:bg-gray-800`}
                     onClick={() => handleFileClick(file.id)}
                   >
                     <ImageWithFallback key={file.id} file={file} />
@@ -1959,11 +1995,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
           )}
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
             <button
-              className={`p-2 rounded-sm ${
-                currentPage === 1
+              className={`p-2 rounded-sm ${currentPage === 1
                   ? "bg-neutral-500 text-neutral-700"
                   : "bg-neutral-700 text-white"
-              }`}
+                }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
             >
@@ -2113,12 +2148,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                               <input
                                 type="text"
                                 placeholder="Search tags..."
-                                value={tagSearch}
+                                value={photoTagSearch}
                                 onClick={(e) => e.stopPropagation()} // Ajoutez ceci pour empêcher la désélection
-                                onChange={(e) => setTagSearch(e.target.value)}
+                                onChange={(e) => setPhotoTagSearch(e.target.value)}
                                 className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
                               />
-                              {tagSearch ? (
+                              {photoTagSearch ? (
                                 <div>
                                   {filteredTags(allMyTags).map((tag) => (
                                     <span
@@ -2140,13 +2175,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                                       onClick={async (e) => {
                                         e.stopPropagation();
                                         await handleCreateTagandUpdate(
-                                          tagSearch,
+                                          photoTagSearch,
                                           photo.id
                                         );
                                       }}
                                       className="bg-green-500 text-white px-2 py-1 rounded m-1"
                                     >
-                                      Create Tag: {tagSearch}
+                                      Create Tag: {photoTagSearch}
                                     </button>
                                   )}
                                 </div>
@@ -2234,9 +2269,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           e.stopPropagation();
                           togglePublished(photo.id, photo.published);
                         }}
-                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
-                          photo.published ? "" : "text-red-700 font-extrabold"
-                        }`}
+                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+                          }`}
                       >
                         <Eye isOpen={photo.published} />
                       </button>
@@ -2247,9 +2281,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           e.stopPropagation();
                           toggleRecent(photo.id);
                         }}
-                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
-                          photo.published ? "" : "text-red-700 font-extrabold"
-                        }`}
+                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+                          }`}
                       >
                         <Star isOpen={recentPhotos.has(photo.id)} />
                       </button>
@@ -2282,11 +2315,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
           <ToastContainer />
           <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
-              className={`p-2 rounded-sm ${
-                currentPage === 1
+              className={`p-2 rounded-sm ${currentPage === 1
                   ? "bg-neutral-500 text-neutral-700"
                   : "bg-neutral-700 text-white"
-              }`}
+                }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
             >
