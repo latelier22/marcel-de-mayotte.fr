@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSession } from "next-auth/react";
-import DotLoaderSpinner from "../../components/spinners/DotLoaderSpinner";
+// import DotLoaderSpinner from "../../components/spinners/DotLoaderSpinner";
+import UploadImageComponent from "./UploadImageComponent";
 import { useRouter } from "next/navigation";
 
 import FavoriteModal from "../Modals/Modal";
@@ -89,6 +90,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
 
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
     useState(false);
+
+
+    const handleUpdatePhotos = (newPhotos) => {
+      setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
+    };
+    
+
 
   const openDeleteConfirmationModal = () => {
     setShowDeleteConfirmationModal(true);
@@ -443,8 +451,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   const mainUnusedTags = unusedTags.filter((tag) => tag.mainTag);
   const otherUnusedTags = unusedTags.filter((tag) => !tag.mainTag);
 
-
-
   const filteredMainUsedTags = mainUsedTags.filter((tag) =>
     tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
@@ -467,9 +473,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
       setShowOtherUnusedTags(false);
     }
   }, [tagSearch]);
-  
-
-
 
   const tagCounts = useMemo(() => {
     const counts = {};
@@ -522,8 +525,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
         newTagStatus[tag] = isTagInAll
           ? "bg-green-500"
           : isTagInSome
-            ? "bg-orange-500"
-            : "bg-red-500";
+          ? "bg-orange-500"
+          : "bg-red-500";
       });
     }
 
@@ -1283,6 +1286,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     }
   };
 
+  const handleImportedFiles = (newFiles) => {
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  };
+
   const handleImportImage = async (selectedFileIds) => {
     const selectedFiles = files.filter((file) =>
       selectedFileIds.includes(file.id)
@@ -1410,8 +1417,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
         })
       );
 
-      // Update importedFilesCount
-      setImportedFilesCount(selectedFileIds.length);
+      setImportedFilesCount(selectedFileIds.length); // Update importedFilesCount
+
+      return selectedFileIds.length; // Re
     } catch (error) {
       console.error("Failed to import images:", error);
     }
@@ -1421,13 +1429,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     <>
       <div ref={containerRef} className="z-[2]" style={{ display: "flex" }}>
         {isAdmin && isShowAdmin && (
-
-
           <div
             className="flex flex-col pt-16 px-16 text-white bg-neutral-600 top-0 h-[100vh] max-h-full overflow-y-auto "
             style={{ width: "20%" }}
           >
-             <h2 className="font-bold text-center mb-4">SELECTION DES PHOTOS</h2>
+            <h2 className="font-bold text-center mb-4">SELECTION DES PHOTOS</h2>
 
             <div className="flex flex-col justify-around ">
               <button
@@ -1444,10 +1450,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
               </button>
               <button
                 onClick={handleRestoreSelection}
-                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${!lastSelection.length
+                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${
+                  !lastSelection.length
                     ? "bg-neutral-200 hover:bg-neutral-200"
                     : "bg-green-700 hover:bg-green-500 text-black"
-                  }`}
+                }`}
                 disabled={!lastSelection.length}
               >
                 Restaurer la sélection ({lastSelection.length})
@@ -1464,7 +1471,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                 className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
               />
               <div className="p-2 border-white border-2">
-                <h2 className="font-bold text-center my-4">TAGS utilisés dans la page</h2>
+                <h2 className="font-bold text-center my-4">
+                  TAGS utilisés dans la page
+                </h2>
                 {filteredMainUsedTags.map((tag) => {
                   const color = tagStatus[tag.name];
                   return (
@@ -1503,7 +1512,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                 >
                   <div className="flex items-center">Autres Tags utilisés</div>
                   <div>
-                    {filteredOtherUsedTags.length} {showOtherUsedTags ? "▲" : "▼"}
+                    {filteredOtherUsedTags.length}{" "}
+                    {showOtherUsedTags ? "▲" : "▼"}
                   </div>
                 </button>
 
@@ -1547,8 +1557,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
               </div>
               <div className="flex flex-row justify-around ">
                 <div>
-
-
                   <div className="flex-flex-row">
                     <button
                       className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
@@ -1570,10 +1578,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                     </button>
 
                     <button
-                      className={`bg-gray-500 border-4 rounded-md ${isShowUpload
+                      className={`bg-gray-500 border-4 rounded-md ${
+                        isShowUpload
                           ? "border-green-500 hover:border-green-700"
                           : ""
-                        } text-white font-bold py-2 px-4 m-2`}
+                      } text-white font-bold py-2 px-4 m-2`}
                       onClick={() => setIsShowUpload(!isShowUpload)}
                       title={
                         isShowUpload
@@ -1585,10 +1594,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                     </button>
 
                     <button
-                      className={`bg-gray-500 border-2 rounded-md ${canDeleteSelection
+                      className={`bg-gray-500 border-2 rounded-md ${
+                        canDeleteSelection
                           ? "border-red-500 hover:border-red-700"
                           : " cursor-not-allowed"
-                        } text-white font-bold py-2 px-4 m-2`}
+                      } text-white font-bold py-2 px-4 m-2`}
                       onClick={
                         canDeleteSelection
                           ? openDeleteConfirmationModal
@@ -1616,16 +1626,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                     <button
                       onClick={() => openModal("add")}
                       disabled={!tagName.trim() || isTagNameExist(tagName)}
-                      className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName)
+                      className={`rounded-md ${
+                        !tagName.trim() || isTagNameExist(tagName)
                           ? `bg-green-700`
                           : `bg-green-500  hover:bg-green-300`
-                        }  text-white font-bold py-2 px-4 m-2`}
+                      }  text-white font-bold py-2 px-4 m-2`}
                       title={
                         !tagName.trim()
                           ? "Entrez un nom pour un nouveau tag."
                           : allMyTags.some((tag) => tag.name === tagName)
-                            ? "Ce tag existe déjà!"
-                            : "Ajouter un tag"
+                          ? "Ce tag existe déjà!"
+                          : "Ajouter un tag"
                       }
                     >
                       Add Tag
@@ -1639,8 +1650,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                         !tagName.trim()
                           ? "Entrez le nom du tag à supprimer."
                           : !tagName.trim() || !isTagNameExist(tagName)
-                            ? "Ce tag n'existe pas!"
-                            : "Supprimer un tag"
+                          ? "Ce tag n'existe pas!"
+                          : "Supprimer un tag"
                       }
                     >
                       Delete Tag
@@ -1654,8 +1665,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                         !tagName.trim()
                           ? "Entrez le nom du tag à éditer."
                           : !tagName.trim() || !isTagNameExist(tagName)
-                            ? "Ce tag n'existe pas!"
-                            : "Éditer un tag"
+                          ? "Ce tag n'existe pas!"
+                          : "Éditer un tag"
                       }
                     >
                       Edit Tag
@@ -1665,11 +1676,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                   <TagCrudModal
                     isOpen={showTagCrudModal}
                     onClose={() => setShowTagCrudModal(false)}
-                    title={`${tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
-                      } Tag`}
+                    title={`${
+                      tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
+                    } Tag`}
                   >
                     <p className="p-8">
-                      Are you sure you want to {tagAction} the tag &quot;{tagName}
+                      Are you sure you want to {tagAction} the tag &quot;
+                      {tagName}
                       &quot;?
                     </p>
                     {tagAction === "add" && (
@@ -1846,7 +1859,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                 </div>
               </div>
               <div className="p-2 my-2 border-black border-2">
-                <h2 className="font-bold text-center mb-4">TAGS NON utilisés dans la page</h2>
+                <h2 className="font-bold text-center mb-4">
+                  TAGS NON utilisés dans la page
+                </h2>
                 {filteredMainUnusedTags.map((tag) => (
                   <div
                     className="flex items-center justify-between"
@@ -1878,7 +1893,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                     Autres Tags non utilisés
                   </div>
                   <div>
-                    {filteredOtherUnusedTags.length} {showOtherUnusedTags ? "▲" : "▼"}
+                    {filteredOtherUnusedTags.length}{" "}
+                    {showOtherUnusedTags ? "▲" : "▼"}
                   </div>
                 </button>
 
@@ -1912,8 +1928,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                 )}
               </div>
             </div>
-
-
           </div>
         )}
         <div
@@ -1932,73 +1946,84 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
             />
           </div>
           {isAdmin && isShowAdmin && isShowUpload && (
-            <div className="">
-              <DotLoaderSpinner isLoading={isUploading} />
-              <div className="flex flex-wrap justify-start items-center my-8 p-4 gap-2">
-                <div className=" px-4 py-2 rounded">
-                  <button
-                    onClick={() => fileInputRef.current.click()}
-                    className="bg-green-500 text-white px-4 py-2 rounded"
-                  >
-                    Upload Image
-                  </button>
+            // <div className="">
+            //   <DotLoaderSpinner isLoading={isUploading} />
+            //   <div className="flex flex-wrap justify-start items-center my-8 p-4 gap-2">
+            //     <div className=" px-4 py-2 rounded">
+            //       <button
+            //         onClick={() => fileInputRef.current.click()}
+            //         className="bg-green-500 text-white px-4 py-2 rounded"
+            //       >
+            //         Upload Image
+            //       </button>
 
-                  <button
-                    onClick={handleFileSelectAll}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                  >
-                    {selectedFileIds.length === files.length
-                      ? "Deselect All"
-                      : "Select All"}
-                  </button>
+            //       <button
+            //         onClick={handleFileSelectAll}
+            //         className="bg-blue-500 text-white px-4 py-2 rounded"
+            //       >
+            //         {selectedFileIds.length === files.length
+            //           ? "Deselect All"
+            //           : "Select All"}
+            //       </button>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleImportImage(selectedFileIds);
-                    }}
-                    disabled={!selectedFileIds.length > 0}
-                    className={`bg-orange-500 text-white px-4 py-2 rounded ${!selectedFileIds.length > 0
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                      }`}
-                  >
-                    Import
-                  </button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: "none" }}
-                    onChange={handleUploadImage}
-                    multiple
-                  />
-                </div>
-                {files.map((file) => (
-                  <div
-                    key={file.id}
-                    className={`${selectedFileIds.includes(file.id)
-                        ? "border-green-500 border-solid border-2 rounded-md"
-                        : ""
-                      } text-center cursor-pointer hover:bg-gray-800`}
-                    onClick={() => handleFileClick(file.id)}
-                  >
-                    <ImageWithFallback key={file.id} file={file} />
-                  </div>
-                ))}
-              </div>
-              {importedFilesCount > 0 && (
-                <div className="bg-green-200 text-green-800 text-center p-2 my-4 rounded">
-                  {importedFilesCount} fichiers ont bien été importés
-                </div>
-              )}
+            //       <button
+            //         onClick={(e) => {
+            //           e.stopPropagation();
+            //           handleImportImage(selectedFileIds);
+            //         }}
+            //         disabled={!selectedFileIds.length > 0}
+            //         className={`bg-orange-500 text-white px-4 py-2 rounded ${!selectedFileIds.length > 0
+            //             ? "opacity-50 cursor-not-allowed"
+            //             : ""
+            //           }`}
+            //       >
+            //         Import
+            //       </button>
+            //       <input
+            //         type="file"
+            //         ref={fileInputRef}
+            //         style={{ display: "none" }}
+            //         onChange={handleUploadImage}
+            //         multiple
+            //       />
+            //     </div>
+            //     {files.map((file) => (
+            //       <div
+            //         key={file.id}
+            //         className={`${selectedFileIds.includes(file.id)
+            //             ? "border-green-500 border-solid border-2 rounded-md"
+            //             : ""
+            //           } text-center cursor-pointer hover:bg-gray-800`}
+            //         onClick={() => handleFileClick(file.id)}
+            //       >
+            //         <ImageWithFallback key={file.id} file={file} />
+            //       </div>
+            //     ))}
+            //   </div>
+            //   {importedFilesCount > 0 && (
+            //     <div className="bg-green-200 text-green-800 text-center p-2 my-4 rounded">
+            //       {importedFilesCount} fichiers ont bien été importés
+            //     </div>
+            //   )}
+            // </div>
+            <div>
+              <UploadImageComponent
+  handleImportedFiles={handleImportedFiles}
+  handleImportImage={handleImportImage}
+  importedFilesCount={importedFilesCount}
+  handleUpdatePhotos={handleUpdatePhotos} // Ajoutez cette ligne
+/>
+
+              {/* Le reste du composant Gallery */}
             </div>
           )}
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
             <button
-              className={`p-2 rounded-sm ${currentPage === 1
+              className={`p-2 rounded-sm ${
+                currentPage === 1
                   ? "bg-neutral-500 text-neutral-700"
                   : "bg-neutral-700 text-white"
-                }`}
+              }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
             >
@@ -2064,6 +2089,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
               return (
                 <>
                   <div
+                    key={photo.id}
                     onClick={(e) => handlePhotoClick(e, photo.id)}
                     style={{
                       ...wrapperStyle,
@@ -2150,7 +2176,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                                 placeholder="Search tags..."
                                 value={photoTagSearch}
                                 onClick={(e) => e.stopPropagation()} // Ajoutez ceci pour empêcher la désélection
-                                onChange={(e) => setPhotoTagSearch(e.target.value)}
+                                onChange={(e) =>
+                                  setPhotoTagSearch(e.target.value)
+                                }
                                 className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
                               />
                               {photoTagSearch ? (
@@ -2269,8 +2297,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           e.stopPropagation();
                           togglePublished(photo.id, photo.published);
                         }}
-                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
-                          }`}
+                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
+                          photo.published ? "" : "text-red-700 font-extrabold"
+                        }`}
                       >
                         <Eye isOpen={photo.published} />
                       </button>
@@ -2281,8 +2310,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           e.stopPropagation();
                           toggleRecent(photo.id);
                         }}
-                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
-                          }`}
+                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
+                          photo.published ? "" : "text-red-700 font-extrabold"
+                        }`}
                       >
                         <Star isOpen={recentPhotos.has(photo.id)} />
                       </button>
@@ -2315,10 +2345,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
           <ToastContainer />
           <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
-              className={`p-2 rounded-sm ${currentPage === 1
+              className={`p-2 rounded-sm ${
+                currentPage === 1
                   ? "bg-neutral-500 text-neutral-700"
                   : "bg-neutral-700 text-white"
-                }`}
+              }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
             >
