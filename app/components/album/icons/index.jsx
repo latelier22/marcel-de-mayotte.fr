@@ -6,5 +6,6 @@ import Pen from "./Pen";
 import ZoomIn from "./ZoomIn"
 import ZoomOut from "./ZoomOut"
 import Trash from "./Trash"
+import Upload from "./Upload"
 
-export {Eye, Star, Htag, Pen, Heart, ZoomIn, ZoomOut, Trash}
+export {Eye, Star, Htag, Pen, Heart, ZoomIn, ZoomOut, Trash, Upload}

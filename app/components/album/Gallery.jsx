@@ -26,7 +26,7 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Eye, Star, Htag, Heart, Trash } from "./icons";
+import { Eye, Star, Htag, Heart, Trash, Upload } from "./icons";
 import EditableButton from "./buttons/EditableButton";
 
 import { useSelector } from "react-redux";
@@ -70,10 +70,15 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [photosPerPage, setPhotosPerPage] = useState(100);
   const [recentPhotos, setRecentPhotos] = useState(new Set());
+
+
   const [isUploading, setIsUploading] = useState(false);
   const [files, setFiles] = useState([]);
   const [selectedFileIds, setSelectedFileIds] = useState([]);
   const [importedFilesCount, setImportedFilesCount] = useState(0);
+  const [isShowUpload, setIsShowUpload] = useState(false);
+
+
   // Htag
   const [openTagDiv, setOpenTagDiv] = useState(null);
   const [showOtherTags, setShowOtherTags] = useState(false);
@@ -1454,6 +1459,24 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                   >
                     <Eye isOpen={true} />
                   </button>
+
+                  <button
+  className={`bg-gray-500 border-4 rounded-md ${
+    isShowUpload
+      ? "border-green-500 hover:border-green-700"
+      : ""
+  } text-white font-bold py-2 px-4 m-2`}
+  onClick={() => setIsShowUpload(!isShowUpload)}
+  title={
+    isShowUpload
+      ? "Masquer l'interface pour Ajouter des photos"
+      : "Cliquer pour afficher l'interface d'ajouter de photos"
+  }
+>
+  <Upload isOpen={isShowUpload}/>
+</button>
+
+
                   <button
                     className={`bg-gray-500 border-2 rounded-md ${
                       canDeleteSelection
@@ -1736,7 +1759,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {isAdmin && isShowAdmin && (
+          {isAdmin && isShowAdmin && isShowUpload &&(
             <div className="">
               <DotLoaderSpinner isLoading={isUploading} />
               <div className="flex flex-wrap justify-start items-center my-8 p-4 gap-2">
@@ -1927,6 +1950,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           <Trash isOpen={true} />
                         </button>
                       )}
+
+
                     {zoomGallery >= 200 &&
                       isAdmin &&
                       isShowAdmin &&
