@@ -9,6 +9,8 @@ import TagModal from "../Modals/Modal";
 import RecentsModal from "../Modals/Modal";
 import PublishedModal from "../Modals/Modal";
 import TagCrudModal from "../Modals/Modal";
+import DeleteConfirmationModal from "../Modals/Modal";
+
 import getSlug from "../getSlug";
 
 import PhotoAlbum from "react-photo-album";
@@ -78,16 +80,31 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   const [tagSearch, setTagSearch] = useState("");
   const tagDivRef = useRef(null);
 
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
+    useState(false);
+
+  const openDeleteConfirmationModal = () => {
+    setShowDeleteConfirmationModal(true);
+  };
+
+  const closeDeleteConfirmationModal = () => {
+    setShowDeleteConfirmationModal(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    closeDeleteConfirmationModal();
+    await handleDeleteSelectedPhotos();
+  };
+
   const router = useRouter();
 
-  
   // const localTag = allMyTags.filter((t) => t.slug === tagSlug);
   // const tagSlugName = localTag && localTag[0].name;
 
   // Définir le nom de la catégorie pour le tagSlug et CAS si tagSlug =favoris
   const localTag = allMyTags.filter((t) => t.slug === tagSlug);
-  const tagSlugName = tagSlug === 'favoris' ? "CATALOGUE COMPLET" : (localTag[0]?.name || '');
- 
+  const tagSlugName =
+    tagSlug === "favoris" ? "CATALOGUE COMPLET" : localTag[0]?.name || "";
 
   const filteredTags = (tags) => {
     if (!tagSearch) return tags;
@@ -113,7 +130,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     setTagSearch("");
   };
 
-  async function handleCreateTagandUpdate( tagName,photoId) {
+  async function handleCreateTagandUpdate(tagName, photoId) {
     setSelectedPhotoIds([photoId]);
     await handleAddTag(tagName);
     setSelectedPhotoIds([photoId]);
@@ -130,7 +147,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
         return photo;
       })
     );
-    
   }
 
   const handleRemoveTagForPhoto = async (photoId, tagName) => {
@@ -482,13 +498,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     );
 
     setTagStatus(sortedTagStatus);
-    
   }, [selectedPhotoIds, photos, localTags, allMyTags]);
 
   const handleTagClick = (tag) => {
     setSelectedTag(tag);
     setTagName(tag);
-    
+
     if (selectedPhotoIds.length === 0) {
       const taggedPhotoIds = photos
         .filter((photo) => photo.tags.some((t) => t.name === tag))
@@ -631,10 +646,32 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     }
   };
 
+  const canDeleteSelection = useMemo(() => {
+    return (
+      selectedPhotoIds.length > 0 &&
+      selectedPhotoIds.every((photoId) => {
+        const photo = photos.find((p) => p.id === photoId);
+        return photo && !photo.published;
+      })
+    );
+  }, [selectedPhotoIds, photos]);
+
+  const handleDeleteSelectedPhotos = async () => {
+    try {
+      for (const photoId of selectedPhotoIds) {
+        await handleDeleteButtonClick(photoId);
+      }
+      setSelectedPhotoIds([]);
+      // toast.success("Photos deleted successfully!");
+    } catch (error) {
+      console.error("Failed to delete photos:", error);
+      // toast.error("Failed to delete photos");
+    }
+  };
+
   const handleTagButtonClick = (photoId) => {
     photos.forEach((photo) => {
       if (selectedPhotoIds.includes(photo.id)) {
-       
       }
     });
 
@@ -1154,7 +1191,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
           posts: [], // Initialize posts as an empty array for new files
         }));
         setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-        
+
         setIsUploading(false);
       }
     } catch (error) {
@@ -1417,6 +1454,26 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                   >
                     <Eye isOpen={true} />
                   </button>
+                  <button
+                    className={`bg-gray-500 border-2 rounded-md ${
+                      canDeleteSelection
+                        ? "border-red-500 hover:border-red-700"
+                        : " cursor-not-allowed"
+                    } text-white font-bold py-2 px-4 m-2`}
+                    onClick={
+                      canDeleteSelection
+                        ? openDeleteConfirmationModal
+                        : undefined
+                    }
+                    title={
+                      canDeleteSelection
+                        ? "Supprimer la sélection"
+                        : "La sélection contient des images publiées, dépubliez-les avant de pouvoir les supprimer"
+                    }
+                    disabled={!canDeleteSelection}
+                  >
+                    <Trash isOpen={canDeleteSelection} />
+                  </button>
                 </div>
 
                 <div style={{ margin: "20px 0" }}>
@@ -1640,6 +1697,23 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                   Retirer ce tag de la sélection
                 </button>
               </TagModal>
+              <DeleteConfirmationModal
+  isOpen={showDeleteConfirmationModal}
+  onClose={closeDeleteConfirmationModal}
+  title="Attention !"
+  textClose="Annuler"
+>
+  <p>Voulez-vous définitivement supprimer la sélection ?</p>
+  <div className="flex justify-around mt-4">
+    <button
+      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+      onClick={handleConfirmDelete}
+    >
+      Confirmer
+    </button>
+   
+  </div>
+</DeleteConfirmationModal>
 
               <div>
                 <ToastContainer position="top-center" autoClose={5000} />
@@ -1853,135 +1927,148 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           <Trash isOpen={true} />
                         </button>
                       )}
- {zoomGallery >= 200 &&
-  isAdmin &&
-  isShowAdmin &&
-  photo.published && (
-    <>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleTagDiv(photo.id);
-        }}
-        className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
-      >
-        <Htag isOpen={true} />
-      </button>
-      {openTagDiv === photo.id && (
-        <div
-          ref={tagDivRef}
-          className="bg-neutral-800 p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
-          style={{
-            top: "100%",
-            left: "0",
-            right: "0",
-            maxHeight: "300px",
-          }}
-        >
-          <input
-            type="text"
-            placeholder="Search tags..."
-            value={tagSearch}
-            onClick={(e) => e.stopPropagation()} // Ajoutez ceci pour empêcher la désélection
-            onChange={(e) => setTagSearch(e.target.value)}
-            className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
-          />
-          {tagSearch ? (
-            <div>
-              {filteredTags(allMyTags).map((tag) => (
-                <span
-                  key={tag.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTagClickForPhoto(photo.id, tag.name);
-                  }}
-                  className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
-                >
-                  {tag.name}
-                </span>
-              ))}
-              {filteredTags(allMyTags).length === 0 && (
-                <button
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await handleCreateTagandUpdate(tagSearch, photo.id);
-                  }}
-                  className="bg-green-500 text-white px-2 py-1 rounded m-1"
-                >
-                  Create Tag: {tagSearch}
-                </button>
-              )}
-            </div>
-          ) : (
-            <>
-              <div>
-                {photo.tags.map((tag) => (
-                  <span
-                    key={tag.id}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveTagForPhoto(photo.id, tag.name);
-                    }}
-                    className="inline-block bg-green-500 m-1 p-1 rounded relative"
-                  >
-                    {tag.name}
-                    <span
-                      className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
-                      style={{
-                        width: "20px",
-                        height: "20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      &times;
-                    </span>
-                  </span>
-                ))}
-              </div>
-              <div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowOtherTags(!showOtherTags);
-                  }}
-                  className="bg-blue-500 text-white px-2 py-1 rounded m-1"
-                >
-                  {showOtherTags ? "Hide Other Tags" : "Show Other Tags"}
-                </button>
-                {showOtherTags && (
-                  <div>
-                    {allMyTags
-                      .filter(
-                        (tag) =>
-                          !photo.tags.some(
-                            (photoTag) => photoTag.name === tag.name
-                          )
-                      )
-                      .map((tag) => (
-                        <span
-                          key={tag.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleTagClickForPhoto(photo.id, tag.name);
-                          }}
-                          className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
-                        >
-                          {tag.name}
-                        </span>
-                      ))}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-    </>
-  )}
-
-
+                    {zoomGallery >= 200 &&
+                      isAdmin &&
+                      isShowAdmin &&
+                      photo.published && (
+                        <>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleTagDiv(photo.id);
+                            }}
+                            className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+                          >
+                            <Htag isOpen={true} />
+                          </button>
+                          {openTagDiv === photo.id && (
+                            <div
+                              ref={tagDivRef}
+                              className="bg-neutral-800 p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
+                              style={{
+                                top: "100%",
+                                left: "0",
+                                right: "0",
+                                maxHeight: "300px",
+                              }}
+                            >
+                              <input
+                                type="text"
+                                placeholder="Search tags..."
+                                value={tagSearch}
+                                onClick={(e) => e.stopPropagation()} // Ajoutez ceci pour empêcher la désélection
+                                onChange={(e) => setTagSearch(e.target.value)}
+                                className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
+                              />
+                              {tagSearch ? (
+                                <div>
+                                  {filteredTags(allMyTags).map((tag) => (
+                                    <span
+                                      key={tag.id}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleTagClickForPhoto(
+                                          photo.id,
+                                          tag.name
+                                        );
+                                      }}
+                                      className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                                    >
+                                      {tag.name}
+                                    </span>
+                                  ))}
+                                  {filteredTags(allMyTags).length === 0 && (
+                                    <button
+                                      onClick={async (e) => {
+                                        e.stopPropagation();
+                                        await handleCreateTagandUpdate(
+                                          tagSearch,
+                                          photo.id
+                                        );
+                                      }}
+                                      className="bg-green-500 text-white px-2 py-1 rounded m-1"
+                                    >
+                                      Create Tag: {tagSearch}
+                                    </button>
+                                  )}
+                                </div>
+                              ) : (
+                                <>
+                                  <div>
+                                    {photo.tags.map((tag) => (
+                                      <span
+                                        key={tag.id}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleRemoveTagForPhoto(
+                                            photo.id,
+                                            tag.name
+                                          );
+                                        }}
+                                        className="inline-block bg-green-500 m-1 p-1 rounded relative"
+                                      >
+                                        {tag.name}
+                                        <span
+                                          className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
+                                          style={{
+                                            width: "20px",
+                                            height: "20px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                          }}
+                                        >
+                                          &times;
+                                        </span>
+                                      </span>
+                                    ))}
+                                  </div>
+                                  <div>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowOtherTags(!showOtherTags);
+                                      }}
+                                      className="bg-blue-500 text-white px-2 py-1 rounded m-1"
+                                    >
+                                      {showOtherTags
+                                        ? "Hide Other Tags"
+                                        : "Show Other Tags"}
+                                    </button>
+                                    {showOtherTags && (
+                                      <div>
+                                        {allMyTags
+                                          .filter(
+                                            (tag) =>
+                                              !photo.tags.some(
+                                                (photoTag) =>
+                                                  photoTag.name === tag.name
+                                              )
+                                          )
+                                          .map((tag) => (
+                                            <span
+                                              key={tag.id}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleTagClickForPhoto(
+                                                  photo.id,
+                                                  tag.name
+                                                );
+                                              }}
+                                              className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                                            >
+                                              {tag.name}
+                                            </span>
+                                          ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </>
+                              )}
+                            </div>
+                          )}
+                        </>
+                      )}
 
                     {zoomGallery >= 200 && isAdmin && isShowAdmin && (
                       <button
