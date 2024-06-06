@@ -81,8 +81,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   const router = useRouter();
 
   
+  // const localTag = allMyTags.filter((t) => t.slug === tagSlug);
+  // const tagSlugName = localTag && localTag[0].name;
+
+  // Définir le nom de la catégorie pour le tagSlug et CAS si tagSlug =favoris
   const localTag = allMyTags.filter((t) => t.slug === tagSlug);
-  const tagSlugName = localTag && localTag[0].name;
+  const tagSlugName = tagSlug === 'favoris' ? "CATALOGUE COMPLET" : (localTag[0]?.name || '');
  
 
   const filteredTags = (tags) => {
