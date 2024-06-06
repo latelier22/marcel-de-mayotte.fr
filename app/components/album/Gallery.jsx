@@ -71,19 +71,20 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
   const [photosPerPage, setPhotosPerPage] = useState(100);
   const [recentPhotos, setRecentPhotos] = useState(new Set());
 
-
   const [isUploading, setIsUploading] = useState(false);
   const [files, setFiles] = useState([]);
   const [selectedFileIds, setSelectedFileIds] = useState([]);
   const [importedFilesCount, setImportedFilesCount] = useState(0);
   const [isShowUpload, setIsShowUpload] = useState(false);
 
-
   // Htag
   const [openTagDiv, setOpenTagDiv] = useState(null);
   const [showOtherTags, setShowOtherTags] = useState(false);
   const [tagSearch, setTagSearch] = useState("");
   const tagDivRef = useRef(null);
+
+  const [showOtherUsedTags, setShowOtherUsedTags] = useState(false);
+  const [showOtherUnusedTags, setShowOtherUnusedTags] = useState(false);
 
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
     useState(false);
@@ -429,6 +430,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     });
     return Array.from(tags);
   }, [photos, isVisible]);
+
+  // Séparer les tags utilisés et non utilisés
+  const mainUsedTags = allMyTags.filter(
+    (tag) => tag.mainTag && localTags.includes(tag.name)
+  );
+  const otherUsedTags = localTags.filter(
+    (tag) => !mainUsedTags.some((t) => t.name === tag)
+  );
+
+  const mainUnusedTags = unusedTags.filter((tag) => tag.mainTag);
+  const otherUnusedTags = unusedTags.filter((tag) => !tag.mainTag);
 
   const tagCounts = useMemo(() => {
     const counts = {};
@@ -1386,7 +1398,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
           >
             <div className="flex flex-row justify-around ">
               <button
-                className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+                className="rounded-md w-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
                 onClick={handleSelectAll}
               >
                 Select All ({numberOfPublishedPhotos})
@@ -1409,34 +1421,158 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                 Restaurer la sélection ({lastSelection.length})
               </button>
             </div>
-            {Object.entries(tagStatus).map(([tag, color]) => {
-              const tagInfo = allMyTags.find((t) => t.name === tag);
-              const borderClass =
-                tagInfo && tagInfo.mainTag ? "border-white border-4" : "";
-              return (
-                <div className="flex items-center justify-between" key={tag}>
-                  <button
-                    className={`${color} ${borderClass} w-[95%]`}
-                    style={{ margin: "5px" }}
-                    onClick={() => handleTagClick(tag)}
-                  >
-                    <div className="flex items-center justify-between flex-wrap py-2 px-4">
-                      <div className="flex-wrap text-center">{tag}</div>
-                      <div className="flex-none">
-                        {tagCounts.selectedCounts[tag] || 0} /{" "}
-                        {tagCounts.counts[tag] || 0}
-                      </div>
+
+            <div className="flex flex-col">
+              <div className="p-2 border-white border-2">
+                <h2 className="font-bold text-center mb-4">TAGS utilisés dans la page</h2>
+                {mainUsedTags.map((tag) => {
+                  const color = tagStatus[tag.name];
+                  return (
+                    <div
+                      className="flex items-center justify-between"
+                      key={tag.id}
+                    >
+                      <button
+                        className={`${color} border-white border-4 w-[95%]`}
+                        style={{ margin: "5px" }}
+                        onClick={() => handleTagClick(tag.name)}
+                      >
+                        <div className="flex items-center justify-between flex-wrap py-2 px-4">
+                          <div className="flex-wrap text-center">
+                            {tag.name}
+                          </div>
+                          <div className="flex-none">
+                            {tagCounts.selectedCounts[tag.name] || 0} /{" "}
+                            {tagCounts.counts[tag.name] || 0}
+                          </div>
+                        </div>
+                      </button>
+                      <input
+                        type="checkbox"
+                        checked={tag.mainTag}
+                        onChange={() => handleToggleMainTag(tag.id)}
+                        className="ml-2"
+                      />
                     </div>
-                  </button>
-                  <input
-                    type="checkbox"
-                    checked={tagInfo ? tagInfo.mainTag : false}
-                    onChange={() => handleToggleMainTag(tagInfo.id)}
-                    className="ml-2"
-                  />
-                </div>
-              );
-            })}
+                  );
+                })}
+
+                <button
+                  className="bg-gray-300 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400 w-[95%] flex justify-between"
+                  onClick={() => setShowOtherUsedTags(!showOtherUsedTags)}
+                >
+                  <div className="flex items-center">Autres Tags utilisés</div>
+                  <div>
+                    {otherUsedTags.length} {showOtherUsedTags ? "▲" : "▼"}
+                  </div>
+                </button>
+
+                {showOtherUsedTags && (
+                  <div className="flex flex-col mt-4">
+                    {otherUsedTags.map((tag) => {
+                      const color = tagStatus[tag];
+                      return (
+                        <div
+                          className="flex items-center justify-between"
+                          key={tag}
+                        >
+                          <button
+                            className={`${color} w-[95%]`}
+                            style={{ margin: "5px" }}
+                            onClick={() => handleTagClick(tag)}
+                          >
+                            <div className="flex items-center justify-between flex-wrap py-2 px-4">
+                              <div className="flex-wrap text-center">{tag}</div>
+                              <div className="flex-none">
+                                {tagCounts.selectedCounts[tag] || 0} /{" "}
+                                {tagCounts.counts[tag] || 0}
+                              </div>
+                            </div>
+                          </button>
+                          <input
+                            type="checkbox"
+                            checked={false}
+                            onChange={() =>
+                              handleToggleMainTag(
+                                allMyTags.find((t) => t.name === tag).id
+                              )
+                            }
+                            className="ml-2"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-2 my-2 border-black border-2">
+              <h2 className="font-bold text-center mb-4">TAGS NON utilisés dans la page</h2>
+                {mainUnusedTags.map((tag) => (
+                  <div
+                    className="flex items-center justify-between"
+                    key={tag.id}
+                  >
+                    <button
+                      className={`bg-neutral-500 w-[95%]`}
+                      style={{ margin: "5px" }}
+                      onClick={() => handleTagClick(tag.name)}
+                    >
+                      <div className="flex items-center justify-between flex-wrap py-2 px-4">
+                        <div className="flex-wrap text-center">{tag.name}</div>
+                      </div>
+                    </button>
+                    <input
+                      type="checkbox"
+                      checked={tag.mainTag}
+                      onChange={() => handleToggleMainTag(tag.id)}
+                      className="ml-2"
+                    />
+                  </div>
+                ))}
+
+                <button
+                  className="bg-gray-300 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400 w-[95%] flex justify-between"
+                  onClick={() => setShowOtherUnusedTags(!showOtherUnusedTags)}
+                >
+                  <div className="flex items-center">
+                    Autres Tags non utilisés
+                  </div>
+                  <div>
+                    {otherUnusedTags.length} {showOtherUnusedTags ? "▲" : "▼"}
+                  </div>
+                </button>
+
+                {showOtherUnusedTags && (
+                  <div className="flex flex-col mt-4">
+                    {otherUnusedTags.map((tag) => (
+                      <div
+                        className="flex items-center justify-between"
+                        key={tag.id}
+                      >
+                        <button
+                          className={`bg-neutral-500 w-[95%]`}
+                          style={{ margin: "5px" }}
+                          onClick={() => handleTagClick(tag.name)}
+                        >
+                          <div className="flex items-center justify-between flex-wrap py-2 px-4">
+                            <div className="flex-wrap text-center">
+                              {tag.name}
+                            </div>
+                          </div>
+                        </button>
+                        <input
+                          type="checkbox"
+                          checked={tag.mainTag}
+                          onChange={() => handleToggleMainTag(tag.id)}
+                          className="ml-2"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
 
             <div className="flex flex-row justify-around ">
               <div>
@@ -1461,21 +1597,20 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                   </button>
 
                   <button
-  className={`bg-gray-500 border-4 rounded-md ${
-    isShowUpload
-      ? "border-green-500 hover:border-green-700"
-      : ""
-  } text-white font-bold py-2 px-4 m-2`}
-  onClick={() => setIsShowUpload(!isShowUpload)}
-  title={
-    isShowUpload
-      ? "Masquer l'interface pour Ajouter des photos"
-      : "Cliquer pour afficher l'interface d'ajouter de photos"
-  }
->
-  <Upload isOpen={isShowUpload}/>
-</button>
-
+                    className={`bg-gray-500 border-4 rounded-md ${
+                      isShowUpload
+                        ? "border-green-500 hover:border-green-700"
+                        : ""
+                    } text-white font-bold py-2 px-4 m-2`}
+                    onClick={() => setIsShowUpload(!isShowUpload)}
+                    title={
+                      isShowUpload
+                        ? "Masquer l'interface pour Ajouter des photos"
+                        : "Cliquer pour afficher l'interface d'ajouter de photos"
+                    }
+                  >
+                    <Upload isOpen={isShowUpload} />
+                  </button>
 
                   <button
                     className={`bg-gray-500 border-2 rounded-md ${
@@ -1613,7 +1748,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                   )}
                 </TagCrudModal>
 
-                <div>
+                {/* <div>
                   <h4 className="text-lg text-center font-semibold">
                     Autres Tags
                   </h4>
@@ -1642,7 +1777,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                       );
                     })}
                   </div>
-                </div>
+                </div> */}
               </div>
               <PublishedModal
                 isOpen={showPublishedModal}
@@ -1721,22 +1856,21 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                 </button>
               </TagModal>
               <DeleteConfirmationModal
-  isOpen={showDeleteConfirmationModal}
-  onClose={closeDeleteConfirmationModal}
-  title="Attention !"
-  textClose="Annuler"
->
-  <p>Voulez-vous définitivement supprimer la sélection ?</p>
-  <div className="flex justify-around mt-4">
-    <button
-      className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-      onClick={handleConfirmDelete}
-    >
-      Confirmer
-    </button>
-   
-  </div>
-</DeleteConfirmationModal>
+                isOpen={showDeleteConfirmationModal}
+                onClose={closeDeleteConfirmationModal}
+                title="Attention !"
+                textClose="Annuler"
+              >
+                <p>Voulez-vous définitivement supprimer la sélection ?</p>
+                <div className="flex justify-around mt-4">
+                  <button
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={handleConfirmDelete}
+                  >
+                    Confirmer
+                  </button>
+                </div>
+              </DeleteConfirmationModal>
 
               <div>
                 <ToastContainer position="top-center" autoClose={5000} />
@@ -1759,7 +1893,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {isAdmin && isShowAdmin && isShowUpload &&(
+          {isAdmin && isShowAdmin && isShowUpload && (
             <div className="">
               <DotLoaderSpinner isLoading={isUploading} />
               <div className="flex flex-wrap justify-start items-center my-8 p-4 gap-2">
@@ -1950,7 +2084,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           <Trash isOpen={true} />
                         </button>
                       )}
-
 
                     {zoomGallery >= 200 &&
                       isAdmin &&
