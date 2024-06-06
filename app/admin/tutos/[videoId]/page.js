@@ -6,8 +6,6 @@ import StrapiVideo from "../../../StrapiVideo";
 async function fetchVideo(videoId) {
   const strapiVideo = await myFetch(`/api/video/${videoId}`, 'GET', null, 'video by Id');
 
-  console.log(strapiVideo);
-
   const convertedUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}${strapiVideo.url}`;
   const thumbnail = strapiVideo.formats?.thumbnail?.url ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${strapiVideo.formats.thumbnail.url}` : null;
 
@@ -18,7 +16,7 @@ async function fetchVideo(videoId) {
     thumbnail,
   };
 
-  console.log(video);
+ 
   return video;
 }
 

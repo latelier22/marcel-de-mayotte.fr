@@ -82,7 +82,7 @@ const ManageTags: React.FC = () => {
       console.error(`Item with id ${itemId} not found`);
       return;
     }
-    console.log(item)
+   
 
     if (item.label === newLabel && item.route === newRoute) {
       return;
@@ -93,8 +93,6 @@ const ManageTags: React.FC = () => {
       label: newLabel,
       route: newRoute,
     };
-
-    console.log("updatedItem",updatedItem)
 
     try {
       await updateMenuItem(updatedItem);

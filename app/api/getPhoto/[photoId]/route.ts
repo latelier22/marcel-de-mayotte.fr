@@ -6,7 +6,6 @@ export const dynamic = 'force-dynamic'
 export async function GET(req: NextRequest, context: { params: { photoId: string } }) {
 
   const photoId = context.params.photoId;
-  console.log("photo by id",photoId)
 
   try {
     // Trouver le tag par son nom

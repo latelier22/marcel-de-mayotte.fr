@@ -22,7 +22,7 @@ async function fetchComments(postId = null) {
         child_comments: comment.attributes.child_comments && Array.isArray(comment.attributes.child_comments.data) ? comment.attributes.child_comments.data.map(reply => reply.id) : []
     }));
 
-    console.log('fetch comments', comments);
+   
     return comments;
 }
 

@@ -7,14 +7,14 @@ async function fetchCitations () {
 
 
         const strapiCitations = response.data
-        console.log(strapiCitations);
+        
 
         const citations = strapiCitations.map(citation => ({
             id: citation.id,
             ...citation.attributes
         }));
         
-        console.log(citations);
+       
 
     return citations
 

@@ -43,8 +43,6 @@ async function getCitations(onlyPublished = false) {
         // Format the final results by flattening each top-level citation group
         const formattedResult = topLevelCitations.map(flattenCitations);
 
-        console.log(formattedResult);
-
         return formattedResult;
     } catch (error) {
         console.error("An error occurred while fetching citations:", error);

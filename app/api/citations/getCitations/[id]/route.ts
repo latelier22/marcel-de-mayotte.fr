@@ -8,8 +8,6 @@ export async function GET(req :NextRequest, context: {params: {id: string}}) {
 
 const id = parseInt(context.params.id);
 
-  console.log("id",id)
-
   try {
     // Récupérer la photo avec l'ID spécifié
     

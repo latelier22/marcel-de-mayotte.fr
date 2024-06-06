@@ -53,7 +53,6 @@ function ListPosts({ allPosts, allComments, allFiles }) {
 
     const handleImageChange = (selectedOption) => {
         const newMediaId = selectedOption ? selectedOption.value : null;
-        console.log('Selected media ID:', newMediaId);
         setEditFormData({ ...editFormData, mediaId: newMediaId });
         setSelectedImageUrl(newMediaId ? images.find(img => img.id === newMediaId).url : '');
     };

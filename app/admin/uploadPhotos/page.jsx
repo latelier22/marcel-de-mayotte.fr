@@ -16,7 +16,6 @@ async function Page() {
       const response = await fetch(`${process.env.NEXTAUTH_URL}/api/getPhoto/${photoId}`);
       
       const photo = await response.json()
-      console.log(photo)
 
       if (photo.success) {
         return photo.tags || [];
@@ -65,7 +64,7 @@ async function Page() {
 
   const myFiles = await fetchPostsForFiles(updatedFiles);
 
-  console.log(myFiles.slice(0, 5));
+  
 
   return (
     <>

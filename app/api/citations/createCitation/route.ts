@@ -5,7 +5,6 @@ import prisma from "../../../../prisma/prisma";
 export async function POST(request) {
   try {
     const { texte, auteur, etat , parentCitationId} = await request.json();
-    console.log(texte, auteur, etat)
 
     // Validation de base pour texte
     if (!texte || typeof texte !== 'string' || texte.trim().length === 0) {

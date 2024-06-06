@@ -7,7 +7,6 @@ import styles from './VideoPlayer.module.css'; // Importez vos styles CSS
 const VideoPlayer = ({ myVideoUrl }) => {
   const [showText, setShowText] = useState(true);
   const videoRef = useRef(null);
-  console.log("myVideoUrl",myVideoUrl);
 
   useEffect(() => {
     const video = videoRef.current;

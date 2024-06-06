@@ -14,7 +14,7 @@ async function Page() {
     const pictures = await fetchPictures();
     const posts = await fetchPosts();
    
-    console.log(pictures.slice(0,5))
+    
     
     return (
         <>

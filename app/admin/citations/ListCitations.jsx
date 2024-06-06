@@ -93,7 +93,7 @@ function ListCitations({ allCitations }) {
     };
     
     const handleAddChild = (parentCitation) => {
-        console.log("reset");
+        
         setNewChildData({ texte: '', auteur: '', etat: 'brouillon', parentCitationId: parentCitation.id });
     };
 
@@ -118,7 +118,7 @@ function ListCitations({ allCitations }) {
                 ...response.data.attributes
             }
 
-            console.log("ADDED NEW CHILD CITATION", addedCitation);
+           
 
             let newCitations = [...citations];
             // Find the last child of this parent to insert the new child after
@@ -218,7 +218,6 @@ function ListCitations({ allCitations }) {
             data: editFormData // Assuming editFormData already contains { texte, auteur, etat }
         };
     
-        console.log("Sending payload:", payload);
     
         try {
             const response = await myFetch('/api/citations', 'POST', payload, 'citation');

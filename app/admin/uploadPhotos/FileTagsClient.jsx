@@ -2,7 +2,7 @@
 import React from 'react';
 
 const FileTagsClient = ({ fileTags }) => {
-    console.log("fileTags",fileTags)
+   
   return (
     <div>
       {fileTags && fileTags.map(tag => (

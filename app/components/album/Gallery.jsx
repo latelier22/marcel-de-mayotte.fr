@@ -1150,7 +1150,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
           posts: [], // Initialize posts as an empty array for new files
         }));
         setFiles((prevFiles) => [...prevFiles, ...newFiles]);
-        console.log("files", files);
+        
         setIsUploading(false);
       }
     } catch (error) {

@@ -27,7 +27,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
   }, [allPictures, allFiles]);
 
   const initializeFiles = () => {
-    console.log(allPictures.slice().reverse().slice(0, 10));
+   
     const updatedFiles = allFiles.map((file) => {
       const picture = allPictures.find((p) => p.fileId === file.id);
      
@@ -44,7 +44,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
     });
 
     setFiles(updatedFiles);
-    console.log(files.slice().reverse());
+    
     fetchPostsForFiles(updatedFiles);
   };
 
@@ -62,7 +62,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
   };
 
   const handleFileClick = (fileId) => {
-    console.log(fileId, allFiles.filter((f) => f.id ===fileId))
+    
     setSelectedFileIds((prev) => {
       if (prev.includes(fileId)) {
         return prev.filter((id) => id !== fileId);
@@ -345,7 +345,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
       });
 
       const resultTag1 = await tagResponse1.json();
-      console.log("Photos added and tagged successfully:", result, resultTag1);
+      
       const tagResponse2 = await fetch("/api/updateTagInBulk", {
         method: "POST",
         headers: {
@@ -359,7 +359,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
       });
 
       const resultTag2 = await tagResponse2.json();
-      console.log("Photos added and tagged successfully:", result, resultTag2);
+      
 
       // Update local state to reflect imported status
       setFiles((prevFiles) =>
@@ -438,7 +438,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
 
   const handleEditImage = (fileId) => {
     const file = files.find((f) => f.id === fileId);
-    console.log(`Editing image with ID: ${fileId}`, file);
+    console.log(`A FAIRE ! Editing image with ID: ${fileId}`, file);
     // Add your edit logic here
   };
 
