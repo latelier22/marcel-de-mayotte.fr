@@ -44,6 +44,7 @@ async function Page({ params }) {
       }
     });
     const tag = await tagIdResponse.json();
+    console.log("TAG",tag)
 
     photoTagOrders = await fetchOrders(tag.id);
 

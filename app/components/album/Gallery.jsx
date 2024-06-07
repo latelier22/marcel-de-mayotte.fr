@@ -2104,15 +2104,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                         <>
                           <s
                            className="text-white bg-transparent text-center w-full absolute -bottom-7">{photo.name}</s>
-                          
                             <input
                               className="absolute -bottom-7"
                               title="Utiliser le nom comme titre"
                               type="checkbox"
                               onChange={() => handleCheckboxChange(photo.id)}
                             />
-                            
-                          
                         </>
                       )}
                       </>
