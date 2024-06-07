@@ -29,9 +29,9 @@ model Photo {
 
 model Tag {
   id         Int      @id @default(autoincrement())
-  name       String   @unique
+  name       String   
   photos     Photo[]  // Relation many-to-many avec la table des photos
-  slug       String
+  slug       String   @unique
   mainTag    Boolean  @default(false)
   parentTag  Tag?     @relation("ChildTags", fields: [parentId], references: [id])
   parentId   Int?     @map("parent_id")

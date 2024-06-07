@@ -15,7 +15,7 @@ export async function GET(req: NextRequest, context: { params: { photoId: string
       },
       include: {
         tags: true
-      }
+      } 
 
     });
 
