@@ -52,8 +52,11 @@ import {
   useSortable,
   arrayMove,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy
+  horizontalListSortingStrategy
 } from "@dnd-kit/sortable";
+
+import { CSS } from '@dnd-kit/utilities';
+
 
 
 
@@ -163,29 +166,247 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     })
   );
 
-  function SortablePhotoFrame(props) {
-    const { photo, activeIndex } = props;
-    const { attributes, listeners, isDragging, index, over, setNodeRef } =
-      useSortable({ id: photo.id });
-
+  const SortablePhotoFrame = (props) => {
+    const { photo } = props;
+    const {  activeIndex, attributes, listeners, isDragging, index, setNodeRef } = useSortable({ id: photo.id });
+  
+    const { alt, style, ...restImageProps } = props.imageProps;
+  
     return (
-      <PhotoFrame
+      <div
         ref={setNodeRef}
-        active={isDragging}
-        insertPosition={
-          activeIndex !== undefined && over?.id === photo.id && !isDragging
-            ? index > activeIndex
-              ? "after"
-              : "before"
-            : undefined
-        }
-        aria-label="sortable image"
-        attributes={attributes}
-        listeners={listeners}
-        {...props}
-      />
+        style={{
+          ...style,
+          transform: CSS.Transform.toString(props.transform),
+          transition: props.transition,
+          border: props.selectedPhotoIds.includes(photo.id) ? "8px solid green" : "4px solid black",
+        }}
+        {...attributes}
+        {...listeners}
+        className="relative mb-4"
+      >
+        <img
+          src={photo.src}
+          alt={photo.title}
+          style={{
+            width: "100%",
+            height: "auto",
+            padding: 0,
+            marginBottom: 0,
+          }}
+          {...restImageProps}
+        />
+        {/* Title */}
+        <EditableButton
+          text={props.titles[photo.id] || ""}
+          onChange={(e) => {
+            const newTitles = {
+              ...props.titles,
+              [photo.id]: e.target.value,
+            };
+            props.setTitles(newTitles);
+          }}
+          onBlur={() =>
+            props.updatePhotoTitle(photo.id, props.titles[photo.id])
+          }
+          isEditable={!props.isReadOnly}
+          inputRef={props.inputRef}
+        />
+        {!props.titles[photo.id] && (
+          <>
+            <span className="text-white bg-transparent text-center w-full absolute -bottom-7">{photo.name}</span>
+            <input
+              className="absolute -bottom-7"
+              title="Utiliser le nom comme titre"
+              type="checkbox"
+              onChange={() => props.handleCheckboxChange(photo.id)}
+            />
+          </>
+        )}
+  
+        {/* Heart Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            props.toggleFavorite(photo.id);
+          }}
+          className={`absolute top-2 left-2`}
+        >
+          <Heart isOpen={props.favorites.has(photo.id)} />
+        </button>
+  
+        {/* Delete Button */}
+        {props.isAdmin && props.isShowAdmin && !photo.published && props.isVisible && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              props.setIndex(-1);
+              props.handleDeleteButtonClick(photo.id);
+            }}
+            className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+          >
+            <Trash isOpen={true} />
+          </button>
+        )}
+  
+        {/* Tag Button */}
+        {props.isAdmin && props.isShowAdmin && photo.published && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                props.toggleTagDiv(photo.id);
+              }}
+              className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+            >
+              <Htag isOpen={true} />
+            </button>
+            {props.openTagDiv === photo.id && (
+              <div
+                ref={props.tagDivRef}
+                className="bg-neutral-800 p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
+                style={{
+                  top: "100%",
+                  left: "0",
+                  right: "0",
+                  maxHeight: "300px",
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Search tags..."
+                  value={props.photoTagSearch}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) =>
+                    props.setPhotoTagSearch(e.target.value)
+                  }
+                  className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
+                />
+                {props.photoTagSearch ? (
+                  <div>
+                    {props.filteredTags(props.allMyTags).map((tag) => (
+                      <span
+                        key={tag.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.handleTagClickForPhoto(photo.id, tag.name);
+                        }}
+                        className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                    {props.filteredTags(props.allMyTags).length === 0 && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await props.handleCreateTagandUpdate(props.photoTagSearch, photo.id);
+                        }}
+                        className="bg-green-500 text-white px-2 py-1 rounded m-1"
+                      >
+                        Create Tag: {props.photoTagSearch}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      {photo.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            props.handleRemoveTagForPhoto(photo.id, tag.name);
+                          }}
+                          className="inline-block bg-green-500 m-1 p-1 rounded relative"
+                        >
+                          {tag.name}
+                          <span
+                            className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            &times;
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                    <div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.setShowOtherTags(!props.showOtherTags);
+                        }}
+                        className="bg-blue-500 text-white px-2 py-1 rounded m-1"
+                      >
+                        {props.showOtherTags ? "Hide Other Tags" : "Show Other Tags"}
+                      </button>
+                      {props.showOtherTags && (
+                        <div>
+                          {props.allMyTags
+                            .filter((tag) =>
+                              !photo.tags.some((photoTag) =>
+                                photoTag.name === tag.name
+                              )
+                            )
+                            .map((tag) => (
+                              <span
+                                key={tag.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  props.handleTagClickForPhoto(photo.id, tag.name);
+                                }}
+                                className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                              >
+                                {tag.name}
+                              </span>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </>
+        )}
+  
+        {/* Published Button */}
+        {props.isAdmin && props.isShowAdmin && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              props.togglePublished(photo.id, photo.published);
+            }}
+            className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+              }`}
+          >
+            <Eye isOpen={photo.published} />
+          </button>
+        )}
+  
+        {/* Recent Button */}
+        {props.isAdmin && props.isShowAdmin && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              props.toggleRecent(photo.id);
+            }}
+            className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+              }`}
+          >
+            <Star isOpen={props.recentPhotos.has(photo.id)} />
+          </button>
+        )}
+      </div>
     );
-  }
+  };
+  
 
   const renderedPhotos = useRef({});
   const [activeId, setActiveId] = useState();
@@ -218,9 +439,41 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   };
 
   const renderPhoto = (props) => {
-    renderedPhotos.current[props.photo.id] = props;
-    return <SortablePhotoFrame activeIndex={activeIndex} {...props} />;
+    return (
+      <SortablePhotoFrame
+        {...props}
+        activeIndex={activeIndex}
+        selectedPhotoIds={selectedPhotoIds}
+        titles={titles}
+        handleTitleChange={handleTitleChange}
+        handleTitleBlur={handleTitleBlur}
+        isReadOnly={isReadOnly}
+        inputRef={inputRef}
+        toggleFavorite={toggleFavorite}
+        favorites={favorites}
+        handleDeleteButtonClick={handleDeleteButtonClick}
+        isAdmin={isAdmin}
+        isShowAdmin={isShowAdmin}
+        toggleTagDiv={toggleTagDiv}
+        openTagDiv={openTagDiv}
+        tagDivRef={tagDivRef}
+        photoTagSearch={photoTagSearch}
+        setPhotoTagSearch={setPhotoTagSearch}
+        filteredTags={filteredTags}
+        handleTagClickForPhoto={handleTagClickForPhoto}
+        handleCreateTagandUpdate={handleCreateTagandUpdate}
+        handleRemoveTagForPhoto={handleRemoveTagForPhoto}
+        showOtherTags={showOtherTags}
+        setShowOtherTags={setShowOtherTags}
+        allMyTags={allMyTags}
+        togglePublished={togglePublished}
+        toggleRecent={toggleRecent}
+        recentPhotos={recentPhotos}
+        zoomGallery={zoomGallery}
+      />
+    );
   };
+  
   // const renderPhoto = ({ photo, attributes, listeners, setNodeRef, style }) => (
   //   <div
   //     ref={setNodeRef}
@@ -1933,36 +2186,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                     )}
                   </TagCrudModal>
 
-                  {/* <div>
-                  <h4 className="text-lg text-center font-semibold">
-                    Autres Tags
-                  </h4>
-                  <div className="mt-4 flex flex-col">
-                    {unusedTags.map((tag) => {
-                      return (
-                        <div
-                          className="flex items-center justify-between"
-                          key={tag.id}
-                        >
-                          <button
-                            className={`flex flex-col w-[95%] items-center justify-between flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2 ${
-                              tag.mainTag ? "border-4  border-black" : ""
-                            }`}
-                            onClick={() => handleTagClick(tag.name)}
-                          >
-                            {tag.name}
-                          </button>
-                          <input
-                            type="checkbox"
-                            checked={tag.mainTag}
-                            onChange={() => handleToggleMainTag(tag.id)}
-                            className="ml-2"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div> */}
                 </div>
                 <PublishedModal
                   isOpen={showPublishedModal}
@@ -2133,22 +2356,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
             </div>
           </div>
         )}
-        <div
-          style={{
-            width: isAdmin && isShowAdmin ? "80%" : "100%",
-            padding: "10px",
-          }}
-        >
-          <div className="left-12 top-2 w-full">
-            <input
-              className="text-black w-full text-bold text-2xl text-center"
-              type="textarea"
-              placeholder="Recherche par mot (titre, nom d'image, tag...)"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          {isAdmin && isShowAdmin && isShowUpload && (
+        <div style={{ width: isAdmin && isShowAdmin ? "80%" : "100%", padding: "10px" }}>
+
+        {isAdmin && isShowAdmin && isShowUpload && (
             <div>
               <UploadImageComponent
                 handleImportedFiles={handleImportedFiles}
@@ -2159,147 +2369,144 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
               />
             </div>
           )}
-          <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
-            <ChangeOrderButton tagId={tagId} photos={photos} />
-            <button
-              className={`p-2 rounded-sm ${
-                currentPage === 1
-                  ? "bg-neutral-500 text-neutral-700"
-                  : "bg-neutral-700 text-white"
-              }`}
-              onClick={goToPreviousPage}
-              disabled={currentPage === 1}
-            >
-              Page Précédente
-            </button>
-            <span>
-              Page {currentPage} / {totalPages}
-            </span>
-            <span>
-              <label className="mr-2 text-white">Photos per page:</label>
-              <select
-                className="p-1 text-xl font-bold text-black bg-white"
-                onChange={(e) => changePhotosPerPage(Number(e.target.value))}
-                value={photosPerPage}
-              >
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-                <option value={200}>200</option>
-                <option value={sortedAndFilteredPhotos.length}>
-                  TOUS ({sortedAndFilteredPhotos.length})
-                </option>
-              </select>
-            </span>
-            <button
-              className="p-2 rounded-sm bg-neutral-700 text-white"
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages}
-            >
-              Page Suivante
-            </button>
-            <button
-              className="p-2 rounded-sm bg-neutral-700 text-white"
-              onClick={() => setZoomGallery(zoomGallery + 50)}
-            >
-              ZOOM IN
-            </button>
-            <button
-              className="p-2 rounded-sm bg-neutral-700 text-white"
-              onClick={() => setZoomGallery(zoomGallery - 50)}
-            >
-              ZOOM OUT
-            </button>
-          </div>
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext
-              items={paginatedPhotos.map((photo) => photo.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <PhotoAlbum
-                photos={paginatedPhotos}
-                spacing={zoomGallery / 7}
-                layout="rows"
-                targetRowHeight={zoomGallery}
-                onClick={({ index }) => setIndex(index)}
-                renderPhoto={renderPhoto}
-              />
-            </SortableContext>
-            <DragOverlay>
-        {activeId ? (
-          <div
-            style={{
-              width: 150,
-              height: 150,
-              backgroundColor: "white",
-              border: "1px solid black",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center"
-            }}
-          >
-            Dragging
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
-          <Lightbox
-            open={isActive && index >= 0}
-            index={index}
-            close={() => setIndex(-1)}
-            slides={paginatedPhotos}
-            render={{ slide: NextJsImage }}
-            plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
-            zoom={{
-              maxZoomPixelRatio: 3,
-              scrollToZoom: true,
-            }}
+        <div className="left-12 top-2 w-full">
+          <input
+            className="text-black w-full text-bold text-2xl text-center"
+            type="textarea"
+            placeholder="Recherche par mot (titre, nom d'image, tag...)"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <ToastContainer />
-          <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
-            <button
-              className={`p-2 rounded-sm ${
-                currentPage === 1
-                  ? "bg-neutral-500 text-neutral-700"
-                  : "bg-neutral-700 text-white"
+        </div>
+        
+        <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
+          <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID {tagId}
+          <button
+            className={`p-2 rounded-sm ${currentPage === 1
+                ? "bg-neutral-500 text-neutral-700"
+                : "bg-neutral-700 text-white"
               }`}
-              onClick={goToPreviousPage}
-              disabled={currentPage === 1}
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1}
+          >
+            Page Précédente
+          </button>
+          <span>
+            Page {currentPage} / {totalPages}
+          </span>
+          <span>
+            <label className="mr-2 text-white">Photos per page:</label>
+            <select
+              className="p-1 text-xl font-bold text-black bg-white"
+              onChange={(e) => changePhotosPerPage(Number(e.target.value))}
+              value={photosPerPage}
             >
-              Page Précédente
-            </button>
-            <span>
-              Page {currentPage} / {totalPages}
-            </span>
-            <span>
-              <label className="mr-2 text-white">Photos per page:</label>
-              <select
-                className="p-1 text-xl font-bold text-black bg-white"
-                onChange={(e) => changePhotosPerPage(Number(e.target.value))}
-                value={photosPerPage}
-              >
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </span>
-            <button
-              className="p-2 rounded-sm bg-neutral-700 text-white"
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages}
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={200}>200</option>
+              <option value={sortedAndFilteredPhotos.length}>
+                TOUS ({sortedAndFilteredPhotos.length})
+              </option>
+            </select>
+          </span>
+          <button
+            className="p-2 rounded-sm bg-neutral-700 text-white"
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+          >
+            Page Suivante
+          </button>
+          <button
+            className="p-2 rounded-sm bg-neutral-700 text-white"
+            onClick={() => setZoomGallery(zoomGallery + 50)}
+          >
+            ZOOM IN
+          </button>
+          <button
+            className="p-2 rounded-sm bg-neutral-700 text-white"
+            onClick={() => setZoomGallery(zoomGallery - 50)}
+          >
+            ZOOM OUT
+          </button>
+        </div>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={paginatedPhotos.map((photo) => photo.id)} strategy={horizontalListSortingStrategy}>
+            <PhotoAlbum
+              photos={paginatedPhotos}
+              spacing={zoomGallery / 7}
+              layout="rows"
+              targetRowHeight={zoomGallery}
+              onClick={({ index }) => setIndex(index)}
+              renderPhoto={renderPhoto}
+            />
+          </SortableContext>
+          <DragOverlay>
+            {activeId ? (
+              <img
+                src={paginatedPhotos.find((photo) => photo.id === activeId).src}
+                alt=""
+                style={{ border: "2px solid black", padding: "10px", width: "100%" }}
+              />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+        <Lightbox
+          open={isActive && index >= 0}
+          index={index}
+          close={() => setIndex(-1)}
+          slides={paginatedPhotos}
+          render={{ slide: NextJsImage }}
+          plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
+          zoom={{
+            maxZoomPixelRatio: 3,
+            scrollToZoom: true,
+          }}
+        />
+        <ToastContainer />
+        <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+          <button
+            className={`p-2 rounded-sm ${currentPage === 1
+                ? "bg-neutral-500 text-neutral-700"
+                : "bg-neutral-700 text-white"
+              }`}
+            onClick={goToPreviousPage}
+            disabled={currentPage === 1}
+          >
+            Page Précédente
+          </button>
+          <span>
+            Page {currentPage} / {totalPages}
+          </span>
+          <span>
+            <label className="mr-2 text-white">Photos per page:</label>
+            <select
+              className="p-1 text-xl font-bold text-black bg-white"
+              onChange={(e) => changePhotosPerPage(Number(e.target.value))}
+              value={photosPerPage}
             >
-              Page Suivante
-            </button>
-          </div>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </span>
+          <button
+            className="p-2 rounded-sm bg-neutral-700 text-white"
+            onClick={goToNextPage}
+            disabled={currentPage === totalPages}
+          >
+            Page Suivante
+          </button>
         </div>
       </div>
-    </>
-  );
+    </div>
+  </>
+);
 };
 
 export default Gallery;
