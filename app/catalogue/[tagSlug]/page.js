@@ -24,6 +24,7 @@ async function Page({ params }) {
 
   let listePhotos = [];
   let photoTagOrders = [];
+  let tag = null;
 
   if (tagSlug === 'favoris' || tagSlug === 'non-publiees') {
     const allCataloguePhotos = await getImagesbyTag("catalogue-complet", userId);
@@ -43,8 +44,8 @@ async function Page({ params }) {
         "Content-Type": "application/json",
       }
     });
-    const tag = await tagIdResponse.json();
-    console.log("TAG",tag)
+    tag = await tagIdResponse.json();
+    console.log("TAG", tag)
 
     photoTagOrders = await fetchOrders(tag.id);
 
@@ -132,6 +133,7 @@ async function Page({ params }) {
       <Navbar />
       <TagsAndGallery
         tagSlug={tagSlug}
+        tagId={tag ? tag.id : null} // Ensure tagId is passed only if tag is defined
         photos={photos}
         allTags={allTags}
         progressionsTags={progressionsTags}

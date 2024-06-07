@@ -29,7 +29,7 @@ model Photo {
 
 model Tag {
   id         Int      @id @default(autoincrement())
-  name       String   
+  name       String   @unique
   photos     Photo[]  // Relation many-to-many avec la table des photos
   slug       String   @unique
   mainTag    Boolean  @default(false)

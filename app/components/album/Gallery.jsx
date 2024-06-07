@@ -33,8 +33,9 @@ import EditableButton from "./buttons/EditableButton";
 import { useSelector } from "react-redux";
 
 import myFetch from "../../components/myFetch";
+import ChangeOrderButton from "./ChangeOrderButton";
 
-const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
+const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
@@ -263,7 +264,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
         usedTags.add(tag.name);
       });
     });
-
+  
     const newUnusedTags = allMyTags
       .filter((tag) => !usedTags.has(tag.name))
       .reduce(
@@ -277,12 +278,26 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
         },
         { mainTags: [], otherTags: [] }
       );
-
-    newUnusedTags.mainTags.sort((a, b) => a.name.localeCompare(b.name));
-    newUnusedTags.otherTags.sort((a, b) => a.name.localeCompare(b.name));
-
+  
+    newUnusedTags.mainTags.sort((a, b) => {
+      if (a.name && b.name) {
+        return a.name.localeCompare(b.name);
+      } else {
+        return 0;
+      }
+    });
+  
+    newUnusedTags.otherTags.sort((a, b) => {
+      if (a.name && b.name) {
+        return a.name.localeCompare(b.name);
+      } else {
+        return 0;
+      }
+    });
+  
     setUnusedTags([...newUnusedTags.mainTags, ...newUnusedTags.otherTags]);
   }, [allMyTags, photos, isShowAdmin]);
+  
 
   const isTagNameExist = (tagName) => {
     return allMyTags.some((tag) => tag.name === tagName);
@@ -461,7 +476,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
   const filteredOtherUnusedTags = otherUnusedTags.filter((tag) =>
-    tag.name.toLowerCase().includes(tagSearch.toLowerCase())
+    tag.name && tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
 
   useEffect(() => {
@@ -2001,6 +2016,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
             </div>
           )}
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
+             {/* Add the ChangeOrderButton here */}
+             <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID
+             {tagId}
+
+
             <button
               className={`p-2 rounded-sm ${currentPage === 1
                   ? "bg-neutral-500 text-neutral-700"

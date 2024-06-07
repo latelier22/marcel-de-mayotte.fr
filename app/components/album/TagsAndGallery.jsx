@@ -7,7 +7,7 @@ import Cards from "../../Cards";
 import { useSession } from "next-auth/react";
 import { useSelector } from "react-redux";
 
-const TagsAndGallery = ({ photos, allTags, progressionsTags, listeTags, tagCards, tagSlug }) => {
+const TagsAndGallery = ({ photos, allTags, progressionsTags, listeTags, tagCards, tagSlug, tagId }) => {
 
 //     const storedPhotoIds = localStorage.getItem('selectedPhotoIds');
 //   if (storedPhotoIds) {
@@ -39,7 +39,7 @@ const TagsAndGallery = ({ photos, allTags, progressionsTags, listeTags, tagCards
                 {tagSlug === "progressions" ? (
                     <Cards cards={tagCards} syliusCard={true} label={"Voir les étapes..."} />
                 ) : (
-                    <Gallery photos={photos} allTags={allTags} tagSlug={tagSlug}/>
+                    <Gallery photos={photos} allTags={allTags} tagSlug={tagSlug} tagId={tagId}/>
                 )}
             </div>
         </div>
