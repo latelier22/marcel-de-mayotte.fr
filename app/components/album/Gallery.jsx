@@ -626,18 +626,55 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     updateTagInBulk(addTag, selectedTag);
     setShowTagModal(false);
   };
-
+  
   useEffect(() => {
     const initialTitles = {};
     photos.forEach((photo) => {
-      if (isAdmin) {
-        initialTitles[photo.id] = photo.title || photo.name;
-      } else {
-        initialTitles[photo.id] = photo.title || "";
-      }
+      initialTitles[photo.id] = photo.title || "";
     });
     setTitles(initialTitles);
-  }, [photos, isAdmin]);
+  }, [photos]);
+
+  const handleTitleChange = (e, photoId) => {
+    const newTitles = {
+      ...titles,
+      [photoId]: e.target.value,
+    };
+    setTitles(newTitles);
+  };
+
+  const handleTitleBlur = (photoId) => {
+    const title = titles[photoId];
+    updatePhotoTitle(photoId, title);
+  };
+
+  const handleCheckboxChange = (photoId) => {
+    const newTitle = photos.find((p) => p.id === photoId).name;
+    setTitles((prevTitles) => ({
+      ...prevTitles,
+      [photoId]: newTitle,
+    }));
+    updatePhotoTitle(photoId, newTitle);
+  };
+
+  const updatePhotoTitle = async (photoId, title) => {
+    try {
+      const response = await fetch(`/api/updatePhotoTitle`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ photoId, title }),
+      });
+
+      if (!response.ok) throw new Error("Failed to update photo title");
+      toast.success("Titre mis à jour!");
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour", error);
+      toast.error("Failed to update title");
+    }
+  };
+
 
   const handleDeleteButtonClick = async (photoId) => {
     try {
@@ -750,23 +787,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     }
   };
 
-  const updatePhotoTitle = async (photoId, title) => {
-    try {
-      const response = await fetch(`/api/updatePhotoTitle`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ photoId, title }),
-      });
-
-      if (!response.ok) throw new Error("Failed to update photo title");
-      // toast.success("Titre mis à jour!");
-    } catch (error) {
-      console.error("Erruer lors de la mise à jour", error);
-      // toast.error("Failed to update title");
-    }
-  };
 
   function normalizeString(str) {
     return str
@@ -777,11 +797,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
 
   const sortedAndFilteredPhotos = useMemo(() => {
     let filteredPhotos = photos;
-
+  
     if (!isAdmin || !isVisible) {
       filteredPhotos = filteredPhotos.filter((photo) => photo.published);
     }
-
+  
     if (searchTerm) {
       const normalizedSearchTerm = normalizeString(searchTerm);
       filteredPhotos = filteredPhotos.filter(
@@ -793,18 +813,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
           )
       );
     }
-
-    return filteredPhotos.sort((a, b) => {
-      const aFavorite = favorites.has(a.id);
-      const bFavorite = favorites.has(b.id);
-      if (aFavorite && !bFavorite) {
-        return -1;
-      } else if (!aFavorite && bFavorite) {
-        return 1;
-      }
-      return 0;
-    });
-  }, [photos, favorites, isAdmin, isVisible, searchTerm]);
+  
+    return filteredPhotos; // Remove additional sorting here
+  }, [photos, isAdmin, isVisible, searchTerm]);
+  
 
   useEffect(() => {
     const initialFavorites = photos.reduce((favoritesSet, photo) => {
@@ -1975,66 +1987,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
             />
           </div>
           {isAdmin && isShowAdmin && isShowUpload && (
-            // <div className="">
-            //   <DotLoaderSpinner isLoading={isUploading} />
-            //   <div className="flex flex-wrap justify-start items-center my-8 p-4 gap-2">
-            //     <div className=" px-4 py-2 rounded">
-            //       <button
-            //         onClick={() => fileInputRef.current.click()}
-            //         className="bg-green-500 text-white px-4 py-2 rounded"
-            //       >
-            //         Upload Image
-            //       </button>
-
-            //       <button
-            //         onClick={handleFileSelectAll}
-            //         className="bg-blue-500 text-white px-4 py-2 rounded"
-            //       >
-            //         {selectedFileIds.length === files.length
-            //           ? "Deselect All"
-            //           : "Select All"}
-            //       </button>
-
-            //       <button
-            //         onClick={(e) => {
-            //           e.stopPropagation();
-            //           handleImportImage(selectedFileIds);
-            //         }}
-            //         disabled={!selectedFileIds.length > 0}
-            //         className={`bg-orange-500 text-white px-4 py-2 rounded ${!selectedFileIds.length > 0
-            //             ? "opacity-50 cursor-not-allowed"
-            //             : ""
-            //           }`}
-            //       >
-            //         Import
-            //       </button>
-            //       <input
-            //         type="file"
-            //         ref={fileInputRef}
-            //         style={{ display: "none" }}
-            //         onChange={handleUploadImage}
-            //         multiple
-            //       />
-            //     </div>
-            //     {files.map((file) => (
-            //       <div
-            //         key={file.id}
-            //         className={`${selectedFileIds.includes(file.id)
-            //             ? "border-green-500 border-solid border-2 rounded-md"
-            //             : ""
-            //           } text-center cursor-pointer hover:bg-gray-800`}
-            //         onClick={() => handleFileClick(file.id)}
-            //       >
-            //         <ImageWithFallback key={file.id} file={file} />
-            //       </div>
-            //     ))}
-            //   </div>
-            //   {importedFilesCount > 0 && (
-            //     <div className="bg-green-200 text-green-800 text-center p-2 my-4 rounded">
-            //       {importedFilesCount} fichiers ont bien été importés
-            //     </div>
-            //   )}
-            // </div>
+            
             <div>
               <UploadImageComponent
                 handleImportedFiles={handleImportedFiles}
@@ -2131,6 +2084,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                     title={photo.src}
                   >
                     {zoomGallery >= 200 && (
+                      <>
                       <EditableButton
                         text={titles[photo.id] || ""}
                         onChange={(e) => {
@@ -2146,6 +2100,22 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                         isEditable={!isReadOnly}
                         inputRef={inputRef}
                       />
+                      {!titles[photo.id] && (
+                        <>
+                          <s
+                           className="text-white bg-transparent text-center w-full absolute -bottom-7">{photo.name}</s>
+                          
+                            <input
+                              className="absolute -bottom-7"
+                              title="Utiliser le nom comme titre"
+                              type="checkbox"
+                              onChange={() => handleCheckboxChange(photo.id)}
+                            />
+                            
+                          
+                        </>
+                      )}
+                      </>
                     )}
                     {zoomGallery >= 200 && (
                       <button

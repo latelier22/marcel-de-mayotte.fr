@@ -11,7 +11,7 @@ export async function GET( req: NextRequest, context: {params: {tagSlug: string}
 
   try {
     // Trouver le tag par son nom
-    const tag = await prisma.tag.findUnique({
+    const tag = await prisma.tag.findFirst({
       where: {
         slug: tagSlug 
       }

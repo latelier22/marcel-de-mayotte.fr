@@ -9,24 +9,22 @@ import getProgressionsTags from "../../components/getProgressionsTags";
 import TagsAndGallery from "../../components/album/TagsAndGallery";
 import { authOptions } from "../../Auth";
 import { getServerSession } from 'next-auth';
-import myFetch from "../../components/myFetch";
+import fetchOrders from "../../components/fetchPhotoTagOrders";
 
 async function Page({ params }) {
-  // Récupérer la session de l'utilisateur
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id || null;
   const isAdmin = session && session.user.role === 'admin';
 
   const page = Pages["catalogue"];
-  const pageTitle = page.title;
-  const pageDescription = page.description;
   const tagSlug = params.tagSlug;
 
   const allPhotos = await getImages();
   const allTags = await getTags(allPhotos);
 
-  // Récupérer les photos en fonction du tag ou toutes les photos si tagSlug = "favoris"
-  let listePhotos;
+  let listePhotos = [];
+  let photoTagOrders = [];
+
   if (tagSlug === 'favoris' || tagSlug === 'non-publiees') {
     const allCataloguePhotos = await getImagesbyTag("catalogue-complet", userId);
 
@@ -39,26 +37,55 @@ async function Page({ params }) {
   } else {
     const apiBaseUrl = process.env.NEXTAUTH_URL;
 
-    const photoId = 1752;
-    const response2 = await fetch(`${apiBaseUrl}/api/getPhoto/${photoId}`);
-    console.log(response2);
-
     const tagIdResponse = await fetch(`${apiBaseUrl}/api/getTagIdBySlug/${tagSlug}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       }
     });
-    const tag= await tagIdResponse.json();
-    console.log("tagId", tag.id);
+    const tag = await tagIdResponse.json();
 
-    const response = await myFetch(`/api/photo-tag-order/${tag.id}`, 'GET', null, 'photoTagOrders');
-    if (response) {         
-      console.log("order response", response);
-      const photoTagOrders = response;
-    }
+    photoTagOrders = await fetchOrders(tag.id);
 
     listePhotos = await getImagesbyTag(tagSlug, userId);
+
+    // Apply custom order if available
+    if (photoTagOrders.length > 0) {
+      const orderedPhotoIds = photoTagOrders.map(order => order.photoId);
+      listePhotos = listePhotos.sort((a, b) => {
+        return orderedPhotoIds.indexOf(a.id) - orderedPhotoIds.indexOf(b.id);
+      });
+    }
+  }
+
+  // Fallback to default sorting by favorite, title, and name
+  if (listePhotos.length > 0 && photoTagOrders.length === 0) {
+    listePhotos.sort((a, b) => {
+      const aFavorite = a.isFavorite ? 1 : 0;
+      const bFavorite = b.isFavorite ? 1 : 0;
+      if (aFavorite !== bFavorite) {
+        return bFavorite - aFavorite;
+      }
+
+      const aTitle = a.title || "";
+      const bTitle = b.title || "";
+
+      if (aTitle && bTitle) {
+        return aTitle.localeCompare(bTitle);
+      }
+
+      if (aTitle && !bTitle) {
+        return -1;
+      }
+
+      if (!aTitle && bTitle) {
+        return 1;
+      }
+
+      const aName = a.name || "";
+      const bName = b.name || "";
+      return aName.localeCompare(bName);
+    });
   }
 
   const photos = listePhotos.map(photo => {
@@ -95,7 +122,6 @@ async function Page({ params }) {
     alt: tag.name,
   }));
 
-  // Marquer les tags présents dans listeTags
   allTags.forEach(tag => {
     tag.present = listePhotos.some(photo => photo.tags.some(t => t.name === tag.name));
   });
