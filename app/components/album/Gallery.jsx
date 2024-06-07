@@ -35,6 +35,30 @@ import { useSelector } from "react-redux";
 import myFetch from "../../components/myFetch";
 import ChangeOrderButton from "./ChangeOrderButton";
 
+import {
+  DndContext,
+  DragOverlay,
+  useSensor,
+  useSensors,
+  MouseSensor,
+  TouchSensor,
+  KeyboardSensor,
+  closestCenter,
+  DragStartEvent,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy
+} from "@dnd-kit/sortable";
+
+
+
+
+
 const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState(new Set());
@@ -92,12 +116,137 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
     useState(false);
 
+  const PhotoFrame = React.memo(
+    React.forwardRef(function PhotoFrame(props, ref) {
+      const {
+        layoutOptions,
+        imageProps,
+        overlay,
+        active,
+        insertPosition,
+        attributes,
+        listeners,
+      } = props;
+      const { alt, style, ...restImageProps } = imageProps;
+
+      return (
+        <div
+          ref={ref}
+          style={{
+            width: overlay
+              ? `calc(100% - ${2 * layoutOptions.padding}px)`
+              : style.width,
+            padding: style.padding,
+            marginBottom: style.marginBottom,
+          }}
+          className={`photo-frame ${overlay ? "overlay" : ""} ${
+            active ? "active" : ""
+          } ${insertPosition === "before" ? "insertBefore" : ""} ${
+            insertPosition === "after" ? "insertAfter" : ""
+          }`}
+          {...attributes}
+          {...listeners}
+        >
+          <img
+            alt={alt}
+            style={{
+              ...style,
+              width: "100%",
+              height: "auto",
+              padding: 0,
+              marginBottom: 0,
+            }}
+            {...restImageProps}
+          />
+        </div>
+      );
+    })
+  );
+
+  function SortablePhotoFrame(props) {
+    const { photo, activeIndex } = props;
+    const { attributes, listeners, isDragging, index, over, setNodeRef } =
+      useSortable({ id: photo.id });
+
+    return (
+      <PhotoFrame
+        ref={setNodeRef}
+        active={isDragging}
+        insertPosition={
+          activeIndex !== undefined && over?.id === photo.id && !isDragging
+            ? index > activeIndex
+              ? "after"
+              : "before"
+            : undefined
+        }
+        aria-label="sortable image"
+        attributes={attributes}
+        listeners={listeners}
+        {...props}
+      />
+    );
+  }
+
+  const renderedPhotos = useRef({});
+  const [activeId, setActiveId] = useState();
+  const activeIndex = activeId
+    ? photos.findIndex((photo) => photo.id === activeId)
+    : undefined;
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 50, tolerance: 10 },
+    }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragStart = ({ active }) => {
+    setActiveId(active.id);
+  };
+
+  const handleDragEnd = ({ active, over }) => {
+    if (over && active.id !== over.id) {
+      setPhotos((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+    setActiveId(undefined);
+  };
+
+  const renderPhoto = (props) => {
+    renderedPhotos.current[props.photo.id] = props;
+    return <SortablePhotoFrame activeIndex={activeIndex} {...props} />;
+  };
+  // const renderPhoto = ({ photo, attributes, listeners, setNodeRef, style }) => (
+  //   <div
+  //     ref={setNodeRef}
+  //     style={{ ...style, border: "2px solid black", padding: "10px" }}
+  //     {...attributes}
+  //     {...listeners}
+  //   >
+  //     <img src={photo.src} alt={photo.title} style={{ width: "100%" }} />
+  //   </div>
+  // );
+  // const renderPhoto = ({ photo, layoutOptions, imageProps, ...rest }) => {
+  //   return (
+  //     <SortablePhotoFrame
+  //       key={photo.id}
+  //       photo={photo}
+  //       layoutOptions={layoutOptions}
+  //       imageProps={imageProps}
+  //       {...rest}
+  //     />
+  //   );
+  // };
+  
 
   const handleUpdatePhotos = (newPhotos) => {
     setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
   };
-
-
 
   const openDeleteConfirmationModal = () => {
     setShowDeleteConfirmationModal(true);
@@ -264,7 +413,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         usedTags.add(tag.name);
       });
     });
-  
+
     const newUnusedTags = allMyTags
       .filter((tag) => !usedTags.has(tag.name))
       .reduce(
@@ -278,7 +427,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         },
         { mainTags: [], otherTags: [] }
       );
-  
+
     newUnusedTags.mainTags.sort((a, b) => {
       if (a.name && b.name) {
         return a.name.localeCompare(b.name);
@@ -286,7 +435,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         return 0;
       }
     });
-  
+
     newUnusedTags.otherTags.sort((a, b) => {
       if (a.name && b.name) {
         return a.name.localeCompare(b.name);
@@ -294,10 +443,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         return 0;
       }
     });
-  
+
     setUnusedTags([...newUnusedTags.mainTags, ...newUnusedTags.otherTags]);
   }, [allMyTags, photos, isShowAdmin]);
-  
 
   const isTagNameExist = (tagName) => {
     return allMyTags.some((tag) => tag.name === tagName);
@@ -475,8 +623,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const filteredMainUnusedTags = mainUnusedTags.filter((tag) =>
     tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
-  const filteredOtherUnusedTags = otherUnusedTags.filter((tag) =>
-    tag.name && tag.name.toLowerCase().includes(tagSearch.toLowerCase())
+  const filteredOtherUnusedTags = otherUnusedTags.filter(
+    (tag) =>
+      tag.name && tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
 
   useEffect(() => {
@@ -540,8 +689,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         newTagStatus[tag] = isTagInAll
           ? "bg-green-500"
           : isTagInSome
-            ? "bg-orange-500"
-            : "bg-red-500";
+          ? "bg-orange-500"
+          : "bg-red-500";
       });
     }
 
@@ -641,7 +790,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     updateTagInBulk(addTag, selectedTag);
     setShowTagModal(false);
   };
-  
+
   useEffect(() => {
     const initialTitles = {};
     photos.forEach((photo) => {
@@ -689,7 +838,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
       toast.error("Failed to update title");
     }
   };
-
 
   const handleDeleteButtonClick = async (photoId) => {
     try {
@@ -802,7 +950,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     }
   };
 
-
   function normalizeString(str) {
     return str
       .normalize("NFD")
@@ -812,11 +959,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
 
   const sortedAndFilteredPhotos = useMemo(() => {
     let filteredPhotos = photos;
-  
+
     if (!isAdmin || !isVisible) {
       filteredPhotos = filteredPhotos.filter((photo) => photo.published);
     }
-  
+
     if (searchTerm) {
       const normalizedSearchTerm = normalizeString(searchTerm);
       filteredPhotos = filteredPhotos.filter(
@@ -828,10 +975,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
           )
       );
     }
-  
+
     return filteredPhotos; // Remove additional sorting here
   }, [photos, isAdmin, isVisible, searchTerm]);
-  
 
   useEffect(() => {
     const initialFavorites = photos.reduce((favoritesSet, photo) => {
@@ -1356,7 +1502,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
       const result = await response.json();
       const photoIds = result.photoIds;
       const createdPhotos = result.createdPhotos;
-      console.log(result, createdPhotos)
+      console.log(result, createdPhotos);
 
       // Ensure the following loop does not create duplicates
       for (const [index, photoId] of photoIds.entries()) {
@@ -1447,13 +1593,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         newTags.push({ name: tagSlugName, id: Date.now() });
       }
 
-      const newPhotos = createdPhotos.map(photo => {
-        const baseURL = photo.url.startsWith('/uploads')
+      const newPhotos = createdPhotos.map((photo) => {
+        const baseURL = photo.url.startsWith("/uploads")
           ? process.env.NEXT_PUBLIC_STRAPI_URL
           : `${site.vpsServer}/images/`;
-      
+
         const imageUrl = `${baseURL}${photo.url}`;
-      
+
         return {
           src: imageUrl,
           width: photo.width,
@@ -1465,17 +1611,14 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
           published: photo.published,
           isFavorite: photo.isFavorite,
           title: photo.title,
-          description: photo.description
+          description: photo.description,
         };
       });
 
+      console.log("newPhotos", newPhotos);
+      setPhotos((prevPhotos) => [...newPhotos, ...prevPhotos]);
 
-     
-
-      console.log("newPhotos",newPhotos)
-      setPhotos((prevPhotos) => [...newPhotos,...prevPhotos]);
-
-      console.log(photos.slice(0,3))
+      console.log(photos.slice(0, 3));
 
       setImportedFilesCount(selectedFileIds.length); // Update importedFilesCount
 
@@ -1484,7 +1627,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
       console.error("Failed to import images:", error);
     }
   };
-
 
   return (
     <>
@@ -1511,10 +1653,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
               </button>
               <button
                 onClick={handleRestoreSelection}
-                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${!lastSelection.length
+                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${
+                  !lastSelection.length
                     ? "bg-neutral-200 hover:bg-neutral-200"
                     : "bg-green-700 hover:bg-green-500 text-black"
-                  }`}
+                }`}
                 disabled={!lastSelection.length}
               >
                 Restaurer la sélection ({lastSelection.length})
@@ -1638,10 +1781,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                     </button>
 
                     <button
-                      className={`bg-gray-500 border-4 rounded-md ${isShowUpload
+                      className={`bg-gray-500 border-4 rounded-md ${
+                        isShowUpload
                           ? "border-green-500 hover:border-green-700"
                           : ""
-                        } text-white font-bold py-2 px-4 m-2`}
+                      } text-white font-bold py-2 px-4 m-2`}
                       onClick={() => setIsShowUpload(!isShowUpload)}
                       title={
                         isShowUpload
@@ -1653,10 +1797,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                     </button>
 
                     <button
-                      className={`bg-gray-500 border-2 rounded-md ${canDeleteSelection
+                      className={`bg-gray-500 border-2 rounded-md ${
+                        canDeleteSelection
                           ? "border-red-500 hover:border-red-700"
                           : " cursor-not-allowed"
-                        } text-white font-bold py-2 px-4 m-2`}
+                      } text-white font-bold py-2 px-4 m-2`}
                       onClick={
                         canDeleteSelection
                           ? openDeleteConfirmationModal
@@ -1684,16 +1829,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                     <button
                       onClick={() => openModal("add")}
                       disabled={!tagName.trim() || isTagNameExist(tagName)}
-                      className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName)
+                      className={`rounded-md ${
+                        !tagName.trim() || isTagNameExist(tagName)
                           ? `bg-green-700`
                           : `bg-green-500  hover:bg-green-300`
-                        }  text-white font-bold py-2 px-4 m-2`}
+                      }  text-white font-bold py-2 px-4 m-2`}
                       title={
                         !tagName.trim()
                           ? "Entrez un nom pour un nouveau tag."
                           : allMyTags.some((tag) => tag.name === tagName)
-                            ? "Ce tag existe déjà!"
-                            : "Ajouter un tag"
+                          ? "Ce tag existe déjà!"
+                          : "Ajouter un tag"
                       }
                     >
                       Add Tag
@@ -1707,8 +1853,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                         !tagName.trim()
                           ? "Entrez le nom du tag à supprimer."
                           : !tagName.trim() || !isTagNameExist(tagName)
-                            ? "Ce tag n'existe pas!"
-                            : "Supprimer un tag"
+                          ? "Ce tag n'existe pas!"
+                          : "Supprimer un tag"
                       }
                     >
                       Delete Tag
@@ -1722,8 +1868,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                         !tagName.trim()
                           ? "Entrez le nom du tag à éditer."
                           : !tagName.trim() || !isTagNameExist(tagName)
-                            ? "Ce tag n'existe pas!"
-                            : "Éditer un tag"
+                          ? "Ce tag n'existe pas!"
+                          : "Éditer un tag"
                       }
                     >
                       Edit Tag
@@ -1733,8 +1879,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                   <TagCrudModal
                     isOpen={showTagCrudModal}
                     onClose={() => setShowTagCrudModal(false)}
-                    title={`${tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
-                      } Tag`}
+                    title={`${
+                      tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
+                    } Tag`}
                   >
                     <p className="p-8">
                       Are you sure you want to {tagAction} the tag &quot;
@@ -2002,7 +2149,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
             />
           </div>
           {isAdmin && isShowAdmin && isShowUpload && (
-            
             <div>
               <UploadImageComponent
                 handleImportedFiles={handleImportedFiles}
@@ -2011,21 +2157,16 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                 handleUpdatePhotos={handleUpdatePhotos}
                 photos={photos} // Ajoutez cette ligne
               />
-
-              {/* Le reste du composant Gallery */}
             </div>
           )}
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
-             {/* Add the ChangeOrderButton here */}
-             <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID
-             {tagId}
-
-
+            <ChangeOrderButton tagId={tagId} photos={photos} />
             <button
-              className={`p-2 rounded-sm ${currentPage === 1
+              className={`p-2 rounded-sm ${
+                currentPage === 1
                   ? "bg-neutral-500 text-neutral-700"
                   : "bg-neutral-700 text-white"
-                }`}
+              }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
             >
@@ -2070,273 +2211,43 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
               ZOOM OUT
             </button>
           </div>
-
-          <PhotoAlbum
-            photos={paginatedPhotos}
-            spacing={zoomGallery / 7}
-            layout="rows"
-            targetRowHeight={zoomGallery}
-            onClick={({ index }) => setIndex(index)}
-            renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
-              const getBorderStyle = (photo) => {
-                if (selectedPhotoIds.includes(photo.id)) {
-                  return "8px solid green";
-                } else {
-                  return photo.tags?.some((tag) => tag.name === "NOIR ET BLANC")
-                    ? "4px solid white"
-                    : "4px solid black";
-                }
-              };
-
-              return (
-                <>
-                  <div
-                    key={photo.id}
-                    onClick={(e) => handlePhotoClick(e, photo.id)}
-                    style={{
-                      ...wrapperStyle,
-                      border: getBorderStyle(photo),
-                      position: "relative",
-                      opacity: photo.published ? 1 : 0.2,
-                      maxWidth: "33.33%",
-                    }}
-                    className="mb-4"
-                    title={photo.src}
-                  >
-                    {zoomGallery >= 200 && (
-                      <>
-                      <EditableButton
-                        text={titles[photo.id] || ""}
-                        onChange={(e) => {
-                          const newTitles = {
-                            ...titles,
-                            [photo.id]: e.target.value,
-                          };
-                          setTitles(newTitles);
-                        }}
-                        onBlur={() =>
-                          updatePhotoTitle(photo.id, titles[photo.id])
-                        }
-                        isEditable={!isReadOnly}
-                        inputRef={inputRef}
-                      />
-                      {!titles[photo.id] && (
-                        <>
-                          <s
-                           className="text-white bg-transparent text-center w-full absolute -bottom-7">{photo.name}</s>
-                            <input
-                              className="absolute -bottom-7"
-                              title="Utiliser le nom comme titre"
-                              type="checkbox"
-                              onChange={() => handleCheckboxChange(photo.id)}
-                            />
-                        </>
-                      )}
-                      </>
-                    )}
-                    {zoomGallery >= 200 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(photo.id);
-                        }}
-                        className={`absolute top-2 left-2`}
-                      >
-                        <Heart isOpen={favorites.has(photo.id)} />
-                      </button>
-                    )}
-                    {zoomGallery >= 200 &&
-                      isAdmin &&
-                      isShowAdmin &&
-                      !photo.published &&
-                      isVisible && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIndex(-1);
-                            handleDeleteButtonClick(photo.id);
-                          }}
-                          className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
-                        >
-                          <Trash isOpen={true} />
-                        </button>
-                      )}
-
-                    {zoomGallery >= 200 &&
-                      isAdmin &&
-                      isShowAdmin &&
-                      photo.published && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleTagDiv(photo.id);
-                            }}
-                            className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
-                          >
-                            <Htag isOpen={true} />
-                          </button>
-                          {openTagDiv === photo.id && (
-                            <div
-                              ref={tagDivRef}
-                              className="bg-neutral-800 p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
-                              style={{
-                                top: "100%",
-                                left: "0",
-                                right: "0",
-                                maxHeight: "300px",
-                              }}
-                            >
-                              <input
-                                type="text"
-                                placeholder="Search tags..."
-                                value={photoTagSearch}
-                                onClick={(e) => e.stopPropagation()} // Ajoutez ceci pour empêcher la désélection
-                                onChange={(e) =>
-                                  setPhotoTagSearch(e.target.value)
-                                }
-                                className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
-                              />
-                              {photoTagSearch ? (
-                                <div>
-                                  {filteredTags(allMyTags).map((tag) => (
-                                    <span
-                                      key={tag.id}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleTagClickForPhoto(
-                                          photo.id,
-                                          tag.name
-                                        );
-                                      }}
-                                      className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
-                                    >
-                                      {tag.name}
-                                    </span>
-                                  ))}
-                                  {filteredTags(allMyTags).length === 0 && (
-                                    <button
-                                      onClick={async (e) => {
-                                        e.stopPropagation();
-                                        await handleCreateTagandUpdate(
-                                          photoTagSearch,
-                                          photo.id
-                                        );
-                                      }}
-                                      className="bg-green-500 text-white px-2 py-1 rounded m-1"
-                                    >
-                                      Create Tag: {photoTagSearch}
-                                    </button>
-                                  )}
-                                </div>
-                              ) : (
-                                <>
-                                  <div>
-                                    {photo.tags.map((tag) => (
-                                      <span
-                                        key={tag.id}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleRemoveTagForPhoto(
-                                            photo.id,
-                                            tag.name
-                                          );
-                                        }}
-                                        className="inline-block bg-green-500 m-1 p-1 rounded relative"
-                                      >
-                                        {tag.name}
-                                        <span
-                                          className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
-                                          style={{
-                                            width: "20px",
-                                            height: "20px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                          }}
-                                        >
-                                          &times;
-                                        </span>
-                                      </span>
-                                    ))}
-                                  </div>
-                                  <div>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setShowOtherTags(!showOtherTags);
-                                      }}
-                                      className="bg-blue-500 text-white px-2 py-1 rounded m-1"
-                                    >
-                                      {showOtherTags
-                                        ? "Hide Other Tags"
-                                        : "Show Other Tags"}
-                                    </button>
-                                    {showOtherTags && (
-                                      <div>
-                                        {allMyTags
-                                          .filter(
-                                            (tag) =>
-                                              !photo.tags.some(
-                                                (photoTag) =>
-                                                  photoTag.name === tag.name
-                                              )
-                                          )
-                                          .map((tag) => (
-                                            <span
-                                              key={tag.id}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleTagClickForPhoto(
-                                                  photo.id,
-                                                  tag.name
-                                                );
-                                              }}
-                                              className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
-                                            >
-                                              {tag.name}
-                                            </span>
-                                          ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                    {zoomGallery >= 200 && isAdmin && isShowAdmin && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePublished(photo.id, photo.published);
-                        }}
-                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
-                          }`}
-                      >
-                        <Eye isOpen={photo.published} />
-                      </button>
-                    )}
-                    {zoomGallery >= 200 && isAdmin && isShowAdmin && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleRecent(photo.id);
-                        }}
-                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
-                          }`}
-                      >
-                        <Star isOpen={recentPhotos.has(photo.id)} />
-                      </button>
-                    )}
-                    {renderDefaultPhoto({ wrapped: true })}
-                  </div>
-                </>
-              );
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={paginatedPhotos.map((photo) => photo.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <PhotoAlbum
+                photos={paginatedPhotos}
+                spacing={zoomGallery / 7}
+                layout="rows"
+                targetRowHeight={zoomGallery}
+                onClick={({ index }) => setIndex(index)}
+                renderPhoto={renderPhoto}
+              />
+            </SortableContext>
+            <DragOverlay>
+        {activeId ? (
+          <div
+            style={{
+              width: 150,
+              height: 150,
+              backgroundColor: "white",
+              border: "1px solid black",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
             }}
-          />
+          >
+            Dragging
+          </div>
+        ) : null}
+      </DragOverlay>
+    </DndContext>
           <Lightbox
             open={isActive && index >= 0}
             index={index}
@@ -2346,23 +2257,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
             plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
             zoom={{
               maxZoomPixelRatio: 3,
-              // zoomInMultiplier,
-              // doubleTapDelay,
-              // doubleClickDelay,
-              // doubleClickMaxStops,
-              // keyboardMoveDistance,
-              // wheelZoomDistanceFactor,
-              // pinchZoomDistanceFactor,
               scrollToZoom: true,
             }}
           />
           <ToastContainer />
           <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
-              className={`p-2 rounded-sm ${currentPage === 1
+              className={`p-2 rounded-sm ${
+                currentPage === 1
                   ? "bg-neutral-500 text-neutral-700"
                   : "bg-neutral-700 text-white"
-                }`}
+              }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
             >
