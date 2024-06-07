@@ -2,8 +2,9 @@ import React, { useRef, useState, useCallback } from 'react';
 import { DndContext, useDroppable } from '@dnd-kit/core';
 import DotLoaderSpinner from '../../components/spinners/DotLoaderSpinner';
 import myFetch from '../../components/myFetch';
+import { photos } from 'site';
 
- const UploadImageComponent = ({ handleImportedFiles, handleImportImage, handleUpdatePhotos }) => {
+ const UploadImageComponent = ({ handleImportedFiles, handleImportImage, handleUpdatePhotos, photos }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [files, setFiles] = useState([]);
   const [selectedFileIds, setSelectedFileIds] = useState([]);
@@ -13,6 +14,8 @@ import myFetch from '../../components/myFetch';
   const { setNodeRef: setDroppableNodeRef } = useDroppable({
     id: 'droppable',
   });
+
+  console.log("photos",photos)
 
   const handleUploadImage = async (selectedFiles) => {
     if (selectedFiles.length === 0) return;
@@ -25,7 +28,7 @@ import myFetch from '../../components/myFetch';
     try {
       setIsUploading(true);
       const response = await myFetch('/api/upload', 'POST', formData, 'image upload');
-      if (response) {
+      if (response) {         
         const newFiles = response.map((file) => ({
           ...file,
           tags: [],
@@ -78,7 +81,7 @@ import myFetch from '../../components/myFetch';
     setSelectedFileIds([]);
   
     // Appeler la fonction de mise à jour des photos avec les fichiers importés
-    handleUpdatePhotos(importedFiles);
+    
   };
   
 

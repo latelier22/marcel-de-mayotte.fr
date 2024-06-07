@@ -92,10 +92,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
     useState(false);
 
 
-    const handleUpdatePhotos = (newPhotos) => {
-      setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
-    };
-    
+  const handleUpdatePhotos = (newPhotos) => {
+    setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
+  };
+
 
 
   const openDeleteConfirmationModal = () => {
@@ -525,8 +525,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
         newTagStatus[tag] = isTagInAll
           ? "bg-green-500"
           : isTagInSome
-          ? "bg-orange-500"
-          : "bg-red-500";
+            ? "bg-orange-500"
+            : "bg-red-500";
       });
     }
 
@@ -1299,13 +1299,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
       return;
     }
 
-    // for (const fileId of selectedFileIds) {
-    //   if (!titles[fileId]) {
-    //     console.error(`Title for file ID ${fileId} is not filled`);
-    //     return;
-    //   }
-    // }
-
     try {
       const photosData = selectedFiles.map((file) => ({
         numero: file.id,
@@ -1335,6 +1328,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
 
       const result = await response.json();
       const photoIds = result.photoIds;
+      const createdPhotos = result.createdPhotos;
+      console.log(result, createdPhotos)
 
       // Ensure the following loop does not create duplicates
       for (const [index, photoId] of photoIds.entries()) {
@@ -1416,14 +1411,53 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
           return file;
         })
       );
+      // Prepare tags
+      const newTags = [
+        { name: "IMPORT", id: Date.now() },
+        { name: "CATALOGUE COMPLET", id: Date.now() },
+      ];
+      if (tagSlugName && tagSlugName !== "CATALOGUE COMPLET") {
+        newTags.push({ name: tagSlugName, id: Date.now() });
+      }
+
+      const newPhotos = createdPhotos.map(photo => {
+        const baseURL = photo.url.startsWith('/uploads')
+          ? process.env.NEXT_PUBLIC_STRAPI_URL
+          : `${site.vpsServer}/images/`;
+      
+        const imageUrl = `${baseURL}${photo.url}`;
+      
+        return {
+          src: imageUrl,
+          width: photo.width,
+          height: photo.height,
+          id: photo.id,
+          tags: newTags,
+          name: photo.name,
+          dimensions: photo.dimensions,
+          published: photo.published,
+          isFavorite: photo.isFavorite,
+          title: photo.title,
+          description: photo.description
+        };
+      });
+
+
+     
+
+      console.log("newPhotos",newPhotos)
+      setPhotos((prevPhotos) => [...newPhotos,...prevPhotos]);
+
+      console.log(photos.slice(0,3))
 
       setImportedFilesCount(selectedFileIds.length); // Update importedFilesCount
 
-      return selectedFileIds.length; // Re
+      return selectedFileIds.length;
     } catch (error) {
       console.error("Failed to import images:", error);
     }
   };
+
 
   return (
     <>
@@ -1450,11 +1484,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
               </button>
               <button
                 onClick={handleRestoreSelection}
-                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${
-                  !lastSelection.length
+                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${!lastSelection.length
                     ? "bg-neutral-200 hover:bg-neutral-200"
                     : "bg-green-700 hover:bg-green-500 text-black"
-                }`}
+                  }`}
                 disabled={!lastSelection.length}
               >
                 Restaurer la sélection ({lastSelection.length})
@@ -1578,11 +1611,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                     </button>
 
                     <button
-                      className={`bg-gray-500 border-4 rounded-md ${
-                        isShowUpload
+                      className={`bg-gray-500 border-4 rounded-md ${isShowUpload
                           ? "border-green-500 hover:border-green-700"
                           : ""
-                      } text-white font-bold py-2 px-4 m-2`}
+                        } text-white font-bold py-2 px-4 m-2`}
                       onClick={() => setIsShowUpload(!isShowUpload)}
                       title={
                         isShowUpload
@@ -1594,11 +1626,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                     </button>
 
                     <button
-                      className={`bg-gray-500 border-2 rounded-md ${
-                        canDeleteSelection
+                      className={`bg-gray-500 border-2 rounded-md ${canDeleteSelection
                           ? "border-red-500 hover:border-red-700"
                           : " cursor-not-allowed"
-                      } text-white font-bold py-2 px-4 m-2`}
+                        } text-white font-bold py-2 px-4 m-2`}
                       onClick={
                         canDeleteSelection
                           ? openDeleteConfirmationModal
@@ -1626,17 +1657,16 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                     <button
                       onClick={() => openModal("add")}
                       disabled={!tagName.trim() || isTagNameExist(tagName)}
-                      className={`rounded-md ${
-                        !tagName.trim() || isTagNameExist(tagName)
+                      className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName)
                           ? `bg-green-700`
                           : `bg-green-500  hover:bg-green-300`
-                      }  text-white font-bold py-2 px-4 m-2`}
+                        }  text-white font-bold py-2 px-4 m-2`}
                       title={
                         !tagName.trim()
                           ? "Entrez un nom pour un nouveau tag."
                           : allMyTags.some((tag) => tag.name === tagName)
-                          ? "Ce tag existe déjà!"
-                          : "Ajouter un tag"
+                            ? "Ce tag existe déjà!"
+                            : "Ajouter un tag"
                       }
                     >
                       Add Tag
@@ -1650,8 +1680,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                         !tagName.trim()
                           ? "Entrez le nom du tag à supprimer."
                           : !tagName.trim() || !isTagNameExist(tagName)
-                          ? "Ce tag n'existe pas!"
-                          : "Supprimer un tag"
+                            ? "Ce tag n'existe pas!"
+                            : "Supprimer un tag"
                       }
                     >
                       Delete Tag
@@ -1665,8 +1695,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                         !tagName.trim()
                           ? "Entrez le nom du tag à éditer."
                           : !tagName.trim() || !isTagNameExist(tagName)
-                          ? "Ce tag n'existe pas!"
-                          : "Éditer un tag"
+                            ? "Ce tag n'existe pas!"
+                            : "Éditer un tag"
                       }
                     >
                       Edit Tag
@@ -1676,9 +1706,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                   <TagCrudModal
                     isOpen={showTagCrudModal}
                     onClose={() => setShowTagCrudModal(false)}
-                    title={`${
-                      tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
-                    } Tag`}
+                    title={`${tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
+                      } Tag`}
                   >
                     <p className="p-8">
                       Are you sure you want to {tagAction} the tag &quot;
@@ -2008,22 +2037,22 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
             // </div>
             <div>
               <UploadImageComponent
-  handleImportedFiles={handleImportedFiles}
-  handleImportImage={handleImportImage}
-  importedFilesCount={importedFilesCount}
-  handleUpdatePhotos={handleUpdatePhotos} // Ajoutez cette ligne
-/>
+                handleImportedFiles={handleImportedFiles}
+                handleImportImage={handleImportImage}
+                importedFilesCount={importedFilesCount}
+                handleUpdatePhotos={handleUpdatePhotos}
+                photos={photos} // Ajoutez cette ligne
+              />
 
               {/* Le reste du composant Gallery */}
             </div>
           )}
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
             <button
-              className={`p-2 rounded-sm ${
-                currentPage === 1
+              className={`p-2 rounded-sm ${currentPage === 1
                   ? "bg-neutral-500 text-neutral-700"
                   : "bg-neutral-700 text-white"
-              }`}
+                }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
             >
@@ -2297,9 +2326,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           e.stopPropagation();
                           togglePublished(photo.id, photo.published);
                         }}
-                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
-                          photo.published ? "" : "text-red-700 font-extrabold"
-                        }`}
+                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+                          }`}
                       >
                         <Eye isOpen={photo.published} />
                       </button>
@@ -2310,9 +2338,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
                           e.stopPropagation();
                           toggleRecent(photo.id);
                         }}
-                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
-                          photo.published ? "" : "text-red-700 font-extrabold"
-                        }`}
+                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+                          }`}
                       >
                         <Star isOpen={recentPhotos.has(photo.id)} />
                       </button>
@@ -2345,11 +2372,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug }) => {
           <ToastContainer />
           <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
-              className={`p-2 rounded-sm ${
-                currentPage === 1
+              className={`p-2 rounded-sm ${currentPage === 1
                   ? "bg-neutral-500 text-neutral-700"
                   : "bg-neutral-700 text-white"
-              }`}
+                }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
             >
