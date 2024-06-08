@@ -6,7 +6,7 @@ import getImages from "../../components/getImages";
 import getTags from "../../components/getTags";
 import getImagesbyTag from "../../components/getImagesbyTag";
 import getProgressionsTags from "../../components/getProgressionsTags";
-import TagsAndGallery from "../../components/album/TagsAndGallery";
+import TagsAndGalleryTri from "../../components/album/TagsAndGalleryTri";
 import { authOptions } from "../../Auth";
 import { getServerSession } from 'next-auth';
 import fetchOrders from "../../components/fetchPhotoTagOrders";
@@ -131,7 +131,7 @@ async function Page({ params }) {
   return (
     <main>
       <Navbar />
-      <TagsAndGallery
+      <TagsAndGalleryTri
         tagSlug={tagSlug}
         tagId={tag ? tag.id : null} // Ensure tagId is passed only if tag is defined
         photos={photos}

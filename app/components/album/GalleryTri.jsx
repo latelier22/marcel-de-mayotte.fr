@@ -28,13 +28,69 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Eye, Star, Htag, Heart, Trash, Upload } from "./icons";
+import { Eye, Star, Htag, Heart, Trash, Upload, Pen, Save } from "./icons";
 import EditableButton from "./buttons/EditableButton";
 
 import { useSelector } from "react-redux";
 
-import myFetch from "../../components/myFetch";
+import myFetch from "../myFetch";
 import ChangeOrderButton from "./ChangeOrderButton";
+
+import {
+  DndContext,
+  DragOverlay,
+  useSensor,
+  useSensors,
+  TouchSensor,
+  closestCenter,
+
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  horizontalListSortingStrategy
+} from "@dnd-kit/sortable";
+
+import { CSS } from '@dnd-kit/utilities';
+
+import { MouseSensor as LibMouseSensor, KeyboardSensor as LibKeyboardSensor } from '@dnd-kit/core';
+
+export class MouseSensor extends LibMouseSensor {
+  static activators = [
+    {
+      eventName: 'onMouseDown',
+      handler: ({ nativeEvent: event }) => {
+        return shouldHandleEvent(event.target);
+      }
+    }
+  ];
+}
+
+export class KeyboardSensor extends LibKeyboardSensor {
+  static activators = [
+    {
+      eventName: 'onKeyDown',
+      handler: ({ nativeEvent: event }) => {
+        return shouldHandleEvent(event.target);
+      }
+    }
+  ];
+}
+
+function shouldHandleEvent(element) {
+  let cur = element;
+
+  while (cur) {
+    if (cur.dataset && cur.dataset.noDnd) {
+      return false;
+    }
+    cur = cur.parentElement;
+  }
+
+  return true;
+}
 
 const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const { data: session } = useSession();
@@ -65,7 +121,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [zoomGallery, setZoomGallery] = useState(250);
+  const [zoomGallery, setZoomGallery] = useState(350);
   const [tagName, setTagName] = useState("");
   const [tagAction, setTagAction] = useState("");
   const [newTagName, setNewTagName] = useState("");
@@ -73,6 +129,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [photosPerPage, setPhotosPerPage] = useState(100);
   const [recentPhotos, setRecentPhotos] = useState(new Set());
+
 
   const [isUploading, setIsUploading] = useState(false);
   const [files, setFiles] = useState([]);
@@ -92,13 +149,380 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
 
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
     useState(false);
+  const [isDragble, setDragable] = useState(true)
+
+
+  // Définir une variable pour vérifier l'état de DnD
+  const isDragAndDropEnabled = isAdmin && isShowAdmin || tagSlug === "favoris";
+  // console.log("isDragAndDropEnabled",isDragAndDropEnabled)
+
+
+  const PhotoFrame = React.memo(
+    React.forwardRef(function PhotoFrame(props, ref) {
+      const {
+        layoutOptions,
+        imageProps,
+        overlay,
+        active,
+        insertPosition,
+        attributes,
+        listeners,
+      } = props;
+      const { alt, style, ...restImageProps } = imageProps;
+
+      return (
+        <div
+          ref={ref}
+          style={{
+            width: overlay
+              ? `calc(100% - ${2 * layoutOptions.padding}px)`
+              : style.width,
+            padding: style.padding,
+            marginBottom: style.marginBottom,
+          }}
+          className={`photo-frame ${overlay ? "overlay" : ""} ${active ? "active" : ""
+            } ${insertPosition === "before" ? "insertBefore" : ""} ${insertPosition === "after" ? "insertAfter" : ""
+            }`}
+          {...attributes}
+          {...listeners}
+        >
+          <img
+            alt={alt}
+            style={{
+              ...style,
+              width: "100%",
+              height: "auto",
+              padding: 0,
+              marginBottom: 0,
+            }}
+            {...restImageProps}
+          />
+        </div>
+      );
+    })
+  );
+
+  const SortablePhotoFrame = (props) => {
+    const { photo } = props;
+    const { attributes, listeners, isDragging, setNodeRef, transform, transition } = useSortable({ id: photo.id });
+
+
+    const { alt, style, ...restImageProps } = props.imageProps;
+
+
+
+    return (
+      <div
+        ref={setNodeRef}
+        style={{
+          ...style,
+          transform: CSS.Transform.toString(transform),
+          transition,
+          border: props.selectedPhotoIds.includes(photo.id) ? "8px solid green" : "4px solid black",
+        }}
+        {...attributes}
+        {...listeners}
+        onClick={(event) => props.onClick(photo.id, event)} // Use props.onClick
+        className="relative mb-4"
+      >
+        <img
+          src={photo.src}
+          alt={photo.title}
+          style={{
+            width: "100%",
+            height: "auto",
+            padding: 0,
+            marginBottom: 0,
+            opacity: photo.published ? 1 : 0.2,
+          }}
+          {...restImageProps}
+        />
+        {/* Title */}
+        <div className="flex items-center justify-center mt-2">
+          <div className="flex items-center justify-center w-full">
+            <span className="text-white text-center -bottom-8 flex-1">
+              {props.titles[photo.id] || <span className="line-through">{photo.name}</span>}
+            </span>
+          </div>
+        </div>
+
+        {/* Heart Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            props.toggleFavorite(photo.id);
+          }}
+          className={`absolute top-2 left-2`}
+        >
+          <Heart isOpen={props.favorites.has(photo.id)} />
+        </button>
+
+        {props.isAdmin && props.isShowAdmin && !photo.published && props.isVisible && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              props.handleDeleteButtonClick(photo.id);
+            }}
+            className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+          >
+            <Trash isOpen={true} />
+          </button>
+        )}
+
+        {props.isAdmin && props.isShowAdmin && photo.published && (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                props.toggleTagDiv(photo.id);
+              }}
+              className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+            >
+              <Htag isOpen={true} />
+            </button>
+            {props.openTagDiv === photo.id && (
+              <div
+              data-no-dnd="true"
+                ref={props.tagDivRef}
+                className="bg-neutral-800 p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
+                style={{
+                  top: "100%",
+                  left: "0",
+                  right: "0",
+                  maxHeight: "300px",
+                }}
+                onClick={(e) => e.stopPropagation()} // Stop event propagation
+              >
+                
+                {props.photoTagSearch ? (
+                  <div>
+                    {props.filteredTags(props.allMyTags).map((tag) => (
+                      <span
+                        key={tag.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.handleTagClickForPhoto(photo.id, tag.name);
+                        }}
+                        className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                    {props.filteredTags(props.allMyTags).length === 0 && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await props.handleCreateTagandUpdate(props.photoTagSearch, photo.id);
+                        }}
+                        className="bg-green-500 text-white px-2 py-1 rounded m-1"
+                      >
+                        Create Tag: {props.photoTagSearch}
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      {photo.tags.map((tag) => (
+                        <span
+                          key={tag.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            props.handleRemoveTagForPhoto(photo.id, tag.name);
+                          }}
+                          className="inline-block bg-green-500 m-1 p-1 rounded relative"
+                        >
+                          {tag.name}
+                          <span
+                            className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            &times;
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                    <div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          props.setShowOtherTags(!props.showOtherTags);
+                        }}
+                        className="bg-blue-500 text-white px-2 py-1 rounded m-1"
+                      >
+                        {props.showOtherTags ? "Hide Other Tags" : "Show Other Tags"}
+                      </button>
+                      {props.showOtherTags && (
+                        <div>
+                          {props.allMyTags
+                            .filter((tag) => !photo.tags.some((photoTag) => photoTag.name === tag.name))
+                            .map((tag) => (
+                              <span
+                                key={tag.id}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  props.handleTagClickForPhoto(photo.id, tag.name);
+                                }}
+                                className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                              >
+                                {tag.name}
+                              </span>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </>
+        )}
+
+        {props.isAdmin && props.isShowAdmin && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              props.togglePublished(photo.id, photo.published);
+            }}
+            className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+              }`}
+          >
+            <Eye isOpen={photo.published} />
+          </button>
+        )}
+
+        {props.isAdmin && props.isShowAdmin && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              props.toggleRecent(photo.id);
+            }}
+            className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
+              }`}
+          >
+            <Star isOpen={props.recentPhotos.has(photo.id)} />
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  const renderedPhotos = useRef({});
+  const [activeId, setActiveId] = useState();
+  const activeIndex = activeId
+    ? photos.findIndex((photo) => photo.id === activeId)
+    : undefined;
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const handleDragStart = ({ active }) => {
+    console.log("active", active)
+    if (isDragAndDropEnabled) {
+      setActiveId(active.id);
+    }
+  };
+
+
+  const handleDragEnd = ({ active, over }) => {
+    if (active.id !== over.id) {
+      setPhotos((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+    setActiveId(null);
+  };
+
+  // const handlePhotoClick = (e, photoId) => {
+  //   if (isShowAdmin && isAdmin) {
+  //     e.stopPropagation();
+  //     handleTagButtonClick(photoId);
+  //   }
+  // };
+
+  const handlePhotoClick = (photoId, event) => {
+    event.stopPropagation(); // Stop event propagation
+    setSelectedPhotoIds((prevSelected) =>
+      prevSelected.includes(photoId)
+        ? prevSelected.filter((id) => id !== photoId)
+        : [...prevSelected, photoId]
+    );
+  };
+
+
+  const renderPhoto = (props) => {
+    return (
+      <SortablePhotoFrame
+        {...props}
+        selectedPhotoIds={selectedPhotoIds}
+        onClick={handlePhotoClick}
+        titles={titles}
+        setTitles={setTitles}
+        updatePhotoTitle={updatePhotoTitle}
+        isReadOnly={isReadOnly}
+        inputRef={inputRef}
+        toggleFavorite={toggleFavorite}
+        favorites={favorites}
+        handleDeleteButtonClick={handleDeleteButtonClick}
+        isAdmin={isAdmin}
+        isShowAdmin={isShowAdmin}
+        toggleTagDiv={toggleTagDiv}
+        openTagDiv={openTagDiv}
+        tagDivRef={tagDivRef}
+        photoTagSearch={photoTagSearch}
+        setPhotoTagSearch={setPhotoTagSearch}
+        filteredTags={filteredTags}
+        handleTagClickForPhoto={handleTagClickForPhoto}
+        handleCreateTagandUpdate={handleCreateTagandUpdate}
+        handleRemoveTagForPhoto={handleRemoveTagForPhoto}
+        showOtherTags={showOtherTags}
+        setShowOtherTags={setShowOtherTags}
+        allMyTags={allMyTags}
+        togglePublished={togglePublished}
+        toggleRecent={toggleRecent}
+        recentPhotos={recentPhotos}
+        zoomGallery={zoomGallery}
+        handleCheckboxChange={handleCheckboxChange}
+      />
+    );
+  };
+
+
+  // const renderPhoto = ({ photo, attributes, listeners, setNodeRef, style }) => (
+  //   <div
+  //     ref={setNodeRef}
+  //     style={{ ...style, border: "2px solid black", padding: "10px" }}
+  //     {...attributes}
+  //     {...listeners}
+  //   >
+  //     <img src={photo.src} alt={photo.title} style={{ width: "100%" }} />
+  //   </div>
+  // );
+  // const renderPhoto = ({ photo, layoutOptions, imageProps, ...rest }) => {
+  //   return (
+  //     <SortablePhotoFrame
+  //       key={photo.id}
+  //       photo={photo}
+  //       layoutOptions={layoutOptions}
+  //       imageProps={imageProps}
+  //       {...rest}
+  //     />
+  //   );
+  // };
 
 
   const handleUpdatePhotos = (newPhotos) => {
     setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
   };
-
-
 
   const openDeleteConfirmationModal = () => {
     setShowDeleteConfirmationModal(true);
@@ -265,7 +689,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         usedTags.add(tag.name);
       });
     });
-  
+
     const newUnusedTags = allMyTags
       .filter((tag) => !usedTags.has(tag.name))
       .reduce(
@@ -279,7 +703,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         },
         { mainTags: [], otherTags: [] }
       );
-  
+
     newUnusedTags.mainTags.sort((a, b) => {
       if (a.name && b.name) {
         return a.name.localeCompare(b.name);
@@ -287,7 +711,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         return 0;
       }
     });
-  
+
     newUnusedTags.otherTags.sort((a, b) => {
       if (a.name && b.name) {
         return a.name.localeCompare(b.name);
@@ -295,10 +719,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         return 0;
       }
     });
-  
+
     setUnusedTags([...newUnusedTags.mainTags, ...newUnusedTags.otherTags]);
   }, [allMyTags, photos, isShowAdmin]);
-  
 
   const isTagNameExist = (tagName) => {
     return allMyTags.some((tag) => tag.name === tagName);
@@ -476,8 +899,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const filteredMainUnusedTags = mainUnusedTags.filter((tag) =>
     tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
-  const filteredOtherUnusedTags = otherUnusedTags.filter((tag) =>
-    tag.name && tag.name.toLowerCase().includes(tagSearch.toLowerCase())
+  const filteredOtherUnusedTags = otherUnusedTags.filter(
+    (tag) =>
+      tag.name && tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
 
   useEffect(() => {
@@ -642,7 +1066,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     updateTagInBulk(addTag, selectedTag);
     setShowTagModal(false);
   };
-  
+
   useEffect(() => {
     const initialTitles = {};
     photos.forEach((photo) => {
@@ -651,27 +1075,22 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     setTitles(initialTitles);
   }, [photos]);
 
-  const handleTitleChange = (e, photoId) => {
+  const handleTitleChange = (e) => {
+    console.log(changed)
     const newTitles = {
-      ...titles,
-      [photoId]: e.target.value,
+      ...props.titles,
+      [photo.id]: e.target.value,
     };
-    setTitles(newTitles);
+    props.setTitles(newTitles);
+
   };
 
-  const handleTitleBlur = (photoId) => {
-    const title = titles[photoId];
-    updatePhotoTitle(photoId, title);
+  const handleSaveTitle = () => {
+    props.updatePhotoTitle(photo.id, props.titles[photo.id]);
+    setIsTitleChanged(false);
   };
 
-  const handleCheckboxChange = (photoId) => {
-    const newTitle = photos.find((p) => p.id === photoId).name;
-    setTitles((prevTitles) => ({
-      ...prevTitles,
-      [photoId]: newTitle,
-    }));
-    updatePhotoTitle(photoId, newTitle);
-  };
+
 
   const updatePhotoTitle = async (photoId, title) => {
     try {
@@ -689,6 +1108,15 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
       console.error("Erreur lors de la mise à jour", error);
       toast.error("Failed to update title");
     }
+  };
+
+  const handleCheckboxChange = (photoId) => {
+    const newTitle = photos.find((p) => p.id === photoId).name;
+    setTitles((prevTitles) => ({
+      ...prevTitles,
+      [photoId]: newTitle,
+    }));
+    updatePhotoTitle(photoId, newTitle);
   };
 
 
@@ -741,12 +1169,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     }
   };
 
-  const handlePhotoClick = (e, photoId) => {
-    if (isShowAdmin && isAdmin) {
-      e.stopPropagation();
-      handleTagButtonClick(photoId);
-    }
-  };
+
 
   const canDeleteSelection = useMemo(() => {
     return (
@@ -803,7 +1226,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     }
   };
 
-
   function normalizeString(str) {
     return str
       .normalize("NFD")
@@ -813,11 +1235,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
 
   const sortedAndFilteredPhotos = useMemo(() => {
     let filteredPhotos = photos;
-  
+
     if (!isAdmin || !isVisible) {
       filteredPhotos = filteredPhotos.filter((photo) => photo.published);
     }
-  
+
     if (searchTerm) {
       const normalizedSearchTerm = normalizeString(searchTerm);
       filteredPhotos = filteredPhotos.filter(
@@ -829,10 +1251,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
           )
       );
     }
-  
+
     return filteredPhotos; // Remove additional sorting here
   }, [photos, isAdmin, isVisible, searchTerm]);
-  
 
   useEffect(() => {
     const initialFavorites = photos.reduce((favoritesSet, photo) => {
@@ -1357,7 +1778,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
       const result = await response.json();
       const photoIds = result.photoIds;
       const createdPhotos = result.createdPhotos;
-      console.log(result, createdPhotos)
+      console.log(result, createdPhotos);
 
       // Ensure the following loop does not create duplicates
       for (const [index, photoId] of photoIds.entries()) {
@@ -1448,13 +1869,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         newTags.push({ name: tagSlugName, id: Date.now() });
       }
 
-      const newPhotos = createdPhotos.map(photo => {
-        const baseURL = photo.url.startsWith('/uploads')
+      const newPhotos = createdPhotos.map((photo) => {
+        const baseURL = photo.url.startsWith("/uploads")
           ? process.env.NEXT_PUBLIC_STRAPI_URL
           : `${site.vpsServer}/images/`;
-      
+
         const imageUrl = `${baseURL}${photo.url}`;
-      
+
         return {
           src: imageUrl,
           width: photo.width,
@@ -1466,17 +1887,14 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
           published: photo.published,
           isFavorite: photo.isFavorite,
           title: photo.title,
-          description: photo.description
+          description: photo.description,
         };
       });
 
+      console.log("newPhotos", newPhotos);
+      setPhotos((prevPhotos) => [...newPhotos, ...prevPhotos]);
 
-     
-
-      console.log("newPhotos",newPhotos)
-      setPhotos((prevPhotos) => [...newPhotos,...prevPhotos]);
-
-      console.log(photos.slice(0,3))
+      console.log(photos.slice(0, 3));
 
       setImportedFilesCount(selectedFileIds.length); // Update importedFilesCount
 
@@ -1485,7 +1903,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
       console.error("Failed to import images:", error);
     }
   };
-
 
   return (
     <>
@@ -1787,36 +2204,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                     )}
                   </TagCrudModal>
 
-                  {/* <div>
-                  <h4 className="text-lg text-center font-semibold">
-                    Autres Tags
-                  </h4>
-                  <div className="mt-4 flex flex-col">
-                    {unusedTags.map((tag) => {
-                      return (
-                        <div
-                          className="flex items-center justify-between"
-                          key={tag.id}
-                        >
-                          <button
-                            className={`flex flex-col w-[95%] items-center justify-between flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2 ${
-                              tag.mainTag ? "border-4  border-black" : ""
-                            }`}
-                            onClick={() => handleTagClick(tag.name)}
-                          >
-                            {tag.name}
-                          </button>
-                          <input
-                            type="checkbox"
-                            checked={tag.mainTag}
-                            onChange={() => handleToggleMainTag(tag.id)}
-                            className="ml-2"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div> */}
                 </div>
                 <PublishedModal
                   isOpen={showPublishedModal}
@@ -1987,12 +2374,19 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
             </div>
           </div>
         )}
-        <div
-          style={{
-            width: isAdmin && isShowAdmin ? "80%" : "100%",
-            padding: "10px",
-          }}
-        >
+        <div style={{ width: isAdmin && isShowAdmin ? "80%" : "100%", padding: "10px" }}>
+
+          {isAdmin && isShowAdmin && isShowUpload && (
+            <div>
+              <UploadImageComponent
+                handleImportedFiles={handleImportedFiles}
+                handleImportImage={handleImportImage}
+                importedFilesCount={importedFilesCount}
+                handleUpdatePhotos={handleUpdatePhotos}
+                photos={photos} // Ajoutez cette ligne
+              />
+            </div>
+          )}
           <div className="left-12 top-2 w-full">
             <input
               className="text-black w-full text-bold text-2xl text-center"
@@ -2002,34 +2396,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {isAdmin && isShowAdmin && isShowUpload && (
-            
-            <div>
-              <UploadImageComponent
-                handleImportedFiles={handleImportedFiles}
-                handleImportImage={handleImportImage}
-                importedFilesCount={importedFilesCount}
-                handleUpdatePhotos={handleUpdatePhotos}
-                photos={photos} // Ajoutez cette ligne
-              />
 
-              {/* Le reste du composant Gallery */}
-            </div>
-          )}
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
-             {/* Add the ChangeOrderButton here */}
-             <Link 
-            href={`/catalogueTri/${tagSlug}`}>
-            TRIER
+            <Link 
+            href={`/catalogue/${tagSlug}`}>
+            QUITTER LE TRI
             </Link>
-             {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID */}
-             {tagId}
-
-
+            {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID {tagId} */}
             <button
               className={`p-2 rounded-sm ${currentPage === 1
-                  ? "bg-neutral-500 text-neutral-700"
-                  : "bg-neutral-700 text-white"
+                ? "bg-neutral-500 text-neutral-700"
+                : "bg-neutral-700 text-white"
                 }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
@@ -2075,273 +2452,47 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
               ZOOM OUT
             </button>
           </div>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={isDragAndDropEnabled && isDragble ? handleDragStart : undefined}
+            onDragEnd={isDragAndDropEnabled && isDragble ? handleDragEnd : undefined}
+          >
+            {isDragAndDropEnabled && isDragble ? (
+              <SortableContext
+                items={paginatedPhotos.map((photo) => photo.id)}
+                strategy={horizontalListSortingStrategy}
+              >
+                <PhotoAlbum
+                  photos={paginatedPhotos}
+                  spacing={zoomGallery / 7}
+                  layout="rows"
+                  targetRowHeight={zoomGallery}
+                  onClick={({ index }) => setIndex(index)}
+                  renderPhoto={renderPhoto}
+                />
+              </SortableContext>
+            ) : (
+              <PhotoAlbum
+                photos={paginatedPhotos}
+                spacing={zoomGallery / 7}
+                layout="rows"
+                targetRowHeight={zoomGallery}
+                onClick={({ index }) => setIndex(index)}
+                renderPhoto={renderPhoto}
+              />
+            )}
+            <DragOverlay>
+              {activeId ? (
+                <img
+                  src={paginatedPhotos.find((photo) => photo.id === activeId).src}
+                  alt=""
+                  style={{ border: "2px solid black", padding: "10px", width: "100%" }}
+                />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
 
-          <PhotoAlbum
-            photos={paginatedPhotos}
-            spacing={zoomGallery / 7}
-            layout="rows"
-            targetRowHeight={zoomGallery}
-            onClick={({ index }) => setIndex(index)}
-            renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
-              const getBorderStyle = (photo) => {
-                if (selectedPhotoIds.includes(photo.id)) {
-                  return "8px solid green";
-                } else {
-                  return photo.tags?.some((tag) => tag.name === "NOIR ET BLANC")
-                    ? "4px solid white"
-                    : "4px solid black";
-                }
-              };
-
-              return (
-                <>
-                  <div
-                    key={photo.id}
-                    onClick={(e) => handlePhotoClick(e, photo.id)}
-                    style={{
-                      ...wrapperStyle,
-                      border: getBorderStyle(photo),
-                      position: "relative",
-                      opacity: photo.published ? 1 : 0.2,
-                      maxWidth: "33.33%",
-                    }}
-                    className="mb-4"
-                    title={photo.src}
-                  >
-                    {zoomGallery >= 200 && (
-                      <>
-                      <EditableButton
-                        text={titles[photo.id] || ""}
-                        onChange={(e) => {
-                          const newTitles = {
-                            ...titles,
-                            [photo.id]: e.target.value,
-                          };
-                          setTitles(newTitles);
-                        }}
-                        onBlur={() =>
-                          updatePhotoTitle(photo.id, titles[photo.id])
-                        }
-                        isEditable={!isReadOnly}
-                        inputRef={inputRef}
-                      />
-                      {!titles[photo.id] && (
-                        <>
-                          <s
-                           className="text-white bg-transparent text-center w-full absolute -bottom-7">{photo.name}</s>
-                            <input
-                              className="absolute -bottom-7"
-                              title="Utiliser le nom comme titre"
-                              type="checkbox"
-                              onChange={() => handleCheckboxChange(photo.id)}
-                            />
-                        </>
-                      )}
-                      </>
-                    )}
-                    {zoomGallery >= 200 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(photo.id);
-                        }}
-                        className={`absolute top-2 left-2`}
-                      >
-                        <Heart isOpen={favorites.has(photo.id)} />
-                      </button>
-                    )}
-                    {zoomGallery >= 200 &&
-                      isAdmin &&
-                      isShowAdmin &&
-                      !photo.published &&
-                      isVisible && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIndex(-1);
-                            handleDeleteButtonClick(photo.id);
-                          }}
-                          className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
-                        >
-                          <Trash isOpen={true} />
-                        </button>
-                      )}
-
-                    {zoomGallery >= 200 &&
-                      isAdmin &&
-                      isShowAdmin &&
-                      photo.published && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleTagDiv(photo.id);
-                            }}
-                            className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
-                          >
-                            <Htag isOpen={true} />
-                          </button>
-                          {openTagDiv === photo.id && (
-                            <div
-                              ref={tagDivRef}
-                              className="bg-neutral-800 p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
-                              style={{
-                                top: "100%",
-                                left: "0",
-                                right: "0",
-                                maxHeight: "300px",
-                              }}
-                            >
-                              <input
-                                type="text"
-                                placeholder="Search tags..."
-                                value={photoTagSearch}
-                                onClick={(e) => e.stopPropagation()} // Ajoutez ceci pour empêcher la désélection
-                                onChange={(e) =>
-                                  setPhotoTagSearch(e.target.value)
-                                }
-                                className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
-                              />
-                              {photoTagSearch ? (
-                                <div>
-                                  {filteredTags(allMyTags).map((tag) => (
-                                    <span
-                                      key={tag.id}
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleTagClickForPhoto(
-                                          photo.id,
-                                          tag.name
-                                        );
-                                      }}
-                                      className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
-                                    >
-                                      {tag.name}
-                                    </span>
-                                  ))}
-                                  {filteredTags(allMyTags).length === 0 && (
-                                    <button
-                                      onClick={async (e) => {
-                                        e.stopPropagation();
-                                        await handleCreateTagandUpdate(
-                                          photoTagSearch,
-                                          photo.id
-                                        );
-                                      }}
-                                      className="bg-green-500 text-white px-2 py-1 rounded m-1"
-                                    >
-                                      Create Tag: {photoTagSearch}
-                                    </button>
-                                  )}
-                                </div>
-                              ) : (
-                                <>
-                                  <div>
-                                    {photo.tags.map((tag) => (
-                                      <span
-                                        key={tag.id}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleRemoveTagForPhoto(
-                                            photo.id,
-                                            tag.name
-                                          );
-                                        }}
-                                        className="inline-block bg-green-500 m-1 p-1 rounded relative"
-                                      >
-                                        {tag.name}
-                                        <span
-                                          className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
-                                          style={{
-                                            width: "20px",
-                                            height: "20px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                          }}
-                                        >
-                                          &times;
-                                        </span>
-                                      </span>
-                                    ))}
-                                  </div>
-                                  <div>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setShowOtherTags(!showOtherTags);
-                                      }}
-                                      className="bg-blue-500 text-white px-2 py-1 rounded m-1"
-                                    >
-                                      {showOtherTags
-                                        ? "Hide Other Tags"
-                                        : "Show Other Tags"}
-                                    </button>
-                                    {showOtherTags && (
-                                      <div>
-                                        {allMyTags
-                                          .filter(
-                                            (tag) =>
-                                              !photo.tags.some(
-                                                (photoTag) =>
-                                                  photoTag.name === tag.name
-                                              )
-                                          )
-                                          .map((tag) => (
-                                            <span
-                                              key={tag.id}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleTagClickForPhoto(
-                                                  photo.id,
-                                                  tag.name
-                                                );
-                                              }}
-                                              className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
-                                            >
-                                              {tag.name}
-                                            </span>
-                                          ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                    {zoomGallery >= 200 && isAdmin && isShowAdmin && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePublished(photo.id, photo.published);
-                        }}
-                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
-                          }`}
-                      >
-                        <Eye isOpen={photo.published} />
-                      </button>
-                    )}
-                    {zoomGallery >= 200 && isAdmin && isShowAdmin && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleRecent(photo.id);
-                        }}
-                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
-                          }`}
-                      >
-                        <Star isOpen={recentPhotos.has(photo.id)} />
-                      </button>
-                    )}
-                    {renderDefaultPhoto({ wrapped: true })}
-                  </div>
-                </>
-              );
-            }}
-          />
           <Lightbox
             open={isActive && index >= 0}
             index={index}
@@ -2351,13 +2502,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
             plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
             zoom={{
               maxZoomPixelRatio: 3,
-              // zoomInMultiplier,
-              // doubleTapDelay,
-              // doubleClickDelay,
-              // doubleClickMaxStops,
-              // keyboardMoveDistance,
-              // wheelZoomDistanceFactor,
-              // pinchZoomDistanceFactor,
               scrollToZoom: true,
             }}
           />
@@ -2365,8 +2509,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
           <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
               className={`p-2 rounded-sm ${currentPage === 1
-                  ? "bg-neutral-500 text-neutral-700"
-                  : "bg-neutral-700 text-white"
+                ? "bg-neutral-500 text-neutral-700"
+                : "bg-neutral-700 text-white"
                 }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
