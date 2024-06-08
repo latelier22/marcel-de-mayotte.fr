@@ -65,7 +65,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [zoomGallery, setZoomGallery] = useState(250);
+  const [zoomGallery, setZoomGallery] = useState(350);
   const [tagName, setTagName] = useState("");
   const [tagAction, setTagAction] = useState("");
   const [newTagName, setNewTagName] = useState("");
@@ -93,6 +93,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
     useState(false);
 
+    const handleDragStart = (event) => {
+      event.preventDefault(); // Empêche le glissement
+      toast.info("Dragging is disabled for photos");
+    };
 
   const handleUpdatePhotos = (newPhotos) => {
     setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
@@ -2096,8 +2100,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
               return (
                 <>
                   <div
+                    
                     key={photo.id}
                     onClick={(e) => handlePhotoClick(e, photo.id)}
+                    onDragStart={handleDragStart} // Ajoutez le gestionnaire onDragStart ici
                     style={{
                       ...wrapperStyle,
                       border: getBorderStyle(photo),
@@ -2106,6 +2112,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                       maxWidth: "33.33%",
                     }}
                     className="mb-4"
+                    
                     title={photo.src}
                   >
                     {zoomGallery >= 200 && (
