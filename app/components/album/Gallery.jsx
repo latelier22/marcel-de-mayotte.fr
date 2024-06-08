@@ -40,12 +40,9 @@ import {
   DragOverlay,
   useSensor,
   useSensors,
-  MouseSensor,
   TouchSensor,
-  KeyboardSensor,
   closestCenter,
-  DragStartEvent,
-  DragEndEvent,
+
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -56,6 +53,44 @@ import {
 } from "@dnd-kit/sortable";
 
 import { CSS } from '@dnd-kit/utilities';
+
+import { MouseSensor as LibMouseSensor, KeyboardSensor as LibKeyboardSensor } from '@dnd-kit/core';
+
+export class MouseSensor extends LibMouseSensor {
+  static activators = [
+    {
+      eventName: 'onMouseDown',
+      handler: ({ nativeEvent: event }) => {
+        return shouldHandleEvent(event.target);
+      }
+    }
+  ];
+}
+
+export class KeyboardSensor extends LibKeyboardSensor {
+  static activators = [
+    {
+      eventName: 'onKeyDown',
+      handler: ({ nativeEvent: event }) => {
+        return shouldHandleEvent(event.target);
+      }
+    }
+  ];
+}
+
+function shouldHandleEvent(element) {
+  let cur = element;
+
+  while (cur) {
+    if (cur.dataset && cur.dataset.noDnd) {
+      return false;
+    }
+    cur = cur.parentElement;
+  }
+
+  return true;
+}
+
 
 
 
@@ -99,6 +134,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [photosPerPage, setPhotosPerPage] = useState(100);
   const [recentPhotos, setRecentPhotos] = useState(new Set());
+  
 
   const [isUploading, setIsUploading] = useState(false);
   const [files, setFiles] = useState([]);
@@ -118,11 +154,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
 
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
     useState(false);
+  const [isDragble, setDragable] = useState(true)
 
 
 // Définir une variable pour vérifier l'état de DnD
 const isDragAndDropEnabled = isAdmin && isShowAdmin || tagSlug === "favoris";
-console.log("isDragAndDropEnabled",isDragAndDropEnabled)
+// console.log("isDragAndDropEnabled",isDragAndDropEnabled)
 
 
   const PhotoFrame = React.memo(
@@ -174,11 +211,13 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
 
   const SortablePhotoFrame = (props) => {
     const { photo } = props;
-    const { attributes, listeners, isDragging, setNodeRef, transform, transition } = useSortable({ id: photo.id });
+    const [isEditing, setIsEditing] = useState(false);
+    const { attributes, listeners, isDragging, setNodeRef, transform, transition } = useSortable({ id: photo.id , disabled: isEditing && true });
+  
     
     const { alt, style, ...restImageProps } = props.imageProps;
     const [isTitleChanged, setIsTitleChanged] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
+   
 
     const handleTitleChange = (e) => {
       const newTitles = {
@@ -229,18 +268,19 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
             <input
               type="text"
               value={props.titles[photo.id] || ""}
-              onChange={handleTitleChange}
-              className={`absolute -bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+              onChange={console.log("change")}
+              onFocus={(e) => e.stopPropagation()} // Prevent exiting edit mode on click
+              className={`absolute -bottom-8 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
               onClick={(e) => e.stopPropagation()} // Stop event propagation
             />
-            {isTitleChanged && (
+            
               <button
                 onClick={handleSaveTitle}
                 className="ml-2 bg-blue-500 text-white font-bold py-1 px-2 rounded"
               >
                 <Save />
               </button>
-            )}
+            
           </div>
         ) : (
           <div className="flex items-center justify-center w-full">
@@ -250,6 +290,7 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
             {props.isAdmin && props.isShowAdmin && (
               <button
                 onClick={(e) => {
+                  console.log("pen")
                   e.stopPropagation();
                   setIsEditing(true);
                 }}
@@ -309,13 +350,21 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
                 onClick={(e) => e.stopPropagation()} // Stop event propagation
               >
                 <input
-                  type="text"
-                  placeholder="Search tags..."
-                  value={props.photoTagSearch}
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => props.setPhotoTagSearch(e.target.value)}
-                  className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
-                />
+  type="text"
+  placeholder="Search tags..."
+  value={props.photoTagSearch}
+  onClick={(e) => {
+    e.stopPropagation();
+    console.log('Input clicked');
+  }}
+  onFocus={(e) => e.stopPropagation()} // Prevent exiting edit mode on click
+  onChange={(e) => {
+    props.setPhotoTagSearch(e.target.value);
+    console.log('Input changed', e.target.value);
+  }}
+  className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
+  data-no-dnd="true"
+/>
                 {props.photoTagSearch ? (
                   <div>
                     {props.filteredTags(props.allMyTags).map((tag) => (
@@ -441,13 +490,9 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
     ? photos.findIndex((photo) => photo.id === activeId)
     : undefined;
 
-  const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 50, tolerance: 10 },
-    }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
+    const sensors = useSensors(
+      useSensor(MouseSensor, { activationConstraint: { distance: 5 } })
+    );
 
   const handleDragStart = ({ active }) => {
     console.log("active",active)
@@ -1102,12 +1147,13 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
   }, [photos]);
 
   const handleTitleChange = (e) => {
+    console.log(changed)
     const newTitles = {
       ...props.titles,
       [photo.id]: e.target.value,
     };
     props.setTitles(newTitles);
-    setIsTitleChanged(true);
+    
   };
 
   const handleSaveTitle = () => {
@@ -2481,10 +2527,10 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
         <DndContext
   sensors={sensors}
   collisionDetection={closestCenter}
-  onDragStart={isDragAndDropEnabled ? handleDragStart : undefined}
-  onDragEnd={isDragAndDropEnabled ? handleDragEnd : undefined}
+  onDragStart={isDragAndDropEnabled && isDragble ? handleDragStart : undefined}
+  onDragEnd={isDragAndDropEnabled &&isDragble ? handleDragEnd : undefined}
 >
-  {isDragAndDropEnabled ? (
+  {isDragAndDropEnabled && isDragble ? (
     <SortableContext
       items={paginatedPhotos.map((photo) => photo.id)}
       strategy={horizontalListSortingStrategy}

@@ -11,7 +11,7 @@ datasource db {
 
 model Photo {
   id          Int         @id @default(autoincrement())
-  numero      Int         // numéro dans le catalogue - CAT
+  numero      Int         @default(0) // numéro dans le catalogue - CAT
   dimensions  String?     // Les dimensions de la photo - DIM
   createdAt   DateTime    @default(now())
   tags        Tag[]       
@@ -36,7 +36,7 @@ model Tag {
   parentTag  Tag?     @relation("ChildTags", fields: [parentId], references: [id])
   parentId   Int?     @map("parent_id")
   childTags  Tag[]    @relation("ChildTags")
-  order      Int      @default(0)
+  
 }
 
 model User {
