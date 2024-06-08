@@ -37,7 +37,7 @@ const ChangeOrderButton = ({ tagId, photos }) => {
 
   return (
     <button onClick={handleInitOrder} className="p-2 rounded-sm bg-blue-500 text-white">
-      CHANGER L'ORDRE
+      INIT ORDER
     </button>
   );
 };
