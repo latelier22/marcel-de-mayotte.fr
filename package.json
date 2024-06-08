@@ -26,6 +26,7 @@
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cheerio": "^1.0.0-rc.12",
+    "cookies-next": "^4.2.1",
     "date-fns": "^3.6.0",
     "dnd-kit-sortable-tree": "^0.1.73",
     "html-react-parser": "^5.1.10",

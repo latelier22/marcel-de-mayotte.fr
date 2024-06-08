@@ -1,12 +1,15 @@
 "use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import Link from "next/link";
 import { useSession } from "next-auth/react";
+// import { cookies } from 'next/headers';
+import Link from "next/link";
+
 // import DotLoaderSpinner from "../../components/spinners/DotLoaderSpinner";
 import UploadImageComponent from "./UploadImageComponent";
 import { useRouter } from "next/navigation";
 
 import FavoriteModal from "../Modals/Modal";
+import DragAlertModal from "../Modals/Modal"
 import TagModal from "../Modals/Modal";
 import RecentsModal from "../Modals/Modal";
 import PublishedModal from "../Modals/Modal";
@@ -38,6 +41,9 @@ import ChangeOrderButton from "./ChangeOrderButton";
 
 const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const { data: session } = useSession();
+  // const [cookies, setCookie] = useCookies(['hideDragAlert']);
+  const [doNotShowAgain, setDoNotShowAgain] = useState("true"); //COOKIES
+  
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
   const [publishedPhotos, setPublishedPhotos] = useState([]);
@@ -57,6 +63,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [showFavoriteModal, setShowFavoriteModal] = useState(false);
   const [modalContent, setModalContent] = useState("");
   const [showTagCrudModal, setShowTagCrudModal] = useState(false);
+  const [showDragAlertModal, setShowDragAlertModal] =useState(false);
   const isVisible = useSelector((state) => state.visible.isVisible);
   const isShowAdmin = useSelector((state) => state.showAdmin.isShowAdmin);
   const isReadOnly = !session || session.user.role !== "admin";
@@ -95,8 +102,19 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
 
     const handleDragStart = (event) => {
       event.preventDefault(); // Empêche le glissement
-      toast.info("Dragging is disabled for photos");
+      console.log("doNotShowAgain", doNotShowAgain);
+      if (!doNotShowAgain) {
+        setShowDragAlertModal(true);
+      }
     };
+  
+    const handleCloseDragModal = () => {
+      if (doNotShowAgain) {
+        
+      }
+      setShowDragAlertModal(false); // Ferme la modal
+    };
+  
 
   const handleUpdatePhotos = (newPhotos) => {
     setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
@@ -118,6 +136,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   };
 
   const router = useRouter();
+
+  
+
+ 
+
 
   // const localTag = allMyTags.filter((t) => t.slug === tagSlug);
   // const tagSlugName = localTag && localTag[0].name;
@@ -1734,7 +1757,30 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                       Edit Tag
                     </button>
                   </div>
-
+                  <DragAlertModal
+        isOpen={showDragAlertModal}
+        onClose={handleCloseDragModal}
+        title="TRI MANUEL DES PHOTOS"
+      >
+        <p>Le tri manuel des photos est désactivé. Voulez-vous trier les photos manuellement ?</p>
+        <button 
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+          onClick={() => {
+            handleCloseDragModal();
+            router.push(`/catalogueTri/${tagSlug}`);
+          }}
+        >
+          OUI
+        </button>
+        <div className="mt-4">
+          <input
+            type="checkbox"
+            checked={doNotShowAgain}
+            onChange={(e) => setDoNotShowAgain(e.target.checked)}
+          />
+          <label className="ml-2">Ne plus afficher ce message</label>
+        </div>
+      </DragAlertModal>
                   <TagCrudModal
                     isOpen={showTagCrudModal}
                     onClose={() => setShowTagCrudModal(false)}
@@ -2099,6 +2145,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
 
               return (
                 <>
+                 
                   <div
                     
                     key={photo.id}
