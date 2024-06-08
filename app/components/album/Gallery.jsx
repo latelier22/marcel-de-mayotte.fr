@@ -91,7 +91,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [zoomGallery, setZoomGallery] = useState(250);
+  const [zoomGallery, setZoomGallery] = useState(350);
   const [tagName, setTagName] = useState("");
   const [tagAction, setTagAction] = useState("");
   const [newTagName, setNewTagName] = useState("");
@@ -118,6 +118,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
 
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
     useState(false);
+
+
+// Définir une variable pour vérifier l'état de DnD
+const isDragAndDropEnabled = isAdmin && isShowAdmin || tagSlug === "favoris";
+console.log("isDragAndDropEnabled",isDragAndDropEnabled)
+
 
   const PhotoFrame = React.memo(
     React.forwardRef(function PhotoFrame(props, ref) {
@@ -234,6 +240,23 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         >
           <Heart isOpen={props.favorites.has(photo.id)} />
         </button>
+
+        {zoomGallery >= 200 &&
+                      isAdmin &&
+                      isShowAdmin &&
+                      !photo.published &&
+                      isVisible && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIndex(-1);
+                            handleDeleteButtonClick(photo.id);
+                          }}
+                          className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+                        >
+                          <Trash isOpen={true} />
+                        </button>
+                      )}
   
         {/* Delete Button */}
         {props.isAdmin && props.isShowAdmin && !photo.published && props.isVisible && (
@@ -423,15 +446,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   );
 
   const handleDragStart = ({ active }) => {
-    setActiveId(active.id);
+    if (isDragAndDropEnabled) {
+      setActiveId(active.id);
+    }
   };
-
+  
   const handleDragEnd = ({ active, over }) => {
-    if (over && active.id !== over.id) {
+    if (isDragAndDropEnabled && over && active.id !== over.id) {
       setPhotos((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
-
+  
         return arrayMove(items, oldIndex, newIndex);
       });
     }
@@ -470,6 +495,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         toggleRecent={toggleRecent}
         recentPhotos={recentPhotos}
         zoomGallery={zoomGallery}
+        updatePhotoTitle={updatePhotoTitle} // Ajout de updatePhotoTitle
+        handleCheckboxChange={handleCheckboxChange} // Ajout de handleCheckboxChange
       />
     );
   };
@@ -1065,15 +1092,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     updatePhotoTitle(photoId, title);
   };
 
-  const handleCheckboxChange = (photoId) => {
-    const newTitle = photos.find((p) => p.id === photoId).name;
-    setTitles((prevTitles) => ({
-      ...prevTitles,
-      [photoId]: newTitle,
-    }));
-    updatePhotoTitle(photoId, newTitle);
-  };
-
   const updatePhotoTitle = async (photoId, title) => {
     try {
       const response = await fetch(`/api/updatePhotoTitle`, {
@@ -1083,7 +1101,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
         },
         body: JSON.stringify({ photoId, title }),
       });
-
+  
       if (!response.ok) throw new Error("Failed to update photo title");
       toast.success("Titre mis à jour!");
     } catch (error) {
@@ -1091,6 +1109,16 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
       toast.error("Failed to update title");
     }
   };
+  
+  const handleCheckboxChange = (photoId) => {
+    const newTitle = photos.find((p) => p.id === photoId).name;
+    setTitles((prevTitles) => ({
+      ...prevTitles,
+      [photoId]: newTitle,
+    }));
+    updatePhotoTitle(photoId, newTitle);
+  };
+  
 
   const handleDeleteButtonClick = async (photoId) => {
     try {
@@ -2431,31 +2459,46 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
           </button>
         </div>
         <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={paginatedPhotos.map((photo) => photo.id)} strategy={horizontalListSortingStrategy}>
-            <PhotoAlbum
-              photos={paginatedPhotos}
-              spacing={zoomGallery / 7}
-              layout="rows"
-              targetRowHeight={zoomGallery}
-              onClick={({ index }) => setIndex(index)}
-              renderPhoto={renderPhoto}
-            />
-          </SortableContext>
-          <DragOverlay>
-            {activeId ? (
-              <img
-                src={paginatedPhotos.find((photo) => photo.id === activeId).src}
-                alt=""
-                style={{ border: "2px solid black", padding: "10px", width: "100%" }}
-              />
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+  sensors={sensors}
+  collisionDetection={closestCenter}
+  onDragStart={isDragAndDropEnabled ? handleDragStart : undefined}
+  onDragEnd={isDragAndDropEnabled ? handleDragEnd : undefined}
+>
+  {isDragAndDropEnabled ? (
+    <SortableContext
+      items={paginatedPhotos.map((photo) => photo.id)}
+      strategy={horizontalListSortingStrategy}
+    >
+      <PhotoAlbum
+        photos={paginatedPhotos}
+        spacing={zoomGallery / 7}
+        layout="rows"
+        targetRowHeight={zoomGallery}
+        onClick={({ index }) => setIndex(index)}
+        renderPhoto={renderPhoto}
+      />
+    </SortableContext>
+  ) : (
+    <PhotoAlbum
+      photos={paginatedPhotos}
+      spacing={zoomGallery / 7}
+      layout="rows"
+      targetRowHeight={zoomGallery}
+      onClick={({ index }) => setIndex(index)}
+      renderPhoto={renderPhoto}
+    />
+  )}
+  <DragOverlay>
+    {activeId ? (
+      <img
+        src={paginatedPhotos.find((photo) => photo.id === activeId).src}
+        alt=""
+        style={{ border: "2px solid black", padding: "10px", width: "100%" }}
+      />
+    ) : null}
+  </DragOverlay>
+</DndContext>
+
         <Lightbox
           open={isActive && index >= 0}
           index={index}
