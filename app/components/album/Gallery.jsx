@@ -27,7 +27,7 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Eye, Star, Htag, Heart, Trash, Upload } from "./icons";
+import { Eye, Star, Htag, Heart, Trash, Upload , Pen, Save} from "./icons";
 import EditableButton from "./buttons/EditableButton";
 
 import { useSelector } from "react-redux";
@@ -174,21 +174,40 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
 
   const SortablePhotoFrame = (props) => {
     const { photo } = props;
-    const {  activeIndex, attributes, listeners, isDragging, index, setNodeRef } = useSortable({ id: photo.id });
-  
+    const { attributes, listeners, isDragging, setNodeRef, transform, transition } = useSortable({ id: photo.id });
+    
     const { alt, style, ...restImageProps } = props.imageProps;
+    const [isTitleChanged, setIsTitleChanged] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+
+    const handleTitleChange = (e) => {
+      const newTitles = {
+        ...props.titles,
+        [photo.id]: e.target.value,
+      };
+      props.setTitles(newTitles);
+      setIsTitleChanged(true);
+    };
+  
+    const handleSaveTitle = (e) => {
+      e.stopPropagation();
+      props.updatePhotoTitle(photo.id, props.titles[photo.id]);
+      setIsEditing(false);
+      setIsTitleChanged(false);
+    };
   
     return (
       <div
         ref={setNodeRef}
         style={{
           ...style,
-          transform: CSS.Transform.toString(props.transform),
-          transition: props.transition,
+          transform: CSS.Transform.toString(transform),
+          transition,
           border: props.selectedPhotoIds.includes(photo.id) ? "8px solid green" : "4px solid black",
         }}
         {...attributes}
         {...listeners}
+        onClick={(event) => props.onClick(photo.id, event)} // Use props.onClick
         className="relative mb-4"
       >
         <img
@@ -199,36 +218,49 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
             height: "auto",
             padding: 0,
             marginBottom: 0,
+            opacity: photo.published ? 1 : 0.2,
           }}
           {...restImageProps}
         />
-        {/* Title */}
-        <EditableButton
-          text={props.titles[photo.id] || ""}
-          onChange={(e) => {
-            const newTitles = {
-              ...props.titles,
-              [photo.id]: e.target.value,
-            };
-            props.setTitles(newTitles);
-          }}
-          onBlur={() =>
-            props.updatePhotoTitle(photo.id, props.titles[photo.id])
-          }
-          isEditable={!props.isReadOnly}
-          inputRef={props.inputRef}
-        />
-        {!props.titles[photo.id] && (
-          <>
-            <span className="text-white bg-transparent text-center w-full absolute -bottom-7">{photo.name}</span>
+     {/* Title */}
+     <div className="flex items-center justify-center mt-2">
+        {isEditing ? (
+          <div className="flex items-center">
             <input
-              className="absolute -bottom-7"
-              title="Utiliser le nom comme titre"
-              type="checkbox"
-              onChange={() => props.handleCheckboxChange(photo.id)}
+              type="text"
+              value={props.titles[photo.id] || ""}
+              onChange={handleTitleChange}
+              className={`absolute -bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+              onClick={(e) => e.stopPropagation()} // Stop event propagation
             />
-          </>
+            {isTitleChanged && (
+              <button
+                onClick={handleSaveTitle}
+                className="ml-2 bg-blue-500 text-white font-bold py-1 px-2 rounded"
+              >
+                <Save />
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center w-full">
+            <span className="text-white text-center -bottom-8 flex-1">
+              {props.titles[photo.id] || <span className="line-through">{photo.name}</span>}
+            </span>
+            {props.isAdmin && props.isShowAdmin && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsEditing(true);
+                }}
+                className={`absolute -bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
+              >
+                <Pen />
+              </button>
+            )}
+          </div>
         )}
+      </div>
   
         {/* Heart Button */}
         <button
@@ -240,30 +272,11 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
         >
           <Heart isOpen={props.favorites.has(photo.id)} />
         </button>
-
-        {zoomGallery >= 200 &&
-                      isAdmin &&
-                      isShowAdmin &&
-                      !photo.published &&
-                      isVisible && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIndex(-1);
-                            handleDeleteButtonClick(photo.id);
-                          }}
-                          className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
-                        >
-                          <Trash isOpen={true} />
-                        </button>
-                      )}
   
-        {/* Delete Button */}
         {props.isAdmin && props.isShowAdmin && !photo.published && props.isVisible && (
           <button
             onClick={(e) => {
               e.stopPropagation();
-              props.setIndex(-1);
               props.handleDeleteButtonClick(photo.id);
             }}
             className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
@@ -272,7 +285,6 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
           </button>
         )}
   
-        {/* Tag Button */}
         {props.isAdmin && props.isShowAdmin && photo.published && (
           <>
             <button
@@ -294,15 +306,14 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
                   right: "0",
                   maxHeight: "300px",
                 }}
+                onClick={(e) => e.stopPropagation()} // Stop event propagation
               >
                 <input
                   type="text"
                   placeholder="Search tags..."
                   value={props.photoTagSearch}
                   onClick={(e) => e.stopPropagation()}
-                  onChange={(e) =>
-                    props.setPhotoTagSearch(e.target.value)
-                  }
+                  onChange={(e) => props.setPhotoTagSearch(e.target.value)}
                   className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
                 />
                 {props.photoTagSearch ? (
@@ -372,11 +383,7 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
                       {props.showOtherTags && (
                         <div>
                           {props.allMyTags
-                            .filter((tag) =>
-                              !photo.tags.some((photoTag) =>
-                                photoTag.name === tag.name
-                              )
-                            )
+                            .filter((tag) => !photo.tags.some((photoTag) => photoTag.name === tag.name))
                             .map((tag) => (
                               <span
                                 key={tag.id}
@@ -399,7 +406,6 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
           </>
         )}
   
-        {/* Published Button */}
         {props.isAdmin && props.isShowAdmin && (
           <button
             onClick={(e) => {
@@ -413,7 +419,6 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
           </button>
         )}
   
-        {/* Recent Button */}
         {props.isAdmin && props.isShowAdmin && (
           <button
             onClick={(e) => {
@@ -429,7 +434,6 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
       </div>
     );
   };
-  
 
   const renderedPhotos = useRef({});
   const [activeId, setActiveId] = useState();
@@ -446,32 +450,50 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
   );
 
   const handleDragStart = ({ active }) => {
+    console.log("active",active)
     if (isDragAndDropEnabled) {
       setActiveId(active.id);
     }
   };
   
+  
   const handleDragEnd = ({ active, over }) => {
-    if (isDragAndDropEnabled && over && active.id !== over.id) {
+    if (active.id !== over.id) {
       setPhotos((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
         const newIndex = items.findIndex((item) => item.id === over.id);
-  
         return arrayMove(items, oldIndex, newIndex);
       });
     }
-    setActiveId(undefined);
+    setActiveId(null);
   };
+
+  // const handlePhotoClick = (e, photoId) => {
+  //   if (isShowAdmin && isAdmin) {
+  //     e.stopPropagation();
+  //     handleTagButtonClick(photoId);
+  //   }
+  // };
+
+  const handlePhotoClick = (photoId, event) => {
+    event.stopPropagation(); // Stop event propagation
+    setSelectedPhotoIds((prevSelected) =>
+      prevSelected.includes(photoId)
+        ? prevSelected.filter((id) => id !== photoId)
+        : [...prevSelected, photoId]
+    );
+  };
+  
 
   const renderPhoto = (props) => {
     return (
       <SortablePhotoFrame
         {...props}
-        activeIndex={activeIndex}
         selectedPhotoIds={selectedPhotoIds}
+        onClick={handlePhotoClick}
         titles={titles}
-        handleTitleChange={handleTitleChange}
-        handleTitleBlur={handleTitleBlur}
+        setTitles={setTitles}
+        updatePhotoTitle={updatePhotoTitle}
         isReadOnly={isReadOnly}
         inputRef={inputRef}
         toggleFavorite={toggleFavorite}
@@ -495,11 +517,11 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
         toggleRecent={toggleRecent}
         recentPhotos={recentPhotos}
         zoomGallery={zoomGallery}
-        updatePhotoTitle={updatePhotoTitle} // Ajout de updatePhotoTitle
-        handleCheckboxChange={handleCheckboxChange} // Ajout de handleCheckboxChange
+        handleCheckboxChange={handleCheckboxChange}
       />
     );
   };
+  
   
   // const renderPhoto = ({ photo, attributes, listeners, setNodeRef, style }) => (
   //   <div
@@ -1079,18 +1101,21 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
     setTitles(initialTitles);
   }, [photos]);
 
-  const handleTitleChange = (e, photoId) => {
+  const handleTitleChange = (e) => {
     const newTitles = {
-      ...titles,
-      [photoId]: e.target.value,
+      ...props.titles,
+      [photo.id]: e.target.value,
     };
-    setTitles(newTitles);
+    props.setTitles(newTitles);
+    setIsTitleChanged(true);
   };
 
-  const handleTitleBlur = (photoId) => {
-    const title = titles[photoId];
-    updatePhotoTitle(photoId, title);
+  const handleSaveTitle = () => {
+    props.updatePhotoTitle(photo.id, props.titles[photo.id]);
+    setIsTitleChanged(false);
   };
+
+
 
   const updatePhotoTitle = async (photoId, title) => {
     try {
@@ -1169,12 +1194,7 @@ console.log("isDragAndDropEnabled",isDragAndDropEnabled)
     }
   };
 
-  const handlePhotoClick = (e, photoId) => {
-    if (isShowAdmin && isAdmin) {
-      e.stopPropagation();
-      handleTagButtonClick(photoId);
-    }
-  };
+  
 
   const canDeleteSelection = useMemo(() => {
     return (
