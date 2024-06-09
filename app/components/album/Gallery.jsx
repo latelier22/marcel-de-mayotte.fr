@@ -2079,7 +2079,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
             </Link>
              {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID */}
              {tagId}
-             "doNotShowAgain"
+             doNotShowAgain
             {doNotShowAgain}
 
 
