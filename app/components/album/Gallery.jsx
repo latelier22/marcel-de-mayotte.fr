@@ -96,38 +96,29 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
 
   const [showOtherUsedTags, setShowOtherUsedTags] = useState(false);
   const [showOtherUnusedTags, setShowOtherUnusedTags] = useState(false);
+  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState(false);
 
   const [doNotShowAgain, setDoNotShowAgain] = useState(false);
-  const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
-    useState(false);
-
-    const [alertCookie , setAlertCookie] = useState(false)
-
-  //  let alertCookie = doNotShowAgain
+ 
   useEffect(() => {
-    const hideDragAlert = getCookie('hideDragAlert');
-    setAlertCookie(hideDragAlert)
-    
-  }, [alertCookie]);
+    const hideDragAlert = getCookie('hideDragAlert') === 'true';
+    setDoNotShowAgain(hideDragAlert);
+  }, []);
 
+  const handleDragStart = (event) => {
+    event.preventDefault(); // Empêche le glissement
+    console.log("cookie", doNotShowAgain ? 'true' : 'false');
+    if (!doNotShowAgain) {
+      setShowDragAlertModal(true);
+    }
+  };
 
-
-    const handleDragStart = (event) => {
-      event.preventDefault(); // Empêche le glissement
-      console.log("cookie", alertCookie ? 'true' : 'false');
-      if (!alertCookie && !doNotShowAgain) {
-        setShowDragAlertModal(true);
-      }
-    };
-  
-    const handleCloseDragModal = () => {
-      if (doNotShowAgain) {
-        setCookie('hideDragAlert', 'NO ALERT', { path: '/' });
-        
-        
-      }
-      setShowDragAlertModal(false); // Ferme la modal
-    };
+  const handleCloseDragModal = () => {
+    if (doNotShowAgain) {
+      setCookie('hideDragAlert', 'true', { path: '/' });
+    }
+    setShowDragAlertModal(false); // Ferme la modal
+  };
   
 
   const handleUpdatePhotos = (newPhotos) => {
@@ -1773,30 +1764,28 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                       Edit Tag
                     </button>
                   </div>
-                  <DragAlertModal
-        isOpen={showDragAlertModal}
-        onClose={handleCloseDragModal}
-        title="TRI MANUEL DES PHOTOS"
-      >
-        <p>Le tri manuel des photos est désactivé. Voulez-vous trier les photos manuellement ?</p>
-        <button 
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => {
-            handleCloseDragModal();
-            router.push(`/catalogueTri/${tagSlug}`);
-          }}
-        >
-          OUI
-        </button>
-        <div className="mt-4">
-          <input
-            type="checkbox"
-            checked={doNotShowAgain}
-            onChange={(e) => setDoNotShowAgain(e.target.checked)}
-          />
-          <label className="ml-2">Ne plus afficher ce message</label>
-        </div>
-      </DragAlertModal>
+                  {showDragAlertModal && (
+        <DragAlertModal isOpen={showDragAlertModal} onClose={handleCloseDragModal} title="TRI MANUEL DES PHOTOS">
+          <p>Le tri manuel des photos est désactivé. Voulez-vous trier les photos manuellement ?</p>
+          <button 
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+            onClick={() => {
+              handleCloseDragModal();
+              router.push(`/catalogueTri/${tagSlug}`);
+            }}
+          >
+            OUI
+          </button>
+          <div className="mt-4">
+            <input
+              type="checkbox"
+              checked={doNotShowAgain}
+              onChange={(e) => setDoNotShowAgain(e.target.checked)}
+            />
+            <label className="ml-2">Ne plus afficher ce message</label>
+          </div>
+        </DragAlertModal>
+      )}
                   <TagCrudModal
                     isOpen={showTagCrudModal}
                     onClose={() => setShowTagCrudModal(false)}
@@ -2090,7 +2079,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
             </Link>
              {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID */}
              {tagId}
-            {alertCookie}
+             "doNotShowAgain"
+            {doNotShowAgain}
 
 
             <button
