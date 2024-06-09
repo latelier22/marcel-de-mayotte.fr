@@ -1,12 +1,12 @@
 "use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSession } from "next-auth/react";
-// import { cookies } from 'next/headers';
 import Link from "next/link";
 
 // import DotLoaderSpinner from "../../components/spinners/DotLoaderSpinner";
 import UploadImageComponent from "./UploadImageComponent";
 import { useRouter } from "next/navigation";
+import { getCookies, setCookie, deleteCookie, getCookie } from 'cookies-next';
 
 import FavoriteModal from "../Modals/Modal";
 import DragAlertModal from "../Modals/Modal"
@@ -42,7 +42,7 @@ import ChangeOrderButton from "./ChangeOrderButton";
 const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const { data: session } = useSession();
   // const [cookies, setCookie] = useCookies(['hideDragAlert']);
-  const [doNotShowAgain, setDoNotShowAgain] = useState("true"); //COOKIES
+
   
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
@@ -97,19 +97,33 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [showOtherUsedTags, setShowOtherUsedTags] = useState(false);
   const [showOtherUnusedTags, setShowOtherUnusedTags] = useState(false);
 
+  const [doNotShowAgain, setDoNotShowAgain] = useState(false);
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] =
     useState(false);
 
+    const [alertCookie , setAlertCookie] = useState(false)
+
+  //  let alertCookie = doNotShowAgain
+  useEffect(() => {
+    const hideDragAlert = getCookie('hideDragAlert');
+    setAlertCookie(hideDragAlert)
+    
+  }, [alertCookie]);
+
+
+
     const handleDragStart = (event) => {
       event.preventDefault(); // Empêche le glissement
-      console.log("doNotShowAgain", doNotShowAgain);
-      if (!doNotShowAgain) {
+      console.log("cookie", alertCookie ? 'true' : 'false');
+      if (!alertCookie && !doNotShowAgain) {
         setShowDragAlertModal(true);
       }
     };
   
     const handleCloseDragModal = () => {
       if (doNotShowAgain) {
+        setCookie('hideDragAlert', 'NO ALERT', { path: '/' });
+        
         
       }
       setShowDragAlertModal(false); // Ferme la modal
@@ -1268,6 +1282,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     router.push("/catalogue/import");
   };
 
+
+
   const handleUploadImage = async (event) => {
     const selectedFiles = event.target.files;
     if (selectedFiles.length === 0) return;
@@ -2070,10 +2086,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
              {/* Add the ChangeOrderButton here */}
              <Link 
             href={`/catalogueTri/${tagSlug}`}>
-            TRIER
+            TRIER 
             </Link>
              {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID */}
              {tagId}
+            {alertCookie}
 
 
             <button
