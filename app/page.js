@@ -1,7 +1,9 @@
+// Importer les bibliothèques nécessaires
 "use client";
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // Utilisation de next/navigation pour la redirection
+import { getCookie, setCookie } from 'cookies-next';
 
 const WordAnimation = ({ word, color, initialX, finalX, initialRotate, delay, rotate, onComplete }) => {
   const [style, setStyle] = useState({
@@ -41,6 +43,15 @@ const Home = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [fadeOut, setFadeOut] = useState(false);
+
+  useEffect(() => {
+    const animCookie = getCookie('anim');
+    if (animCookie) {
+      router.push('/accueil');
+    } else {
+      setCookie('anim', 'true', { path: '/', maxAge: 60 * 60 * 24 * 365 });
+    }
+  }, [router]);
 
   useEffect(() => {
     if (step === 3) {
