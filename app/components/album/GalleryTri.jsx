@@ -92,7 +92,20 @@ function shouldHandleEvent(element) {
   return true;
 }
 
-const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
+async function updatePhotoOrders(orders) {
+  try {
+    const response = await myFetch('/api/photo-tag-orders/updateOrder', 'POST', orders, "UPDATE ORDERS");
+    if (!response.ok) {
+      throw new Error('Failed to update photo orders');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating photo orders:', error);
+    throw error;
+  }
+}
+
+const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
@@ -127,7 +140,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [newTagName, setNewTagName] = useState("");
   const [unusedTags, setUnusedTags] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [photosPerPage, setPhotosPerPage] = useState(100);
+  const [photosPerPage, setPhotosPerPage] = useState(3);
   const [recentPhotos, setRecentPhotos] = useState(new Set());
 
 
@@ -433,14 +446,56 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
 
   const handleDragEnd = ({ active, over }) => {
     if (active.id !== over.id) {
-      setPhotos((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-        return arrayMove(items, oldIndex, newIndex);
+      const oldIndex = paginatedPhotos.findIndex((photo) => photo.id === active.id);
+      const newIndex = paginatedPhotos.findIndex((photo) => photo.id === over.id);
+      const newPhotos = arrayMove(paginatedPhotos, oldIndex, newIndex);
+      setPhotos((prevPhotos) => {
+        // Create a new array with the updated order for the current page
+        const updatedPhotos = [...prevPhotos];
+        const startIndex = (currentPage - 1) * photosPerPage;
+        const endIndex = startIndex + photosPerPage;
+        for (let i = 0; i < newPhotos.length; i++) {
+          updatedPhotos[startIndex + i] = newPhotos[i];
+        }
+        return updatedPhotos;
       });
+  
+      // Préparer les données à envoyer pour la mise à jour
+      const startIndex = (currentPage - 1) * photosPerPage;
+      const orders = newPhotos.map((photo, index) => ({
+        photoId: photo.id,
+        tagId: tagId,
+        order: startIndex + index + 1,
+      }));
+  
+      // Appeler l'API pour mettre à jour les ordres
+      updatePhotoOrders(orders)
+        .then(response => {
+          console.log('Orders updated successfully:', response);
+        })
+        .catch(error => {
+          console.error('Error updating orders:', error);
+        });
     }
     setActiveId(null);
   };
+  
+  // Function to update photo order on the backend
+  const updatePhotoOrders = async (orders) => {
+    try {
+      const response = await myFetch('/api/photo-tag-orders/updateOrder', 'POST', orders, 'Update order');
+      if (response && response.message) {
+        console.log("Order updated successfully", response.message);
+      } else {
+        console.error("Failed to update order");
+      }
+    } catch (error) {
+      console.error("An error occurred while updating order:", error);
+    }
+  };
+ 
+  
+
 
   // const handlePhotoClick = (e, photoId) => {
   //   if (isShowAdmin && isAdmin) {
@@ -2398,9 +2453,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
           </div>
 
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
-            <Link 
+          <Link 
+             className={`rounded-md 
+               bg-orange-500  hover:bg-orange-300
+             text-white font-bold py-2 px-4 m-2`}
             href={`/catalogue/${tagSlug}`}>
-            QUITTER LE TRI
+            QUITTER LE TRI 
             </Link>
             {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID {tagId} */}
             <button
@@ -2423,10 +2481,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                 onChange={(e) => changePhotosPerPage(Number(e.target.value))}
                 value={photosPerPage}
               >
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-                <option value={200}>200</option>
+                <option value={3}>3</option>
+                <option value={6}>6</option>
+                <option value={9}>9</option>
+                {/* <option value={200}>200</option> */}
                 <option value={sortedAndFilteredPhotos.length}>
                   TOUS ({sortedAndFilteredPhotos.length})
                 </option>
@@ -2546,4 +2604,4 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   );
 };
 
-export default Gallery;
+export default GalleryTri;

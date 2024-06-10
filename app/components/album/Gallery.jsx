@@ -78,7 +78,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [newTagName, setNewTagName] = useState("");
   const [unusedTags, setUnusedTags] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [photosPerPage, setPhotosPerPage] = useState(100);
+  const [photosPerPage, setPhotosPerPage] = useState(3);
   const [recentPhotos, setRecentPhotos] = useState(new Set());
 
   const [isUploading, setIsUploading] = useState(false);
@@ -2074,13 +2074,30 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
              {/* Add the ChangeOrderButton here */}
              <Link 
+             className={`rounded-md 
+               bg-green-500  hover:bg-green-300
+             text-white font-bold py-2 px-4 m-2`}
             href={`/catalogueTri/${tagSlug}`}>
             TRIER 
             </Link>
              {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID */}
-             {tagId}
-             doNotShowAgain
-            {doNotShowAgain}
+             {/* <button
+                      onClick={() => openModal("add")}
+                      disabled={!tagName.trim() || isTagNameExist(tagName)}
+                      className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName)
+                          ? `bg-green-700`
+                          : `bg-green-500  hover:bg-green-300`
+                        }  text-white font-bold py-2 px-4 m-2`}
+                      title={
+                        !tagName.trim()
+                          ? "Entrez un nom pour un nouveau tag."
+                          : allMyTags.some((tag) => tag.name === tagName)
+                            ? "Ce tag existe déjà!"
+                            : "Ajouter un tag"
+                      }
+                    >
+                      Add Tag
+                    </button> */}
 
 
             <button
@@ -2103,10 +2120,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                 onChange={(e) => changePhotosPerPage(Number(e.target.value))}
                 value={photosPerPage}
               >
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-                <option value={200}>200</option>
+                <option value={3}>3</option>
+                <option value={6}>6</option>
+                <option value={9}>9</option>
+                {/* <option value={200}>200</option> */}
                 <option value={sortedAndFilteredPhotos.length}>
                   TOUS ({sortedAndFilteredPhotos.length})
                 </option>
