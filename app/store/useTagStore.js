@@ -6,31 +6,29 @@ const useTagStore = create((set) => ({
       try {
         const response = await fetch('/api/getTags');
         const data = await response.json();
-    
-        // Fonction récursive pour transformer les données et ajouter les parents
-        const transformTagItem = (item) => {
-          return {
-            id: item.id,
-            name: item.name,
-            slug: item.slug,
-            order: item.order,
-            children: item.childTags ? item.childTags.map(transformTagItem) : [],
-            parent: item.parentId || null,
-            mainTag : item.mainTag
-          };
-        };
-    
-        // Appliquer la transformation aux données des tags
-        let tagItems = data.map(transformTagItem);
-    
-        // Créer une map des éléments de tags par ID pour faciliter l'assignation des enfants aux parents
+  
+        // Function to transform tag data and avoid duplication
+        const transformTagItem = (item) => ({
+          id: item.id,
+          name: item.name,
+          slug: item.slug,
+          order: item.order,
+          children: [],
+          parent: item.parentId || null,
+          mainTag: item.mainTag
+        });
+  
+        // Step 1: Transform the data
+        let transformedTags = data.map(transformTagItem);
+  
+        // Step 2: Create a map for easy reference
         const tagMap = {};
-        tagItems.forEach(item => {
+        transformedTags.forEach(item => {
           tagMap[item.id] = item;
         });
-    
-        // Construire l'arbre des tags
-        tagItems.forEach(item => {
+  
+        // Step 3: Assign children to their respective parents
+        transformedTags.forEach(item => {
           if (item.parent) {
             if (!tagMap[item.parent].children) {
               tagMap[item.parent].children = [];
@@ -38,11 +36,11 @@ const useTagStore = create((set) => ({
             tagMap[item.parent].children.push(item);
           }
         });
-    
-        // Filtrer les éléments de tags pour ne garder que ceux sans parent
-        const rootTagItems = tagItems.filter(item => !item.parent);
-    
-        // Trier les éléments de tags par le champ "order"
+  
+        // Step 4: Filter root tags (those without parents)
+        const rootTagItems = transformedTags.filter(item => !item.parent);
+  
+        // Step 5: Sort the tags by 'order' and recursively sort their children
         const sortChildren = (items) => {
           items.forEach(item => {
             if (item.children) {
@@ -51,16 +49,17 @@ const useTagStore = create((set) => ({
             }
           });
         };
-    
+  
         rootTagItems.sort((a, b) => a.order - b.order);
         sortChildren(rootTagItems);
-    
+  
+        console.log("rootTagItems", rootTagItems);
+  
         set({ tagItems: rootTagItems });
       } catch (error) {
         console.error('Failed to fetch tags:', error);
       }
-    }
-    ,
+    },
     
     addTagItem: async (tagName, tagSlug) => {
       try {

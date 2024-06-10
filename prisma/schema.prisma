@@ -6,7 +6,9 @@ generator client {
 
 datasource db {
   provider = "mysql"
-  url      =env("DATABASE_URL")
+  
+  url      = "mysql://root:Bigtoon221274@localhost:3306/catalogue3"
+  
 }
 
 model Photo {

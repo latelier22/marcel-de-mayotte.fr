@@ -18,6 +18,7 @@ const TagsTree: React.FC<{}> = () => {
 
   useEffect(() => {
     fetchAndSetTags();
+    console.log(tagItems)
   }, [fetchAndSetTags]);
 
   const handleAddTagItem = async () => {
