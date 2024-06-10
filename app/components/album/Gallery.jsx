@@ -39,9 +39,12 @@ import { useSelector } from "react-redux";
 import myFetch from "../../components/myFetch";
 import ChangeOrderButton from "./ChangeOrderButton";
 
-const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
+const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPerPage={photosPerPage} ,queryCurrentPage={currentPage} }) => {
   const { data: session } = useSession();
   // const [cookies, setCookie] = useCookies(['hideDragAlert']);
+
+
+ 
 
   
   const [favorites, setFavorites] = useState(new Set());
@@ -77,8 +80,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [tagAction, setTagAction] = useState("");
   const [newTagName, setNewTagName] = useState("");
   const [unusedTags, setUnusedTags] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [photosPerPage, setPhotosPerPage] = useState(3);
+  
   const [recentPhotos, setRecentPhotos] = useState(new Set());
 
   const [isUploading, setIsUploading] = useState(false);
@@ -99,6 +101,50 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [showDeleteConfirmationModal, setShowDeleteConfirmationModal] = useState(false);
 
   const [doNotShowAgain, setDoNotShowAgain] = useState(false);
+
+   // Utilisation de la fonction de navigation
+
+   const router = useRouter();
+
+
+const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 50); // Valeur par défaut
+const [currentPage, setCurrentPage] = useState(parseInt(queryCurrentPage) || 1); // Valeur par défaut
+
+const handleChangePhotosPerPage = (number) => {
+  setPhotosPerPage(number);
+  setCurrentPage(1); // Réinitialiser à la première page
+  router.push({
+    pathname: router.pathname,
+    query: {
+      ...router.query,
+      photosPerPage: number,
+      currentPage: 1
+    }
+  });
+};
+
+const handlePageChange = (newPage) => {
+  setCurrentPage(newPage);
+  router.push({
+    pathname: router.pathname,
+    query: {
+      ...router.query,
+      photosPerPage: photosPerPage,
+      currentPage: newPage
+    }
+  });
+};
+
+// Exemple de fonction de navigation
+const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
+router.push({
+  pathname: `/catalogue/${tagSlug}`,
+  query: {
+    photosPerPage: photosPerPage,
+    currentPage: currentPage
+  }
+});
+};
  
   useEffect(() => {
     const hideDragAlert = getCookie('hideDragAlert') === 'true';
@@ -140,7 +186,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     await handleDeleteSelectedPhotos();
   };
 
-  const router = useRouter();
+  
 
   
 
@@ -2077,7 +2123,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
              className={`rounded-md 
                bg-green-500  hover:bg-green-300
              text-white font-bold py-2 px-4 m-2`}
-            href={`/catalogueTri/${tagSlug}`}>
+             href={`/catalogueTri/${tagSlug}?photosPerPage=${photosPerPage}&currentPage=${currentPage}`}>
             TRIER 
             </Link>
              {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID */}
@@ -2120,10 +2166,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                 onChange={(e) => changePhotosPerPage(Number(e.target.value))}
                 value={photosPerPage}
               >
-                <option value={3}>3</option>
-                <option value={6}>6</option>
-                <option value={9}>9</option>
-                {/* <option value={200}>200</option> */}
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={200}>200</option>
                 <option value={sortedAndFilteredPhotos.length}>
                   TOUS ({sortedAndFilteredPhotos.length})
                 </option>

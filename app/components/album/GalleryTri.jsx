@@ -105,7 +105,8 @@ async function updatePhotoOrders(orders) {
   }
 }
 
-const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
+const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId , queryPhotosPerPage={photosPerPage} ,queryCurrentPage={currentPage}}) => {
+
   const { data: session } = useSession();
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
@@ -139,8 +140,7 @@ const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   const [tagAction, setTagAction] = useState("");
   const [newTagName, setNewTagName] = useState("");
   const [unusedTags, setUnusedTags] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [photosPerPage, setPhotosPerPage] = useState(3);
+
   const [recentPhotos, setRecentPhotos] = useState(new Set());
 
 
@@ -168,6 +168,48 @@ const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   // Définir une variable pour vérifier l'état de DnD
   const isDragAndDropEnabled = isAdmin && isShowAdmin || tagSlug === "favoris";
   // console.log("isDragAndDropEnabled",isDragAndDropEnabled)
+
+  const router = useRouter();
+
+  const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 50); // Valeur par défaut
+  const [currentPage, setCurrentPage] = useState(parseInt(queryCurrentPage) || 1); // Valeur par défaut
+
+  const handleChangePhotosPerPage = (number) => {
+    setPhotosPerPage(number);
+    setCurrentPage(1); // Réinitialiser à la première page
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        photosPerPage: number,
+        currentPage: 1
+      }
+    });
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        photosPerPage: photosPerPage,
+        currentPage: newPage
+      }
+    });
+  };
+
+// Exemple de fonction de navigation
+const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
+  router.push({
+    pathname: `/catalogue/${tagSlug}`,
+    query: {
+      photosPerPage: photosPerPage,
+      currentPage: currentPage
+    }
+  });
+};
+
 
 
   const PhotoFrame = React.memo(
@@ -494,15 +536,6 @@ const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     }
   };
  
-  
-
-
-  // const handlePhotoClick = (e, photoId) => {
-  //   if (isShowAdmin && isAdmin) {
-  //     e.stopPropagation();
-  //     handleTagButtonClick(photoId);
-  //   }
-  // };
 
   const handlePhotoClick = (photoId, event) => {
     event.stopPropagation(); // Stop event propagation
@@ -552,29 +585,6 @@ const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
   };
 
 
-  // const renderPhoto = ({ photo, attributes, listeners, setNodeRef, style }) => (
-  //   <div
-  //     ref={setNodeRef}
-  //     style={{ ...style, border: "2px solid black", padding: "10px" }}
-  //     {...attributes}
-  //     {...listeners}
-  //   >
-  //     <img src={photo.src} alt={photo.title} style={{ width: "100%" }} />
-  //   </div>
-  // );
-  // const renderPhoto = ({ photo, layoutOptions, imageProps, ...rest }) => {
-  //   return (
-  //     <SortablePhotoFrame
-  //       key={photo.id}
-  //       photo={photo}
-  //       layoutOptions={layoutOptions}
-  //       imageProps={imageProps}
-  //       {...rest}
-  //     />
-  //   );
-  // };
-
-
   const handleUpdatePhotos = (newPhotos) => {
     setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
   };
@@ -591,11 +601,6 @@ const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
     closeDeleteConfirmationModal();
     await handleDeleteSelectedPhotos();
   };
-
-  const router = useRouter();
-
-  // const localTag = allMyTags.filter((t) => t.slug === tagSlug);
-  // const tagSlugName = localTag && localTag[0].name;
 
   // Définir le nom de la catégorie pour le tagSlug et CAS si tagSlug =favoris
   const localTag = allMyTags.filter((t) => t.slug === tagSlug);
@@ -2457,7 +2462,7 @@ const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
              className={`rounded-md 
                bg-orange-500  hover:bg-orange-300
              text-white font-bold py-2 px-4 m-2`}
-            href={`/catalogue/${tagSlug}`}>
+            href={`/catalogue/${tagSlug}?photosPerPage=${photosPerPage}&currentPage=${currentPage}`}>
             QUITTER LE TRI 
             </Link>
             {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID {tagId} */}
@@ -2481,10 +2486,10 @@ const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId }) => {
                 onChange={(e) => changePhotosPerPage(Number(e.target.value))}
                 value={photosPerPage}
               >
-                <option value={3}>3</option>
-                <option value={6}>6</option>
-                <option value={9}>9</option>
-                {/* <option value={200}>200</option> */}
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+                <option value={200}>200</option>
                 <option value={sortedAndFilteredPhotos.length}>
                   TOUS ({sortedAndFilteredPhotos.length})
                 </option>

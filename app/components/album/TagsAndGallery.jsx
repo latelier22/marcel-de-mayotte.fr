@@ -1,5 +1,5 @@
 "use client"
-
+import { useSearchParams } from "next/navigation";
 import React from 'react';
 import Tags from "../../components/Tags";
 import Gallery from "../../components/album/Gallery";
@@ -7,14 +7,18 @@ import Cards from "../../Cards";
 import { useSession } from "next-auth/react";
 import { useSelector } from "react-redux";
 
-const TagsAndGallery = ({ photos, allTags, progressionsTags, listeTags, tagCards, tagSlug, tagId }) => {
+const TagsAndGallery = ({ params, photos, allTags, progressionsTags, listeTags, tagCards, tagSlug, tagId }) => {
 
-//     const storedPhotoIds = localStorage.getItem('selectedPhotoIds');
-//   if (storedPhotoIds) {
-//     console.log(JSON.parse(storedPhotoIds));
-//     // Clear the local storage after reading
-//     localStorage.removeItem('selectedPhotoIds');
-//   }
+    //     const storedPhotoIds = localStorage.getItem('selectedPhotoIds');
+    //   if (storedPhotoIds) {
+    //     console.log(JSON.parse(storedPhotoIds));
+    //     // Clear the local storage after reading
+    //     localStorage.removeItem('selectedPhotoIds');
+    //   }
+    const searchParams = useSearchParams();
+    const pageSlug = params.pageSlug;
+    const photosPerPage = parseInt(searchParams.get("photosPerPage"), 10); // Assurez-vous de spécifier la base 10 pour la conversion en nombre entier
+    const currentPage = parseInt(searchParams.get("currentPage"), 10); // Utilisez parseInt pour convertir la largeur en nombre entier
 
     const isShowAdmin = useSelector((state) => state.showAdmin.isShowAdmin);
     const { data: session } = useSession(); // Récupérer les données de session
@@ -39,7 +43,8 @@ const TagsAndGallery = ({ photos, allTags, progressionsTags, listeTags, tagCards
                 {tagSlug === "progressions" ? (
                     <Cards cards={tagCards} syliusCard={true} label={"Voir les étapes..."} />
                 ) : (
-                    <Gallery photos={photos} allTags={allTags} tagSlug={tagSlug} tagId={tagId}/>
+                    <Gallery photos={photos} allTags={allTags} tagSlug={tagSlug} tagId={tagId} queryPhotosPerPage={photosPerPage}
+                    queryCurrentPage={currentPage} />
                 )}
             </div>
         </div>

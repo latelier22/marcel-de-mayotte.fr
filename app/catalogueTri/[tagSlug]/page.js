@@ -1,3 +1,5 @@
+import { useSearchParams } from "next/navigation";
+
 import Navbar from "../../NavBar";
 import Footer from "../../Footer";
 import RootLayout from "../../layout";
@@ -139,6 +141,7 @@ async function Page({ params }) {
         progressionsTags={progressionsTags}
         listeTags={allTags}
         tagCards={tagCards}
+        params={params}
       />
       <Footer />
     </main>

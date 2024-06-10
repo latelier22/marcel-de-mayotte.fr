@@ -1,6 +1,5 @@
 
-import { getCookies, setCookie, deleteCookie, getCookie } from 'cookies-next';
-import { cookies } from 'next/headers'
+
 
 import Navbar from "../../NavBar";
 import Footer from "../../Footer";
@@ -143,6 +142,8 @@ async function Page({ params }) {
         progressionsTags={progressionsTags}
         listeTags={allTags}
         tagCards={tagCards}
+        params={params}
+   
       />
       <Footer />
     </main>
