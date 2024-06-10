@@ -1,5 +1,4 @@
-
-
+import { useSearchParams } from "next/navigation";
 
 import Navbar from "../../NavBar";
 import Footer from "../../Footer";
@@ -13,6 +12,7 @@ import TagsAndGallery from "../../components/album/TagsAndGallery";
 import { authOptions } from "../../Auth";
 import { getServerSession } from 'next-auth';
 import fetchOrders from "../../components/fetchPhotoTagOrders";
+
 
 async function Page({ params }) {
   const session = await getServerSession(authOptions);
@@ -63,35 +63,30 @@ async function Page({ params }) {
     }
   }
 
-  // Fallback to default sorting by favorite, title, and name
-  if (listePhotos.length > 0 && photoTagOrders.length === 0) {
-    listePhotos.sort((a, b) => {
-      const aFavorite = a.isFavorite ? 1 : 0;
-      const bFavorite = b.isFavorite ? 1 : 0;
-      if (aFavorite !== bFavorite) {
-        return bFavorite - aFavorite;
-      }
+  // Fallback to default sorting by favorite, order, title, and name
+  listePhotos.sort((a, b) => {
+    const aFavorite = a.isFavorite ? 1 : 0;
+    const bFavorite = b.isFavorite ? 1 : 0;
+    if (aFavorite !== bFavorite) {
+      return bFavorite - aFavorite;
+    }
 
-      const aTitle = a.title || "";
-      const bTitle = b.title || "";
+    const aOrder = photoTagOrders.find(order => order.photoId === a.id)?.order || Infinity;
+    const bOrder = photoTagOrders.find(order => order.photoId === b.id)?.order || Infinity;
+    if (aOrder !== bOrder) {
+      return aOrder - bOrder;
+    }
 
-      if (aTitle && bTitle) {
-        return aTitle.localeCompare(bTitle);
-      }
+    const aTitle = a.title || "";
+    const bTitle = b.title || "";
+    if (aTitle && bTitle) {
+      return aTitle.localeCompare(bTitle);
+    }
 
-      if (aTitle && !bTitle) {
-        return -1;
-      }
-
-      if (!aTitle && bTitle) {
-        return 1;
-      }
-
-      const aName = a.name || "";
-      const bName = b.name || "";
-      return aName.localeCompare(bName);
-    });
-  }
+    const aName = a.name || "";
+    const bName = b.name || "";
+    return aName.localeCompare(bName);
+  });
 
   const photos = listePhotos.map(photo => {
     const baseURL = photo.url.startsWith('/uploads')

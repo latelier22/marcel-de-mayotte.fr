@@ -1608,6 +1608,8 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
       });
       setPhotos(newPhotos);
 
+      
+
       const newFavorites = new Set(favorites);
       selectedPhotoIds.forEach((photoId) => {
         if (makeFavorite) {
@@ -1617,6 +1619,28 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
         }
       });
       setFavorites(newFavorites);
+
+      // Recalculate orders but maintain the position of the toggled photo
+    const startIndex = (currentPage - 1) * photosPerPage;
+
+      const orders = paginatedPhotos.map((photo, index) => {
+        if (index < startIndex) return null;
+        return {
+          photoId: photo.id,
+          tagId: tagId,
+          order: index + 1,
+        };
+      }).filter(Boolean);
+    
+      // Send updated orders to the server
+      await updatePhotoOrders(orders)
+        .then(response => {
+          console.log('Orders updated successfully:', response);
+        })
+        .catch(error => {
+          console.error('Error updating orders:', error);
+        });
+
     } catch (error) {
       console.error(
         "An error occurred while updating favorites in bulk:",
@@ -1626,12 +1650,16 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
     }
   };
 
+
+
+
+
   const toggleFavorite = async (photoId) => {
     if (!session) {
       // toast.info("Veuillez vous connecter ou vous inscrire pour mémoriser vos favoris.");
       return;
     }
-
+  
     const isFavorited = favorites.has(photoId);
     const newFavorites = new Set(favorites);
     if (isFavorited) {
@@ -1639,19 +1667,44 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
     } else {
       newFavorites.add(photoId);
     }
-
+  
     setFavorites(newFavorites);
-    updateFavoriteOnServer(photoId, !isFavorited, session.user.id);
-
+    await updateFavoriteOnServer(photoId, !isFavorited, session.user.id);
+  
     const newPhotos = publishedPhotos.map((photo) => {
       if (photo.id === photoId) {
         return { ...photo, isFavorite: !isFavorited };
       }
       return photo;
     });
+  
     setPublishedPhotos(newPhotos);
+  
+    // Recalculate orders but maintain the position of the toggled photo
+    const startIndex = (currentPage - 1) * photosPerPage;
+    const toggledPhotoIndex = newPhotos.findIndex(photo => photo.id === photoId);
+  
+    const orders = paginatedPhotos.map((photo, index) => {
+      if (index < startIndex) return null;
+      return {
+        photoId: photo.id,
+        tagId: tagId,
+        order: index + 1,
+      };
+    }).filter(Boolean);
+  
+    // Send updated orders to the server
+    await updatePhotoOrders(orders)
+      .then(response => {
+        console.log('Orders updated successfully:', response);
+      })
+      .catch(error => {
+        console.error('Error updating orders:', error);
+      });
   };
-
+  
+  
+  
   const updateFavoriteOnServer = async (photoId, toggleFavorite, userId) => {
     console.log("updateFavoritesOnServer", photoId, toggleFavorite, userId);
     try {
