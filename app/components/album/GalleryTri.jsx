@@ -30,6 +30,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Eye, Star, Htag, Heart, Trash, Upload, Pen, Save } from "./icons";
 import EditableButton from "./buttons/EditableButton";
+import NavigationButtons from "./buttons/NavigationButtons"
 
 import { useSelector } from "react-redux";
 
@@ -2511,6 +2512,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
           </div>
 
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
+            <NavigationButtons />
           <Link 
              className={`rounded-md 
                bg-orange-500  hover:bg-orange-300

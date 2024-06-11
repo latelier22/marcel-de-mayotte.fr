@@ -24,8 +24,17 @@ async function main() {
     },
   });
 
+  // Fetch the "PROGRESSIONS" tag
+  const progressionsTag = await prisma.tag.findUnique({
+    where: { slug: 'progressions' },
+  });
+
   // Step 2: Fetch all photos and assign the appropriate format tags based on dimensions
-  const photos = await prisma.photo.findMany();
+  const photos = await prisma.photo.findMany({
+    include: {
+      tags: true,
+    },
+  });
 
   const portraitTag = formatsTag.childTags.find(tag => tag.name === 'Format PORTRAIT');
   const paysageTag = formatsTag.childTags.find(tag => tag.name === 'Format PAYSAGE');
@@ -36,6 +45,12 @@ async function main() {
   const tolerance = 0.05; // 5% tolerance
 
   for (const photo of photos) {
+    // Check if the photo has the "PROGRESSIONS" tag
+    const hasProgressionsTag = photo.tags.some(tag => tag.id === progressionsTag.id);
+    if (hasProgressionsTag) {
+      continue;
+    }
+
     const { width, height } = photo;
     let tagToAssign;
 
