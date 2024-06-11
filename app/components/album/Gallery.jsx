@@ -39,6 +39,7 @@ import { useSelector } from "react-redux";
 
 import myFetch from "../../components/myFetch";
 import ChangeOrderButton from "./ChangeOrderButton";
+import { Button } from "@mantine/core";
 
 const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPerPage = { photosPerPage }, queryCurrentPage = { currentPage } }) => {
   const { data: session } = useSession();
@@ -1633,6 +1634,15 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                         <div className="flex items-center justify-between flex-wrap py-2 px-4">
                           <div className="flex-wrap text-center">
                             {tag.name}
+                            <Link
+                              onClick={(e) => {
+                                e.stopPropagation()
+                              }}
+                              key={tag.id}
+                              href={`/catalogue/${tag.slug}`}
+                              className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                              Voir
+                            </Link>
                           </div>
                           <div className="flex-none">
                             {tagCounts.selectedCounts[tag.name] || 0} /{" "}
@@ -1675,13 +1685,49 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                             style={{ margin: "5px" }}
                             onClick={() => handleTagClick(tag)}
                           >
-                            <div className="flex items-center justify-between flex-wrap py-2 px-4">
-                              <div className="flex-wrap text-center">{tag}</div>
-                              <div className="flex-none">
-                                {tagCounts.selectedCounts[tag] || 0} /{" "}
-                                {tagCounts.counts[tag] || 0}
-                              </div>
-                            </div>
+                       <div className="flex items-center justify-between flex-wrap py-2 px-4">
+  <div className="flex text-left">{tag}</div>
+  <div className="flex items-center">
+    <Link
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+      key={allMyTags.find((t) => t.name === tag)?.id}
+      href={`/catalogue/${allMyTags.find((t) => t.name === tag)?.slug}`}
+      className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+    >
+      Voir
+    </Link>
+    <Button
+      title="Ajouter ce tag à la sélection"
+      disabled={selectedPhotoIds.length === 0}
+      onClick={(e) => {
+        e.stopPropagation();
+        updateTagInBulk(true, tag);
+      }}
+      key={`${tag}-add`}
+      className="ml-2 bg-green-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+    >
+      +
+    </Button>
+    <Button
+      title="Supprimer ce tag de la sélection"
+      disabled={selectedPhotoIds.length === 0}
+      onClick={(e) => {
+        e.stopPropagation();
+        updateTagInBulk(false, tag);
+      }}
+      key={`${tag}-remove`}
+      className="ml-2 bg-red-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+    >
+      -
+    </Button>
+    <div className="flex-none ml-4">
+      {tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}
+    </div>
+  </div>
+</div>
+
                           </button>
                           <input
                             type="checkbox"
@@ -2034,7 +2080,19 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                       onClick={() => handleTagClick(tag.name)}
                     >
                       <div className="flex items-center justify-between flex-wrap py-2 px-4">
-                        <div className="flex-wrap text-center">{tag.name}</div>
+                        <div className="flex-wrap text-center">{tag.name}
+                          <Link
+                            onClick={(e) => {
+                              e.stopPropagation()
+                            }}
+                            key={tag.id}
+                            href={`/catalogue/${tag.slug}`}
+                            className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                            Voir
+                          </Link>
+
+
+                        </div>
                       </div>
                     </button>
                     <input
@@ -2133,12 +2191,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             {/* Add the ChangeOrderButton here */}
 
             {/* Browser navigation buttons */}
-             {/* Use the new NavigationButtons component */}
-             <NavigationButtons
-              
+            {/* Use the new NavigationButtons component */}
+            <NavigationButtons
+
             />
 
-            
+
 
             <Link
               className={`rounded-md 
