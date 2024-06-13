@@ -33,20 +33,22 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Eye, Star, Htag, Heart, Trash, Upload } from "./icons";
 import EditableButton from "./buttons/EditableButton";
+import NavigationButtons from "./buttons/NavigationButtons"
 
 import { useSelector } from "react-redux";
 
 import myFetch from "../../components/myFetch";
 import ChangeOrderButton from "./ChangeOrderButton";
+import { Button } from "@mantine/core";
 
-const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPerPage={photosPerPage} ,queryCurrentPage={currentPage} }) => {
+const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPerPage = { photosPerPage }, queryCurrentPage = { currentPage } }) => {
   const { data: session } = useSession();
   // const [cookies, setCookie] = useCookies(['hideDragAlert']);
 
 
- 
 
-  
+
+
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
   const [publishedPhotos, setPublishedPhotos] = useState([]);
@@ -66,7 +68,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   const [showFavoriteModal, setShowFavoriteModal] = useState(false);
   const [modalContent, setModalContent] = useState("");
   const [showTagCrudModal, setShowTagCrudModal] = useState(false);
-  const [showDragAlertModal, setShowDragAlertModal] =useState(false);
+  const [showDragAlertModal, setShowDragAlertModal] = useState(false);
   const isVisible = useSelector((state) => state.visible.isVisible);
   const isShowAdmin = useSelector((state) => state.showAdmin.isShowAdmin);
   const isReadOnly = !session || session.user.role !== "admin";
@@ -80,7 +82,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   const [tagAction, setTagAction] = useState("");
   const [newTagName, setNewTagName] = useState("");
   const [unusedTags, setUnusedTags] = useState([]);
-  
+
   const [recentPhotos, setRecentPhotos] = useState(new Set());
 
   const [isUploading, setIsUploading] = useState(false);
@@ -102,50 +104,52 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
   const [doNotShowAgain, setDoNotShowAgain] = useState(false);
 
-   // Utilisation de la fonction de navigation
+  // Utilisation de la fonction de navigation
 
-   const router = useRouter();
+  const router = useRouter();
 
 
-const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 50); // Valeur par défaut
-const [currentPage, setCurrentPage] = useState(parseInt(queryCurrentPage) || 1); // Valeur par défaut
+  const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 50); // Valeur par défaut
+  const [currentPage, setCurrentPage] = useState(parseInt(queryCurrentPage) || 1); // Valeur par défaut
 
-const handleChangePhotosPerPage = (number) => {
-  setPhotosPerPage(number);
-  setCurrentPage(1); // Réinitialiser à la première page
-  router.push({
-    pathname: router.pathname,
-    query: {
-      ...router.query,
-      photosPerPage: number,
-      currentPage: 1
-    }
-  });
-};
 
-const handlePageChange = (newPage) => {
-  setCurrentPage(newPage);
-  router.push({
-    pathname: router.pathname,
-    query: {
-      ...router.query,
-      photosPerPage: photosPerPage,
-      currentPage: newPage
-    }
-  });
-};
 
-// Exemple de fonction de navigation
-const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
-router.push({
-  pathname: `/catalogue/${tagSlug}`,
-  query: {
-    photosPerPage: photosPerPage,
-    currentPage: currentPage
-  }
-});
-};
- 
+  const handleChangePhotosPerPage = (number) => {
+    setPhotosPerPage(number);
+    setCurrentPage(1); // Réinitialiser à la première page
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        photosPerPage: number,
+        currentPage: 1
+      }
+    });
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    router.push({
+      pathname: router.pathname,
+      query: {
+        ...router.query,
+        photosPerPage: photosPerPage,
+        currentPage: newPage
+      }
+    });
+  };
+
+  // Exemple de fonction de navigation
+  const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
+    router.push({
+      pathname: `/catalogue/${tagSlug}`,
+      query: {
+        photosPerPage: photosPerPage,
+        currentPage: currentPage
+      }
+    });
+  };
+
   useEffect(() => {
     const hideDragAlert = getCookie('hideDragAlert') === 'true';
     setDoNotShowAgain(hideDragAlert);
@@ -165,7 +169,7 @@ router.push({
     }
     setShowDragAlertModal(false); // Ferme la modal
   };
-  
+
 
   const handleUpdatePhotos = (newPhotos) => {
     setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
@@ -186,11 +190,11 @@ router.push({
     await handleDeleteSelectedPhotos();
   };
 
-  
 
-  
 
- 
+
+
+
 
 
   // const localTag = allMyTags.filter((t) => t.slug === tagSlug);
@@ -343,7 +347,7 @@ router.push({
         usedTags.add(tag.name);
       });
     });
-  
+
     const newUnusedTags = allMyTags
       .filter((tag) => !usedTags.has(tag.name))
       .reduce(
@@ -357,7 +361,7 @@ router.push({
         },
         { mainTags: [], otherTags: [] }
       );
-  
+
     newUnusedTags.mainTags.sort((a, b) => {
       if (a.name && b.name) {
         return a.name.localeCompare(b.name);
@@ -365,7 +369,7 @@ router.push({
         return 0;
       }
     });
-  
+
     newUnusedTags.otherTags.sort((a, b) => {
       if (a.name && b.name) {
         return a.name.localeCompare(b.name);
@@ -373,10 +377,10 @@ router.push({
         return 0;
       }
     });
-  
+
     setUnusedTags([...newUnusedTags.mainTags, ...newUnusedTags.otherTags]);
   }, [allMyTags, photos, isShowAdmin]);
-  
+
 
   const isTagNameExist = (tagName) => {
     return allMyTags.some((tag) => tag.name === tagName);
@@ -720,7 +724,7 @@ router.push({
     updateTagInBulk(addTag, selectedTag);
     setShowTagModal(false);
   };
-  
+
   useEffect(() => {
     const initialTitles = {};
     photos.forEach((photo) => {
@@ -891,11 +895,11 @@ router.push({
 
   const sortedAndFilteredPhotos = useMemo(() => {
     let filteredPhotos = photos;
-  
+
     if (!isAdmin || !isVisible) {
       filteredPhotos = filteredPhotos.filter((photo) => photo.published);
     }
-  
+
     if (searchTerm) {
       const normalizedSearchTerm = normalizeString(searchTerm);
       filteredPhotos = filteredPhotos.filter(
@@ -907,10 +911,10 @@ router.push({
           )
       );
     }
-  
+
     return filteredPhotos; // Remove additional sorting here
   }, [photos, isAdmin, isVisible, searchTerm]);
-  
+
 
   useEffect(() => {
     const initialFavorites = photos.reduce((favoritesSet, photo) => {
@@ -1532,9 +1536,9 @@ router.push({
         const baseURL = photo.url.startsWith('/uploads')
           ? process.env.NEXT_PUBLIC_STRAPI_URL
           : `${site.vpsServer}/images/`;
-      
+
         const imageUrl = `${baseURL}${photo.url}`;
-      
+
         return {
           src: imageUrl,
           width: photo.width,
@@ -1551,12 +1555,12 @@ router.push({
       });
 
 
-     
 
-      console.log("newPhotos",newPhotos)
-      setPhotos((prevPhotos) => [...newPhotos,...prevPhotos]);
 
-      console.log(photos.slice(0,3))
+      console.log("newPhotos", newPhotos)
+      setPhotos((prevPhotos) => [...newPhotos, ...prevPhotos]);
+
+      console.log(photos.slice(0, 3))
 
       setImportedFilesCount(selectedFileIds.length); // Update importedFilesCount
 
@@ -1593,8 +1597,8 @@ router.push({
               <button
                 onClick={handleRestoreSelection}
                 className={`rounded-md text-white font-bold py-2 px-4 m-2 ${!lastSelection.length
-                    ? "bg-neutral-200 hover:bg-neutral-200"
-                    : "bg-green-700 hover:bg-green-500 text-black"
+                  ? "bg-neutral-200 hover:bg-neutral-200"
+                  : "bg-green-700 hover:bg-green-500 text-black"
                   }`}
                 disabled={!lastSelection.length}
               >
@@ -1630,6 +1634,15 @@ router.push({
                         <div className="flex items-center justify-between flex-wrap py-2 px-4">
                           <div className="flex-wrap text-center">
                             {tag.name}
+                            <Link
+                              onClick={(e) => {
+                                e.stopPropagation()
+                              }}
+                              key={tag.id}
+                              href={`/catalogue/${tag.slug}`}
+                              className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                              Voir
+                            </Link>
                           </div>
                           <div className="flex-none">
                             {tagCounts.selectedCounts[tag.name] || 0} /{" "}
@@ -1672,13 +1685,49 @@ router.push({
                             style={{ margin: "5px" }}
                             onClick={() => handleTagClick(tag)}
                           >
-                            <div className="flex items-center justify-between flex-wrap py-2 px-4">
-                              <div className="flex-wrap text-center">{tag}</div>
-                              <div className="flex-none">
-                                {tagCounts.selectedCounts[tag] || 0} /{" "}
-                                {tagCounts.counts[tag] || 0}
-                              </div>
-                            </div>
+                       <div className="flex items-center justify-between flex-wrap py-2 px-4">
+  <div className="flex text-left">{tag}</div>
+  <div className="flex items-center">
+    <Link
+      onClick={(e) => {
+        e.stopPropagation();
+      }}
+      key={allMyTags.find((t) => t.name === tag)?.id}
+      href={`/catalogue/${allMyTags.find((t) => t.name === tag)?.slug}`}
+      className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+    >
+      Voir
+    </Link>
+    <Button
+      title="Ajouter ce tag à la sélection"
+      disabled={selectedPhotoIds.length === 0}
+      onClick={(e) => {
+        e.stopPropagation();
+        updateTagInBulk(true, tag);
+      }}
+      key={`${tag}-add`}
+      className="ml-2 bg-green-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+    >
+      +
+    </Button>
+    <Button
+      title="Supprimer ce tag de la sélection"
+      disabled={selectedPhotoIds.length === 0}
+      onClick={(e) => {
+        e.stopPropagation();
+        updateTagInBulk(false, tag);
+      }}
+      key={`${tag}-remove`}
+      className="ml-2 bg-red-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+    >
+      -
+    </Button>
+    <div className="flex-none ml-4">
+      {tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}
+    </div>
+  </div>
+</div>
+
                           </button>
                           <input
                             type="checkbox"
@@ -1720,8 +1769,8 @@ router.push({
 
                     <button
                       className={`bg-gray-500 border-4 rounded-md ${isShowUpload
-                          ? "border-green-500 hover:border-green-700"
-                          : ""
+                        ? "border-green-500 hover:border-green-700"
+                        : ""
                         } text-white font-bold py-2 px-4 m-2`}
                       onClick={() => setIsShowUpload(!isShowUpload)}
                       title={
@@ -1735,8 +1784,8 @@ router.push({
 
                     <button
                       className={`bg-gray-500 border-2 rounded-md ${canDeleteSelection
-                          ? "border-red-500 hover:border-red-700"
-                          : " cursor-not-allowed"
+                        ? "border-red-500 hover:border-red-700"
+                        : " cursor-not-allowed"
                         } text-white font-bold py-2 px-4 m-2`}
                       onClick={
                         canDeleteSelection
@@ -1766,8 +1815,8 @@ router.push({
                       onClick={() => openModal("add")}
                       disabled={!tagName.trim() || isTagNameExist(tagName)}
                       className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName)
-                          ? `bg-green-700`
-                          : `bg-green-500  hover:bg-green-300`
+                        ? `bg-green-700`
+                        : `bg-green-500  hover:bg-green-300`
                         }  text-white font-bold py-2 px-4 m-2`}
                       title={
                         !tagName.trim()
@@ -1811,27 +1860,27 @@ router.push({
                     </button>
                   </div>
                   {showDragAlertModal && (
-        <DragAlertModal isOpen={showDragAlertModal} onClose={handleCloseDragModal} title="TRI MANUEL DES PHOTOS">
-          <p>Le tri manuel des photos est désactivé. Voulez-vous trier les photos manuellement ?</p>
-          <button 
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-            onClick={() => {
-              handleCloseDragModal();
-              router.push(`/catalogueTri/${tagSlug}`);
-            }}
-          >
-            OUI
-          </button>
-          <div className="mt-4">
-            <input
-              type="checkbox"
-              checked={doNotShowAgain}
-              onChange={(e) => setDoNotShowAgain(e.target.checked)}
-            />
-            <label className="ml-2">Ne plus afficher ce message</label>
-          </div>
-        </DragAlertModal>
-      )}
+                    <DragAlertModal isOpen={showDragAlertModal} onClose={handleCloseDragModal} title="TRI MANUEL DES PHOTOS">
+                      <p>Le tri manuel des photos est désactivé. Voulez-vous trier les photos manuellement ?</p>
+                      <button
+                        className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                        onClick={() => {
+                          handleCloseDragModal();
+                          router.push(`/catalogueTri/${tagSlug}`);
+                        }}
+                      >
+                        OUI
+                      </button>
+                      <div className="mt-4">
+                        <input
+                          type="checkbox"
+                          checked={doNotShowAgain}
+                          onChange={(e) => setDoNotShowAgain(e.target.checked)}
+                        />
+                        <label className="ml-2">Ne plus afficher ce message</label>
+                      </div>
+                    </DragAlertModal>
+                  )}
                   <TagCrudModal
                     isOpen={showTagCrudModal}
                     onClose={() => setShowTagCrudModal(false)}
@@ -2031,7 +2080,19 @@ router.push({
                       onClick={() => handleTagClick(tag.name)}
                     >
                       <div className="flex items-center justify-between flex-wrap py-2 px-4">
-                        <div className="flex-wrap text-center">{tag.name}</div>
+                        <div className="flex-wrap text-center">{tag.name}
+                          <Link
+                            onClick={(e) => {
+                              e.stopPropagation()
+                            }}
+                            key={tag.id}
+                            href={`/catalogue/${tag.slug}`}
+                            className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                            Voir
+                          </Link>
+
+
+                        </div>
                       </div>
                     </button>
                     <input
@@ -2071,6 +2132,15 @@ router.push({
                           <div className="flex items-center justify-between flex-wrap py-2 px-4">
                             <div className="flex-wrap text-center">
                               {tag.name}
+                              <Link
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                }}
+                                key={tag.id}
+                                href={`/catalogue/${tag.slug}`}
+                                className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                                Voir
+                              </Link>
                             </div>
                           </div>
                         </button>
@@ -2104,7 +2174,7 @@ router.push({
             />
           </div>
           {isAdmin && isShowAdmin && isShowUpload && (
-            
+
             <div>
               <UploadImageComponent
                 handleImportedFiles={handleImportedFiles}
@@ -2118,16 +2188,26 @@ router.push({
             </div>
           )}
           <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
-             {/* Add the ChangeOrderButton here */}
-             <Link 
-             className={`rounded-md 
+            {/* Add the ChangeOrderButton here */}
+
+            {/* Browser navigation buttons */}
+            {/* Use the new NavigationButtons component */}
+            <NavigationButtons
+
+            />
+
+
+
+            <Link
+              className={`rounded-md 
                bg-green-500  hover:bg-green-300
              text-white font-bold py-2 px-4 m-2`}
-             href={`/catalogueTri/${tagSlug}?photosPerPage=${photosPerPage}&currentPage=${currentPage}`}>
-            TRIER 
+              href={`/catalogueTri/${tagSlug}?photosPerPage=${photosPerPage}&currentPage=${currentPage}`}>
+              TRIER
             </Link>
-             {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID */}
-             {/* <button
+
+            {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID */}
+            {/* <button
                       onClick={() => openModal("add")}
                       disabled={!tagName.trim() || isTagNameExist(tagName)}
                       className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName)
@@ -2148,8 +2228,8 @@ router.push({
 
             <button
               className={`p-2 rounded-sm ${currentPage === 1
-                  ? "bg-neutral-500 text-neutral-700"
-                  : "bg-neutral-700 text-white"
+                ? "bg-neutral-500 text-neutral-700"
+                : "bg-neutral-700 text-white"
                 }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
@@ -2215,9 +2295,9 @@ router.push({
 
               return (
                 <>
-                 
+
                   <div
-                    
+
                     key={photo.id}
                     onClick={(e) => handlePhotoClick(e, photo.id)}
                     onDragStart={handleDragStart} // Ajoutez le gestionnaire onDragStart ici
@@ -2229,38 +2309,38 @@ router.push({
                       maxWidth: "33.33%",
                     }}
                     className="mb-4"
-                    
+
                     title={photo.src}
                   >
                     {zoomGallery >= 200 && (
                       <>
-                      <EditableButton
-                        text={titles[photo.id] || ""}
-                        onChange={(e) => {
-                          const newTitles = {
-                            ...titles,
-                            [photo.id]: e.target.value,
-                          };
-                          setTitles(newTitles);
-                        }}
-                        onBlur={() =>
-                          updatePhotoTitle(photo.id, titles[photo.id])
-                        }
-                        isEditable={!isReadOnly}
-                        inputRef={inputRef}
-                      />
-                      {!titles[photo.id] && (
-                        <>
-                          <s
-                           className="text-white bg-transparent text-center w-full absolute -bottom-7">{photo.name}</s>
+                        <EditableButton
+                          text={titles[photo.id] || ""}
+                          onChange={(e) => {
+                            const newTitles = {
+                              ...titles,
+                              [photo.id]: e.target.value,
+                            };
+                            setTitles(newTitles);
+                          }}
+                          onBlur={() =>
+                            updatePhotoTitle(photo.id, titles[photo.id])
+                          }
+                          isEditable={!isReadOnly}
+                          inputRef={inputRef}
+                        />
+                        {!titles[photo.id] && (
+                          <>
+                            <s
+                              className="text-white bg-transparent text-center w-full absolute -bottom-7">{photo.name}</s>
                             <input
                               className="absolute -bottom-7"
                               title="Utiliser le nom comme titre"
                               type="checkbox"
                               onChange={() => handleCheckboxChange(photo.id)}
                             />
-                        </>
-                      )}
+                          </>
+                        )}
                       </>
                     )}
                     {zoomGallery >= 200 && (
@@ -2374,6 +2454,15 @@ router.push({
                                         className="inline-block bg-green-500 m-1 p-1 rounded relative"
                                       >
                                         {tag.name}
+                                        <Link
+                                          onClick={(e) => {
+                                            e.stopPropagation()
+                                          }}
+                                          key={tag.id}
+                                          href={`/catalogue/${tag.slug}`}
+                                          className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                                          Voir
+                                        </Link>
                                         <span
                                           className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
                                           style={{
@@ -2412,19 +2501,31 @@ router.push({
                                               )
                                           )
                                           .map((tag) => (
-                                            <span
-                                              key={tag.id}
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleTagClickForPhoto(
-                                                  photo.id,
-                                                  tag.name
-                                                );
-                                              }}
-                                              className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
-                                            >
-                                              {tag.name}
-                                            </span>
+                                            <>
+                                              <span
+                                                key={tag.id}
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  handleTagClickForPhoto(
+                                                    photo.id,
+                                                    tag.name
+                                                  );
+                                                }}
+                                                className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                                              >
+                                                {tag.name}
+                                                <Link
+                                                  onClick={(e) => {
+                                                    e.stopPropagation()
+                                                  }}
+                                                  key={tag.id}
+                                                  href={`/catalogue/${tag.slug}`}
+                                                  className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                                                  Voir
+                                                </Link>
+                                              </span>
+
+                                            </>
                                           ))}
                                       </div>
                                     )}
@@ -2489,8 +2590,8 @@ router.push({
           <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
               className={`p-2 rounded-sm ${currentPage === 1
-                  ? "bg-neutral-500 text-neutral-700"
-                  : "bg-neutral-700 text-white"
+                ? "bg-neutral-500 text-neutral-700"
+                : "bg-neutral-700 text-white"
                 }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
