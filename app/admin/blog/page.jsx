@@ -21,7 +21,7 @@ async function Page () {
 
       {/* Liste des citations */}
       <div className="container mx-auto my-8 p-4 shadow-lg rounded">
-          <ListPosts allPosts={allPosts} allComments={allComments} allFiles={allFiles}/>
+          <ListPosts allPosts={allPosts.slice().reverse()} allComments={allComments} allFiles={allFiles}/>
       </div>
     </>
   );

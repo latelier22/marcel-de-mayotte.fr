@@ -103,7 +103,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             }
         };
         try {
-            await myFetch(`/api/posts/${selectedPost.id}`, 'PUT', payload);
+            await myFetch(`/api/posts/${selectedPost.id}`, 'PUT', payload, 'article blog');
             // Faire une nouvelle requête pour récupérer le post mis à jour avec les médias peuplés
             const response = await myFetch(`/api/posts/${selectedPost.id}?populate=*`, 'GET');
             const updatedPost = { id: response.data.id, ...response.data.attributes };
@@ -147,7 +147,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             }
         };
         try {
-            const response = await myFetch('/api/posts', 'POST', payload);
+            const response = await myFetch('/api/posts', 'POST', payload, 'article blog');
             const newPostId = response.data.id;
     
             // Faire une nouvelle requête pour récupérer le post créé avec les médias peuplés
