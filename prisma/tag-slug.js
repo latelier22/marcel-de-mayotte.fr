@@ -23,7 +23,6 @@ async function getTags() {
     });
 
     // Afficher les trois premiers slugs dans la console
-    console.log(tagsArray.map(tag => tag.slug).slice(0, 3));
 
     return tagsArray;
   } catch (error) {

@@ -1,21 +1,26 @@
-/* @import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&display=swap"); */
-/* @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap'); */
-
 @tailwind base;
 
 @layer base {
-  
   html {
-    /* @apply text-[#4f4f4f]; */
-    
-    @apply bg-white;
-    @apply flex-col;
+    @apply bg-white flex-col;
   }
   html.dark {
-    @apply text-neutral-50;
-    @apply bg-neutral-800;
+    @apply text-neutral-50 bg-neutral-800;
   }
 }
 
 @tailwind components;
+
+/* 
+@layer components {
+  .cms-content > p {
+    @apply mt-8}
+
+    .cms-content > h2 { 
+      @apply text-red-500 text-3xl mb-12
+  }
+    
+} */
+
+
 @tailwind utilities;

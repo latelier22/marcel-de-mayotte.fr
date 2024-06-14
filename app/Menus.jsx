@@ -11,7 +11,7 @@ const Menu = () => {
 
     const router = useRouter();
 
-    // console.log(session, "isVisible=", isVisible, "isAdmin", isAdmin)
+
 
     useEffect(() => {
         const init = async () => {

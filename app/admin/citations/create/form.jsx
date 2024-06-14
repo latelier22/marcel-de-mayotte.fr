@@ -33,7 +33,7 @@ export default function CitationForm() {
       );
 
       const data = await response.json();
-      console.log(data.message, "lors de l'ajout de la citation", data.content)
+      
       if (data.message === "success") {
         router.push('/admin/citations')
       } else {

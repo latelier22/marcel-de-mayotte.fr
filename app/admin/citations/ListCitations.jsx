@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useRef, useEffect } from 'react';
-import myFetch from '../../components/myFech';
+import myFetch from '../../components/myFetch';
 
 function ListCitations({ allCitations }) {
     const [citations, setCitations] = useState(allCitations);
@@ -12,8 +12,6 @@ function ListCitations({ allCitations }) {
     const containerRef = useRef(null);
     const [creatingNew, setCreatingNew] = useState(false);
     const [lastModifiedCitationId, setLastModifiedCitationId] = useState(null);
-
-    console.log(allCitations);
 
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -79,8 +77,6 @@ function ListCitations({ allCitations }) {
                 ...response.data.attributes
             };
     
-            console.log("UPDATED CITATION", updatedCitation);
-    
             // Update the list of citations
             const updatedCitations = citations.map(citation =>
                 citation.id === updatedCitation.id ? { ...citation, ...editFormData } : citation
@@ -97,7 +93,7 @@ function ListCitations({ allCitations }) {
     };
     
     const handleAddChild = (parentCitation) => {
-        console.log("reset");
+        
         setNewChildData({ texte: '', auteur: '', etat: 'brouillon', parentCitationId: parentCitation.id });
     };
 
@@ -122,7 +118,7 @@ function ListCitations({ allCitations }) {
                 ...response.data.attributes
             }
 
-            console.log("ADDED NEW CHILD CITATION", addedCitation);
+           
 
             let newCitations = [...citations];
             // Find the last child of this parent to insert the new child after
@@ -199,10 +195,6 @@ function ListCitations({ allCitations }) {
     
         try {
             const response = await myFetch(`/api/citations/${selectedCitation.id}`, 'DELETE', null, 'citations');
-            console.log(response);
-    
-            console.log(`citation ${selectedCitation.id} deleted successfully`);
-    
             const updatedCitations = citations.filter(c => c.id !== selectedCitation.id);
             setCitations(updatedCitations);
             setSelectedCitation(null);
@@ -226,7 +218,6 @@ function ListCitations({ allCitations }) {
             data: editFormData // Assuming editFormData already contains { texte, auteur, etat }
         };
     
-        console.log("Sending payload:", payload);
     
         try {
             const response = await myFetch('/api/citations', 'POST', payload, 'citation');

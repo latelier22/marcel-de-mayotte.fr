@@ -1,4 +1,4 @@
-import myFetch from "./myFech";
+import myFetch from "./myFetch";
 
 
 async function fetchFiles () {
@@ -7,16 +7,9 @@ async function fetchFiles () {
 
 
         const strapiFiles = response;
-        // console.log("FROM FETCHFILES strapifiles", strapiFiles);
-
-        // const files = strapiFiles.map(f => ({
-        //     id: f.id,
-        //     ...f.attributes
-        // }));
-
+     
         const files = strapiFiles;
-        
-        // console.log(files);
+       
 
     return files
 

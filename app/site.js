@@ -32,7 +32,7 @@ export const menuItems = [
   { label: "Livres", route: "/livre" },
   { label: "Vidéos", route: "/video" },
 
-  { label: "Blog", route: "https://liberteegalitemagnegne.fr/" },
+  { label: "Blog", route: "/blog" },
   { label: "Contact", route: "/contact" },
 ];
 
@@ -165,7 +165,7 @@ export const Pages = {
         text: "En cours d'écriture",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/livre/5",
+        link: "/blog/41",
         url: "livre-5.png",
         alt: "Mémoires de Marcel Séjour",
         nbPages :"18",
@@ -253,7 +253,7 @@ export const Pages = {
         text: "15min",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/video/1",
+        link: "/videos/1",
         url: "video-1.png",
         alt: "Interview de Marcel Séjour",
       },
@@ -262,7 +262,7 @@ export const Pages = {
         text: "2min41",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/video/2",
+        link: "/videos/2",
         url: "video-2.png",
         alt: "Des élèves du lycée de Mamoudzou Nord rencontrent le peintre Marcel Séjour",
       },
@@ -271,7 +271,7 @@ export const Pages = {
         text: "2min15",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/video/3",
+        link: "/videos/3",
         url: "video-3.png",
         alt: "Marcel Séjour, artiste peintre, nous parle de sa dernière création. Mayotte, le 20 octobre",
       },
@@ -280,7 +280,7 @@ export const Pages = {
         text: "1m29",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/video/4",
+        link: "/videos/4",
         url: "video-4.png",
         alt: "Art_ Lancement de la marque Marcel Séjour.",
       },
@@ -289,7 +289,7 @@ export const Pages = {
         text: "1m29",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/video/5",
+        link: "/videos/5",
         url: "video-5.png",
         alt: "Confinement",
       },
@@ -298,7 +298,7 @@ export const Pages = {
         text: "1m29 - Mayotte Première - 08/11/2017",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/video/6",
+        link: "/videos/6",
         url: "video-6.png",
         alt: "Art_ Lancement de la marque Marcel Séjour.",
       },
@@ -307,7 +307,7 @@ export const Pages = {
         text: "3m06 - LTOM - 16/03/2020",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/video/7",
+        link: "/videos/7",
         url: "video-7.png",
         alt: "La peinture de Marcel Séjour",
       },
@@ -316,7 +316,103 @@ export const Pages = {
         text: "3m06 - Réunion la 1èere - 30/11/2017",
         button: "",
         buttonColor: "bg-gold-500",
-        link: "/video/8",
+        link: "/videos/8",
+        url: "video-8.png",
+        alt: "Le peintre mahorais, Marcel Sejour, sort un livre sur ses 25 ans de peinture (liberté, égalité, magnégné)",
+      }, 
+    ]
+  },
+  tutos: {
+    title: "Tutos",
+    description: "Vidéos tutoriels utilisation du site",
+    photos: [
+      { url: "livre-1.png", alt: "Livre épuisé" },
+      { url: "livre-2.png", alt: "Liberté, Egalité, Magnégné: beau livre d'art" },
+      { url: "livre-3.png", alt: "Mayotte, livret 64 pages, carré" },
+      { url: "livre-4.png", alt: "Une île, deux regards - Marcel Séjour & Nicolas FRAISSE" },
+    ],
+    sections: [
+      {
+        title: "",
+        body: (
+          <ul className="list-disc text-gold-400 pl-4">
+            <li>  </li>
+            <li>  </li>
+            <li>  </li>
+          </ul>
+        ),
+      },
+    ],
+    cards: [
+      {
+        title: "Interview dans son atelier de Marcel Séjour",
+        text: "15min",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/videos/1",
+        url: "video-1.png",
+        alt: "Interview de Marcel Séjour",
+      },
+      {
+        title: "Des élèves du lycée de Mamoudzou Nord rencontrent le peintre Marcel Séjour",
+        text: "2min41",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/videos/2",
+        url: "video-2.png",
+        alt: "Des élèves du lycée de Mamoudzou Nord rencontrent le peintre Marcel Séjour",
+      },
+      {
+        title: "Marcel Séjour, artiste peintre, nous parle de sa dernière création. Mayotte, le 20 octobre",
+        text: "2min15",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/videos/3",
+        url: "video-3.png",
+        alt: "Marcel Séjour, artiste peintre, nous parle de sa dernière création. Mayotte, le 20 octobre",
+      },
+      {
+        title: "Art_ Lancement de la marque Marcel Séjour.",
+        text: "1m29",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/videos/4",
+        url: "video-4.png",
+        alt: "Art_ Lancement de la marque Marcel Séjour.",
+      },
+      {
+        title: "Le confinement de Marcel Séjour.",
+        text: "1m29",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/videos/5",
+        url: "video-5.png",
+        alt: "Confinement",
+      },
+      {
+        title: "Emission TV Place publique",
+        text: "1m29 - Mayotte Première - 08/11/2017",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/videos/6",
+        url: "video-6.png",
+        alt: "Art_ Lancement de la marque Marcel Séjour.",
+      },
+      {
+        title: "Emission Témoins d'outre-mer: La peinture de Marcel Séjour",
+        text: "3m06 - LTOM - 16/03/2020",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/videos/7",
+        url: "video-7.png",
+        alt: "La peinture de Marcel Séjour",
+      },
+      {
+        title: "CULTURE 1ère avec Melade Jean Paul et ses invités : Le peintre mahorais, Marcel Sejour, sort un livre sur ses 25 ans de peinture (liberté, égalité, magnégné)",
+        text: "3m06 - Réunion la 1èere - 30/11/2017",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/videos/8",
         url: "video-8.png",
         alt: "Le peintre mahorais, Marcel Sejour, sort un livre sur ses 25 ans de peinture (liberté, égalité, magnégné)",
       },
@@ -326,6 +422,7 @@ export const Pages = {
       
     ]
   },
+  
   blog: {
     title: "Blog",
     description: "Les articles des différents blog de Marcel Séjour",

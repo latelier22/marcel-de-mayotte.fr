@@ -1,18 +1,21 @@
-// app/api/toggleRecentPhotos/route.ts
 import { NextResponse } from 'next/server';
 import prisma from "../../../prisma/prisma"
 
-export async function GET() {
-  // const { photoId, toggleRecent } = await request.json();
+export const dynamic = 'force-dynamic'
 
+export async function GET() {
   try {
-    // Récupérer la photo avec l'ID spécifié
-    const allTags = await prisma.tag.findMany();
+    // Fetch all tags with their childTags and parentTag relations
+    const allTags = await prisma.tag.findMany({
+      include: {
+        childTags: true,
+        parentTag: true,
+      },
+    });
 
     if (!allTags) {
-      throw new Error('Tag not found');
+      throw new Error('Tags not found');
     }
-
 
     return NextResponse.json(allTags);
   } catch (error) {

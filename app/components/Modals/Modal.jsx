@@ -10,7 +10,7 @@ const Modal = ({ isOpen, onClose, title, textClose="Fermer", children }) => {
                 <div className=" flex flex-col justify-around">
                 {children}
                 </div>
-                <button className='bg-orange-700 rounded-md p-2 m-4 items-end' onClick={onClose}>{textClose}</button>
+                <button className='bg-green-500 rounded-md p-2 m-4 items-end' onClick={onClose}>{textClose}</button>
             </div>
             <style jsx>{`
                 .modal-overlay {

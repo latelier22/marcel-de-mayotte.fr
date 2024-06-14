@@ -1,19 +1,22 @@
 
 generator client {
   provider = "prisma-client-js"
+  
 }
 
 datasource db {
   provider = "mysql"
-  url      ="mysql://root:Bigtoon221274@localhost:3306/catalogue4"
+  
+  url      = "mysql://root:Bigtoon221274@localhost:3306/catalogue4"
+  
 }
 
 model Photo {
   id          Int         @id @default(autoincrement())
-  numero      BigInt         // numéro dans le catalogue - CAT
+  numero      Int         @default(0) // numéro dans le catalogue - CAT
   dimensions  String?     // Les dimensions de la photo - DIM
   createdAt   DateTime    @default(now())
-  tags        Tag[]       // Relation many-to-many avec la table des tags - TAG
+  tags        Tag[]       
   url         String      // L'url de la photo
   name        String      // Nom original du fichier image - IMG
   height      Int         @default(0)
@@ -30,11 +33,12 @@ model Tag {
   id         Int      @id @default(autoincrement())
   name       String   @unique
   photos     Photo[]  // Relation many-to-many avec la table des photos
-  slug       String
+  slug       String   @unique
   mainTag    Boolean  @default(false)
   parentTag  Tag?     @relation("ChildTags", fields: [parentId], references: [id])
   parentId   Int?     @map("parent_id")
   childTags  Tag[]    @relation("ChildTags")
+  
 }
 
 model User {

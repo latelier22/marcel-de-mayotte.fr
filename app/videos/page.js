@@ -1,6 +1,5 @@
 import Navbar from "../NavBar";
 import Footer from "../Footer";
-import RootLayout from "../layout";
 import Cards from "../Cards";
 import HeaderSimple from "../headerSimple";
 import { Pages, site } from "../site";
@@ -13,7 +12,7 @@ const Page = () => {
   const pageTitle = page.title;
   const pageDescription = page.description;
   return (
-    <RootLayout pageTitle={pageTitle} pageDescription={pageDescription}>
+   <>
       <Navbar />
       <HeaderSimple  siteTitle ={site.title} title={pageTitle}/>
 
@@ -22,7 +21,7 @@ const Page = () => {
 
 
       <Footer />
-    </RootLayout>
+      </>
   );
 };
 

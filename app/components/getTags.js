@@ -6,14 +6,15 @@ async function getTags() {
     let allTags = await prisma.tag.findMany({
 
       include: {
+        
         photos: true // Inclure les photos associées à chaque tag
       }
       
     });
 
 
-    const tagsArray = allTags.map ((tag) => {
-      const { name, slug, photos } = tag;
+    const tagsArray = allTags.map((tag) => {
+      const { id, name, slug, photos, mainTag, parentId } = tag;
       const count = photos.length; // Compter le nombre de photos associées à ce tag
       let url = null;
       if (photos.length > 0) {
@@ -22,13 +23,18 @@ async function getTags() {
         url = photos[randomIndex].url; // URL de la photo aléatoire
       }
       return {
+        id,
         name,
         slug,
+        mainTag,
+        parentId,
         count,
         url: url, // Remplacer par l'URL de la photo aléatoire associée à ce tag
-        mainTag: false // Remplacer par true/false en fonction de la logique de votre application
-      };h
-    })
+      };
+    });
+
+    // Trier les tags par ordre alphabétique basé sur le nom
+    tagsArray.sort((a, b) => a.name.localeCompare(b.name));
 
     return tagsArray;
   } catch (error) {

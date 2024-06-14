@@ -13,9 +13,6 @@ function FlipBook( {livre, nbPages,bookWidth,bookHeight}) {
     // Récupérer les images du flip book depuis le dossier public/flipbook
     const images = [...Array(nbPages+1).keys()].map(index => `/livres/livre-${livre}/image_${index}.png`);
 
-    console.log ( nbPages,bookWidth,bookHeight)
-    // console.log(images)
-
     return (
         <header>
             <div className="container flex flex-roww mx-auto mt-16 md:py-8 md:px-12 lg:px-20 lg:py-12 animate-appear rounded-3xl bg-black">
