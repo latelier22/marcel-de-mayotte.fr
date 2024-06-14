@@ -24,12 +24,12 @@ async function Page  () {
     <main>
      <Navbar />
       <div className="pt-64">
-        <TitleLine title="GESTION DU BLOG" />
+        <TitleLine title="DERNIERS ARTICLES DU BLOG" />
       </div>
 
       {/* Liste des citations */}
       <div className="container mx-auto my-8 p-4 shadow-lg rounded">
-          <ListPosts allPosts={allPosts.filter((p) => p.etat ==="publiée")} />
+          <ListPosts allPosts={allPosts.slice().reverse().filter((p) => p.etat ==="publiée")} />
       </div>
 
       <Footer />

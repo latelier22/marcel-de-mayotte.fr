@@ -1,11 +1,15 @@
-"use client";
+"use client"
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import myFetch from '../../components/myFetch';
 import EditorClient from './EditorClient'; // Ensure you import your editor correctly
 import Image from 'next/image';
+import Link from 'next/link';
 import getBaseUrl from '../../components/getBaseUrl';
 import Select from 'react-select';
+import UploadFileToPost from './UploadFileToPost'; // Import the new component
+import getSlug from "../../components/getSlug"
 
 function ListPosts({ allPosts, allComments, allFiles }) {
     const [posts, setPosts] = useState([]);
@@ -23,6 +27,9 @@ function ListPosts({ allPosts, allComments, allFiles }) {
     const [images, setImages] = useState(allFiles);
     const [selectedImageUrl, setSelectedImageUrl] = useState('');
 
+    const { data: session } = useSession();
+
+
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
@@ -33,6 +40,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
     useEffect(() => {
         const initialPosts = groupPosts(allPosts, allComments);
         setPosts(initialPosts);
+        console.log(initialPosts)
     }, [allComments, allPosts]);
 
     const groupPosts = (posts, comments) => {
@@ -44,7 +52,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
     };
 
     const generateSlug = (title) => {
-        return title
+        return getSlug(title)
             .toLowerCase()
             .replace(/[^a-z0-9 -]/g, '') // Remove invalid characters
             .replace(/\s+/g, '-') // Replace spaces with -
@@ -324,9 +332,10 @@ function ListPosts({ allPosts, allComments, allFiles }) {
         } else if (post === selectedPost || post.id === lastModifiedPostId) {
             return (
                 <div className="flex space-x-2">
+                    <Link className="bg-green-500 text-white px-4 py-2 rounded" href={`/blog/${generateSlug(post.title)}`}>Lire</Link>
                     <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleEditPost}>Edit</button>
                     <button className={`text-white px-4 py-2 rounded ${hasComments ? 'bg-neutral-600' : 'bg-red-500'}`} onClick={() => handleDeletePost(post.id)} disabled={hasComments}>Delete</button>
-                    <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={() => handleAddComment(post)}>Add Comment</button>
+                    <button className="bg-orange-500 text-white px-4 py-2 rounded" onClick={() => handleAddComment(post)}>Add Comment</button>
                     {hasComments && (
                         <button className="bg-yellow-500 text-white px-4 py-2 rounded" onClick={() => toggleComments(post.id)}>
                             {showComments[post.id] ? 'Hide comments' : 'Show comments'}
@@ -362,7 +371,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
         );
     };
 
-    const imageOptions = images.map(image => {
+    const imageOptions = images.slice().reverse().map(image => {
         const baseUrl = getBaseUrl(image.url);
         const thumbnailUrl = image.formats && image.formats.thumbnail ? `${baseUrl}${image.formats.thumbnail.url}` : `${baseUrl}${image.url}`;
         return {
@@ -493,6 +502,10 @@ function ListPosts({ allPosts, allComments, allFiles }) {
         );
     };
 
+    const handleFileUpload = (newFiles) => {
+        setImages((prevImages) => [...prevImages, ...newFiles]);
+    };
+
     return (
         <div ref={containerRef} className="container bg-yellow-100 text-red-900 mx-auto my-8 p-4 shadow-lg rounded">
             {creatingNew ? (
@@ -510,6 +523,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
                         value={imageOptions.find(option => option.value === editFormData.mediaId)}
                         isClearable
                     />
+                    <UploadFileToPost onFileUpload={handleFileUpload} /> {/* Add the component here */}
                     <EditorClient
                         initialContent={editFormData.content}
                         onContentChange={(content) => setEditFormData({ ...editFormData, content })}
@@ -544,9 +558,9 @@ function ListPosts({ allPosts, allComments, allFiles }) {
             ) : (
                 <button onClick={() => {
                     setCreatingNew(true);
-                    setEditFormData({ title: '', content: '', auteur: '', etat: 'brouillon', mediaId: null, slug: '' });
+                    setEditFormData({ title: '', content: '', auteur: session?.user?.email || 'entrer email', etat: 'brouillon', mediaId: null, slug: '' });
                     setSelectedPost(null);
-                }} className="bg-lime-500 px-4 py-2 rounded mb-4">Create New Post</button>
+                }} className="bg-lime-500 px-4 py-2 rounded mb-4">AJOUTER UN ARTICLE</button>
             )}
 
             <div ref={containerRef} className="container bg-yellow-100 text-red-900 mx-auto my-8 p-4 shadow-lg rounded">
