@@ -16,8 +16,7 @@
   .cms-content > p {
     @apply mt-8}
 
-    .cms-content > h2 { 
-      @apply text-red-500 text-3xl mb-12
+  
   }
     
 } */
