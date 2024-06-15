@@ -56,11 +56,13 @@ async function Page({ params }) {
     <main>
       <Navbar />
       <div className="pt-32">
-      {!session && (<AlertLoginRegister />)}
+     
         <TitleLine title={post.title} />
       </div>
 
       <div className="container mx-auto my-8 p-4 shadow-lg rounded-2xl">
+        <div className="flex flex-row items-center gap-12">
+
         {post.imageUrl ? (
           <img
             src={`${baseURL}${post.imageUrl}`}
@@ -72,7 +74,13 @@ async function Page({ params }) {
             <span>No Image Available</span>
           </div>
         )}
-        <div className="p-4 mx-auto w-full prose prose-xl max-w-none bg-neutral-50">
+         {!session && (
+          <div className="h-1/3">
+          <AlertLoginRegister />
+          </div>)}
+
+        </div>
+        <div className="p-4 mx-auto w-full prose prose-xl max-w-none bg-yellow-50">
           <h2 className="text-center my-4">{post.title}</h2>
           <div dangerouslySetInnerHTML={{ __html: post.content }} />
           <p className="text-right">- {post.auteur}</p>
@@ -101,5 +109,6 @@ async function Page({ params }) {
     </main>
   );
 }
+
 
 export default Page;
