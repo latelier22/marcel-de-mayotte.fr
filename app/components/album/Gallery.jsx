@@ -281,7 +281,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const handleSelectAll = () => {
-    const allPhotoIds = photos
+    const allPhotoIds = paginatedPhotos
       .filter((photo) => isVisible || photo.published)
       .map((photo) => photo.id);
     setSelectedPhotoIds(allPhotoIds);
@@ -1586,7 +1586,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                 className="rounded-md  bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
                 onClick={handleSelectAll}
               >
-                Select All ({numberOfPublishedPhotos})
+                Select All ({sortedAndFilteredPhotos.length})
               </button>
               <button
                 className="rounded-md bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 m-2"
