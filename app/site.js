@@ -3,7 +3,7 @@ import { Vesper_Libre } from "next/font/google";
 //STRAPI SINGLE : site
 export const site = {
   title: "Liberté Egalité Magnégné",
-  description: "Artiste peintre de Mayotte - Marcel Séjour - 0639676875",
+  description: "Artiste peintre de Mayotte - Marcel Séjour - contact@marcel-de-mayotte.fr",
   societe: "Association",
   SIRET: "",
   contact: "Marcel SEJOUR",
