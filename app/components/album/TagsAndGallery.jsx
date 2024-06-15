@@ -25,33 +25,24 @@ const TagsAndGallery = ({ params, photos, allTags, progressionsTags, listeTags, 
         setShowTags(!showTags);
     };
 
-    // Use effect to hide tags on initial render for small screens
-    useEffect(() => {
-        if (window.innerWidth < 768) {
-            setShowTags(false);
-        }
-    }, []);
-
     return (
         <div className="flex flex-col md:grid md:grid-cols-12 md:justify-center items-start" style={{ scrollbarWidth: "thin", scrollbarColor: "brown black" }}>
             {isReadOnly && (
                 <div className="w-full md:col-span-2 md:pt-16 text-white bg-yellow-200 top-0 md:h-screen md:max-h-full overflow-y-auto">
                     <button
-                        className="md:hidden w-full bg-yellow-500 text-black p-2 flex justify-between items-center"
+                        className="md:hidden w-full bg-yellow-500 text-black p-2 flex justify-center items-center"
                         onClick={handleToggleTags}
                     >
                         <span>Voir les catégories</span>
                         <span>{showTags ? '▲' : '▼'}</span>
                     </button>
-                    {(showTags || window.innerWidth >= 768) && (
-                        <div className={`mt-4 md:mt-0 ${showTags ? 'block' : 'hidden md:block'}`}>
-                            {tagSlug.startsWith("progression") ? (
-                                <Tags className="text-center" tags={progressionsTags} />
-                            ) : (
-                                <Tags className="text-center" tags={listeTags} />
-                            )}
-                        </div>
-                    )}
+                    <div className={`mt-4 md:mt-0 ${showTags ? 'block' : 'hidden md:block'}`}>
+                        {tagSlug.startsWith("progression") ? (
+                            <Tags className="text-center" tags={progressionsTags} />
+                        ) : (
+                            <Tags className="text-center" tags={listeTags} />
+                        )}
+                    </div>
                 </div>
             )}
             <div className={`${isShowAdmin && isAdmin ? "col-span-12" : "w-full md:col-span-10"} z-1 mt-4 md:mt-28`}>

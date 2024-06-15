@@ -31,7 +31,7 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Eye, Star, Htag, Heart, Trash, Upload } from "./icons";
+import { Eye, Star, Htag, Heart, Trash, Upload ,ZoomIn, ZoomOut} from "./icons";
 import EditableButton from "./buttons/EditableButton";
 import NavigationButtons from "./buttons/NavigationButtons"
 
@@ -2166,7 +2166,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         >
           <div className="left-12 top-2 w-full">
             <input
-              className="text-black w-full text-bold text-2xl text-center"
+              className="text-black w-full text-bold text-md md:text-2xl text-center"
               type="textarea"
               placeholder="Recherche par mot (titre, nom d'image, tag...)"
               value={searchTerm}
@@ -2187,7 +2187,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
               {/* Le reste du composant Gallery */}
             </div>
           )}
-          <div className="flex flex-row justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
+          <div className="flex flex-wrap justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
             {/* Add the ChangeOrderButton here */}
 
             {/* Browser navigation buttons */}
@@ -2208,7 +2208,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             </Link>
 
             )}
-           
+           <div>
+
             <button
               className={`p-2 rounded-sm ${currentPage === 1
                 ? "bg-neutral-500 text-neutral-700"
@@ -2222,8 +2223,16 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             <span>
               Page {currentPage} / {totalPages}
             </span>
+            <button
+              className="p-2 rounded-sm bg-neutral-700 text-white"
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Page Suivante
+            </button>
+           </div>
             <span>
-              <label className="mr-2 text-white">Photos per page:</label>
+              <label className="mr-2 text-white">Photos par page:</label>
               <select
                 className="p-1 text-xl font-bold text-black bg-white"
                 onChange={(e) => changePhotosPerPage(Number(e.target.value))}
@@ -2240,22 +2249,15 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             </span>
             <button
               className="p-2 rounded-sm bg-neutral-700 text-white"
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages}
-            >
-              Page Suivante
-            </button>
-            <button
-              className="p-2 rounded-sm bg-neutral-700 text-white"
               onClick={() => setZoomGallery(zoomGallery + 50)}
             >
-              ZOOM IN
+              <ZoomIn/>
             </button>
             <button
               className="p-2 rounded-sm bg-neutral-700 text-white"
               onClick={() => setZoomGallery(zoomGallery - 50)}
             >
-              ZOOM OUT
+              <ZoomIn/>
             </button>
           </div>
 
