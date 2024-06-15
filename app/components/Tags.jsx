@@ -9,7 +9,7 @@ const Tags = ({ tags, slug }) => {
   const otherTags = filteredTags.filter(tag => tag.slug !== "tableaux-recents");
 
   return (
-    <div className="grid grid-cols-1 gap-4 mt-8">
+    <div className="grid grid-cols-1 md:gap-4 mt-8">
       <h2 className="col-span-1 mb-4 text-xl font-extrabold text-black">Liste des tags :</h2>
       {/* Afficher le tag "tableaux-recents" en premier */}
       {recentTag && (
