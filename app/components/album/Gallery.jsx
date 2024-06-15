@@ -2198,7 +2198,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
 
 
-            <Link
+            {session && (
+              <Link
               className={`rounded-md 
                bg-green-500  hover:bg-green-300
              text-white font-bold py-2 px-4 m-2`}
@@ -2206,26 +2207,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
               TRIER
             </Link>
 
-            {/* <ChangeOrderButton tagId={tagId} photos={photos} /> TAGID */}
-            {/* <button
-                      onClick={() => openModal("add")}
-                      disabled={!tagName.trim() || isTagNameExist(tagName)}
-                      className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName)
-                          ? `bg-green-700`
-                          : `bg-green-500  hover:bg-green-300`
-                        }  text-white font-bold py-2 px-4 m-2`}
-                      title={
-                        !tagName.trim()
-                          ? "Entrez un nom pour un nouveau tag."
-                          : allMyTags.some((tag) => tag.name === tagName)
-                            ? "Ce tag existe déjà!"
-                            : "Ajouter un tag"
-                      }
-                    >
-                      Add Tag
-                    </button> */}
-
-
+            )}
+           
             <button
               className={`p-2 rounded-sm ${currentPage === 1
                 ? "bg-neutral-500 text-neutral-700"
