@@ -8,10 +8,15 @@ import { site } from "site";
 import ListComments from "./ListComments";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { authOptions } from "../../Auth";
+import { getServerSession } from "next-auth";
+import AlertLoginRegister from "../../AlertLoginRegister";
 
 async function Page({ params }) {
   let postId = params.pageSlug;
 
+  const session = await getServerSession(authOptions);
+ 
   // Attempt to fetch the post by slug
   let postBySlug = await fetchPostBySlug(postId);
 
@@ -28,7 +33,8 @@ async function Page({ params }) {
     return (
       <main>
         <Navbar />
-        <div className="pt-64">
+        <div className="pt-32">
+        
           <TitleLine title="Post Not Found" />
         </div>
         <Footer />
@@ -49,7 +55,8 @@ async function Page({ params }) {
   return (
     <main>
       <Navbar />
-      <div className="pt-64">
+      <div className="pt-32">
+      {!session && (<AlertLoginRegister />)}
         <TitleLine title={post.title} />
       </div>
 
@@ -88,6 +95,7 @@ async function Page({ params }) {
       <div className="container mx-auto p-4">
         <ListComments post={post} postComments={comments} />
       </div>
+      {!session && (<AlertLoginRegister />)}
 
       <Footer />
     </main>
