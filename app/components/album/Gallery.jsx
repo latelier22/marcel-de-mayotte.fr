@@ -1613,9 +1613,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                 placeholder="Search tags..."
                 value={tagSearch}
                 onChange={(e) => setTagSearch(e.target.value)}
-                className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
+                className="mb-2 p-1 md:p-2 border text-black border-gray-300 rounded w-full"
               />
-              <div className="p-2 border-white border-2">
+              <div className="p-1 md:p-2 border-white border-2">
                 <h2 className="font-bold text-center my-4">
                   TAGS utilisés dans la page
                 </h2>
@@ -1894,7 +1894,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                     </p>
                     {tagAction === "add" && (
                       <button
-                        className="bg-lime-600 rounded-md p-2 m-4 items-end"
+                        className="bg-lime-600 rounded-md p-1 md:p-2 m-4 items-end"
                         onClick={() => {
                           closeModal();
                           handleAddTag(tagName);
@@ -1906,7 +1906,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
                     {tagAction === "delete" && (
                       <button
-                        className="bg-lime-600 rounded-md p-2 m-4 items-end"
+                        className="bg-lime-600 rounded-md p-1 md:p-2 m-4 items-end"
                         onClick={() => {
                           closeModal();
                           handleDeleteTag(tagName);
@@ -1925,7 +1925,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                           onChange={(e) => setNewTagName(e.target.value)}
                         />
                         <button
-                          className="bg-lime-600 rounded-md p-2 m-4 items-end"
+                          className="bg-lime-600 rounded-md p-1 md:p-2 m-4 items-end"
                           onClick={() => {
                             handleEditTag(tagName, newTagName);
                             closeModal();
@@ -2065,7 +2065,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                   <ToastContainer position="top-center" autoClose={5000} />
                 </div>
               </div>
-              <div className="p-2 my-2 border-black border-2">
+              <div className="p-1 md:p-2 my-2 border-black border-2">
                 <h2 className="font-bold text-center mb-4">
                   TAGS NON utilisés dans la page
                 </h2>
@@ -2211,7 +2211,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
            <div>
 
             <button
-              className={`p-2 rounded-sm ${currentPage === 1
+              className={`p-1 md:p-2 rounded-sm ${currentPage === 1
                 ? "bg-neutral-500 text-neutral-700"
                 : "bg-neutral-700 text-white"
                 }`}
@@ -2224,7 +2224,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
               Page {currentPage} / {totalPages}
             </span>
             <button
-              className="p-2 rounded-sm bg-neutral-700 text-white"
+              className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
             >
@@ -2247,18 +2247,20 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                 </option>
               </select>
             </span>
+            <div>
             <button
-              className="p-2 rounded-sm bg-neutral-700 text-white"
+              className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
               onClick={() => setZoomGallery(zoomGallery + 50)}
             >
               <ZoomIn/>
             </button>
             <button
-              className="p-2 rounded-sm bg-neutral-700 text-white"
+              className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
               onClick={() => setZoomGallery(zoomGallery - 50)}
             >
               <ZoomIn/>
             </button>
+            </div>
           </div>
 
           <PhotoAlbum
@@ -2389,7 +2391,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                                 onChange={(e) =>
                                   setPhotoTagSearch(e.target.value)
                                 }
-                                className="mb-2 p-2 border text-black border-gray-300 rounded w-full"
+                                className="mb-2 p-1 md:p-2 border text-black border-gray-300 rounded w-full"
                               />
                               {photoTagSearch ? (
                                 <div>
@@ -2572,9 +2574,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             }}
           />
           <ToastContainer />
-          <div className="flex flex-row justify-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white">
+          <div className="flex flex-row justify-center gap-8 p-1 md:p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
-              className={`p-2 rounded-sm ${currentPage === 1
+              className={`p-1 md:p-2 rounded-sm ${currentPage === 1
                 ? "bg-neutral-500 text-neutral-700"
                 : "bg-neutral-700 text-white"
                 }`}
@@ -2599,7 +2601,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
               </select>
             </span>
             <button
-              className="p-2 rounded-sm bg-neutral-700 text-white"
+              className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
             >

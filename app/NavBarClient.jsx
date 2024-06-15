@@ -1,4 +1,3 @@
-// app/components/NavbarClient.jsx
 "use client";
 
 import { useEffect } from "react";
@@ -12,7 +11,7 @@ import Dropdown from "./DropDown";
 import { useSelector } from 'react-redux';
 import useMenuStore from 'store/useStore';
 import Image from "next/image";
-import { Eye, Star, Htag, Pen, Heart, ZoomIn, ZoomOut, Trash } from "./components/album/icons";
+import { Heart, Star } from "./components/album/icons";
 
 const NavbarClient = () => {
   const menuItems = useMenuStore((state) => state.menuItems);
@@ -36,10 +35,10 @@ const NavbarClient = () => {
 
   const getIconForRoute = (route) => {
     if (route.includes("favoris")) {
-      return <Heart isOpen ={true} className="mr-2" />;
+      return <Heart isOpen={true} className="mr-2" />;
     }
     if (route.includes("recents")) {
-      return <Star isOpen ={true} className="mr-2" />;
+      return <Star isOpen={true} className="mr-2" />;
     }
     return null;
   };
@@ -47,15 +46,10 @@ const NavbarClient = () => {
   return (
     <>
       <nav className="z-40 md:fixed flex w-full items-center justify-between bg-neutral-200 py-2 text-white shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-black dark:text-gold-500 md:flex-wrap" data-te-navbar-ref>
-        <div className="flex flex-row w-full justify-center items-center px-3">
-          <a href="/" className="md:hidden ml-2 h-24 w-auto">
-            <Image src={site.logo.url}
-             alt="Accueil"
-             width={24}
-             height={24}
-             />
-          </a>
-          <div className="flex items-center">
+        <div className="flex flex-row w-full gap-4 justify-start items-start px-3">
+        
+          <div className="flex flex-col justify-start items-center">
+          <Image src={site.logo.url} alt="Accueil" width={48} height={48} />
             <button
               className="border-0 bg-transparent px-2 text-xl leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-neutral-700 dark:hover:text-white dark:focus:text-white lg:hidden"
               type="button"
@@ -72,16 +66,17 @@ const NavbarClient = () => {
               </span>
             </button>
           </div>
+         
 
-          <div className="hidden grow basis-[100%] items-center lg:!flex lg:basis-auto mx-auto" id="navbarSupportedContentY" data-te-collapse-item>
-            <ul className="mx-auto flex flex-col lg:flex-row" data-te-navbar-nav-ref>
+          <div className="hidden grow basis-[100%] items-center lg:!flex lg:basis-auto ml-auto" id="navbarSupportedContentY" data-te-collapse-item>
+            <ul className="flex flex-col lg:flex-row flex-wrap lg:justify-end" data-te-navbar-nav-ref>
               {regularMenuItems.map((menuItem) => (
-                <li key={menuItem.id} className={`lg:mb-0 lg:pr-2`} data-te-nav-item-ref>
+                <li key={menuItem.id} className={`lg:mb-0 lg:pl-2`} data-te-nav-item-ref>
                   {menuItem.children && menuItem.children.length ? (
                     <Dropdown className="" item={menuItem} />
                   ) : (
                     <a
-                      className={`font-lien  flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                      className={`font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                       href={menuItem.route}
                       data-te-nav-link-ref
                       data-te-ripple-init
@@ -96,7 +91,7 @@ const NavbarClient = () => {
 
               {session ? (
                 <>
-                  <li className="lg:mb-0 lg:pr-2">
+                  <li className="lg:mb-0 lg:pl-2">
                     <button
                       className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                       onClick={() => {
@@ -120,7 +115,7 @@ const NavbarClient = () => {
                 </>
               ) : (
                 <>
-                  <li className="lg:mb-0 lg:pr-2">
+                  <li className="lg:mb-0 lg:pl-2">
                     <button
                       className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
                       onClick={() => signIn()}
@@ -128,7 +123,7 @@ const NavbarClient = () => {
                       Connexion
                     </button>
                   </li>
-                  <li className="lg:mb-0 lg:pr-2">
+                  <li className="lg:mb-0 lg:pl-2">
                     <Link className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`} href={"/inscription"}>
                       Inscription
                     </Link>
