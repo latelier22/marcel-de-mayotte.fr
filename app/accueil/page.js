@@ -1,12 +1,10 @@
 import React from "react";
-import RootLayout from "../layout";
 import Navbar from "../NavBar";
 import HeaderSimple from "../headerSimple";
 import Footer from "../Footer";
-import Cards from "../Cards";
 import Section from "../Section";
 import Banner from "../Banner";
-import {cards, sections, site, photos} from "../site"
+import {sections, site, photos} from "@/site"
 import Citation from "../Citation";
 import getCitations from "../components/getCitations";
 

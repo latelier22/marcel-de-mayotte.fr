@@ -1,34 +1,25 @@
 {
   "compilerOptions": {
-    "typeRoots": ["./node_modules/@types", "./types"],
-    "baseUrl": "app", // Définit la base des chemins relatifs au dossier app
+    "typeRoots": ["./node_modules/@types", "./types"],  // Emplacement des types
+    "baseUrl": ".",  // Base de la résolution des chemins relatifs
     "paths": {
-      "@/toto/*": [
-        "toto/*"
-      ], // Alias pour tous les fichiers dans le dossier toto sous app
-      "@/utils/*": [
-        "utils/*"
-      ] // Alias pour tous les fichiers dans le dossier utils sous app
+      "@/*": ["./*", "app/*", "src/*"]  // Alias pour vos répertoires
     },
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "noEmit": true,
-    "incremental": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
+    "lib": ["dom", "dom.iterable", "esnext"],  // Bibliothèques incluses
+    "allowJs": true,  // Permet le JavaScript
+    "skipLibCheck": true,  // Ignore la vérification des fichiers .d.ts
+    "strict": false,  // Désactive les vérifications strictes
+    "noEmit": true,  // Empêche l'émission de fichiers .js
+    "incremental": true,  // Compilation incrémentale pour améliorer la vitesse
+    "esModuleInterop": true,  // Interopérabilité avec les modules ES
+    "module": "esnext",  // Module système cible
+    "moduleResolution": "node",  // Stratégie de résolution des modules
+    "resolveJsonModule": true,  // Permet l'importation de fichiers .json
+    "isolatedModules": true,  // Assure l'isolement des modules
+    "jsx": "preserve",  // Préserve le JSX
     "plugins": [
       {
-        "name": "next"
+        "name": "next"  // Plugin Next.js
       }
     ]
   },
@@ -37,10 +28,14 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx",
+    "**/*.js",  // Inclut les fichiers JavaScript
+    "**/*.jsx",  // Inclut les fichiers JSX
     "types/**/*.d.ts",
-    "app/components/media-items/media-items-list.jsx"
-, "app/api/auth/[...nextauth]/pages.js", "app/api/updateTagInBulk/route.js"  ],
+    "app/components/media-items/media-items-list.jsx",
+    "app/api/auth/[...nextauth]/pages.js",
+    "app/api/updateTagInBulk/route.js"
+, "app/layout.jsx"  ],
   "exclude": [
-    "node_modules"
+    "node_modules"  // Exclut le répertoire node_modules
   ]
 }

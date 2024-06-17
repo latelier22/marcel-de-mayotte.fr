@@ -2,7 +2,6 @@ import React, { useRef, useState, useCallback } from 'react';
 import { DndContext, useDroppable } from '@dnd-kit/core';
 import DotLoaderSpinner from '../../components/spinners/DotLoaderSpinner';
 import myFetch from '../../components/myFetch';
-import { photos } from 'site';
 
  const UploadImageComponent = ({ handleImportedFiles, handleImportImage, handleUpdatePhotos, photos }) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -14,8 +13,6 @@ import { photos } from 'site';
   const { setNodeRef: setDroppableNodeRef } = useDroppable({
     id: 'droppable',
   });
-
-  console.log("photos",photos)
 
   const handleUploadImage = async (selectedFiles) => {
     if (selectedFiles.length === 0) return;

@@ -1,111 +1,93 @@
-// Importer les bibliothèques nécessaires
-"use client";
+'use client'
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation'; // Utilisation de next/navigation pour la redirection
-import { getCookie, setCookie } from 'cookies-next';
+import dynamic from 'next/dynamic'
+import { Suspense } from 'react'
+import MugModel from '@/components/models3d/MugModel'
+import Palette from '@/components/models3d/Palette'
 
-const WordAnimation = ({ word, color, initialX, finalX, initialRotate, delay, rotate, onComplete }) => {
-  const [style, setStyle] = useState({
-    opacity: 0,
-    transform: `translateX(${initialX}vw) rotate(${initialRotate}deg)`, // Utiliser vw pour le positionnement initial
-    position: 'absolute',
-    top: '50%',
-    left: '40%',
-    transformOrigin: 'center',
-    color: color,
-    transition: `opacity 1s, transform 1s`
-  });
+const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
+const Dog = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Dog), { ssr: false })
+const Duck = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Duck), { ssr: false })
+// const Mug = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Mug), { ssr: false })
 
-  useEffect(() => {
-    const timer1 = setTimeout(() => {
-      setStyle(prevStyle => ({
-        ...prevStyle,
-        opacity: 1,
-        transform: `translateX(${finalX}vw) rotate(${rotate}deg)` // Utiliser vw pour la translation finale
-      }));
-    }, delay);
-
-    const timer2 = setTimeout(() => {
-      if (onComplete) onComplete();
-    }, delay + 1500);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, [initialX, finalX, rotate, delay, onComplete]);
-
-  return <div className='font-bold text-[5vw]' style={style}>{word}</div>;
-};
-
-const Home = () => {
-  const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [fadeOut, setFadeOut] = useState(false);
-
-  useEffect(() => {
-    const animCookie = getCookie('anim');
-    if (animCookie) {
-      router.push('/accueil');
-    } else {
-      setCookie('anim', 'true', { path: '/', maxAge: 60 * 60 * 24 * 365 });
-    }
-  }, [router]);
-
-  useEffect(() => {
-    if (step === 3) {
-      setTimeout(() => {
-        setFadeOut(true);
-      }, 1000);
-      setTimeout(() => {
-        router.push('/accueil');
-      }, 1500);
-    }
-  }, [step, router]);
-
-  const handleDivClic = () => { router.push("/accueil")}
-
-  return (
-    <div onClick={handleDivClic} className='container h-screen flex items-center justify-center' style={{ transition: 'opacity 1s', opacity: fadeOut ? 0 : 1 }}>
-      {step >= 1 && (
-        <WordAnimation
-          word="Liberté"
-          color="blue"
-          initialX="0"
-          finalX="-25" // Pourcentage de la translation à gauche
-          delay={0}
-          initialRotate={-10}
-          rotate={0}
-          onComplete={() => setStep(2)}
+const View = dynamic(() => import('@/components/canvas/View').then((mod) => mod.View), {
+  ssr: false,
+  loading: () => (
+    <div className='flex h-96 w-full flex-col items-center justify-center'>
+      <svg className='-ml-1 mr-3 h-5 w-5 animate-spin text-black' fill='none' viewBox='0 0 24 24'>
+        <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+        <path
+          className='opacity-75'
+          fill='currentColor'
+          d='M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 0 1 4 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
         />
-      )}
-      {step >= 2 && (
-        <WordAnimation
-          word="Égalité"
-          color="white"
-          initialX="0"
-          finalX="0" // Aucun déplacement
-          delay={0}
-          initialRotate={10}
-          rotate={0}
-          onComplete={() => setStep(3)}
-        />
-      )}
-      {step >= 3 && (
-        <WordAnimation
-          word="Magnégné"
-          color="#c85831"
-          initialX="-100" // Départ à droite
-          finalX="25" // Translation vers la gauche
-          delay={0}
-          initialRotate={-20}
-          rotate={20}
-          onComplete={() => setStep(4)}
-        />
-      )}
+      </svg>
     </div>
-  );
-};
+  ),
+})
+const Common = dynamic(() => import('@/components/canvas/View').then((mod) => mod.Common), { ssr: false })
 
-export default Home;
+export default function Page() {
+  return (
+    <>
+      <div className='mx-auto flex w-full flex-col flex-wrap items-center md:flex-row  lg:w-4/5'>
+        {/* jumbo */}
+         <div className='flex w-full flex-col items-start justify-center p-12 text-center md:w-2/5 md:text-left'>
+          <p className='w-full uppercase'>Next + React Three Fiber</p>
+          <h1 className='my-4 text-5xl font-bold leading-tight'>C&apos;est mon mug</h1>
+          <p className='mb-8 text-2xl leading-normal'>A minimalist starter for React, React-three-fiber and Threejs.</p>
+        </div>
+
+        <div className='w-full text-center '>
+          <View orbit className='absolute top-0 flex h-1/2 w-full flex-col items-center justify-center'>
+            <Suspense fallback={null}>
+              <Palette scale={[0.1,0.1,0.1]}/>
+              <Common />
+            </Suspense>
+          </View>
+        </div>
+       </div> 
+
+      {/* <div className='mx-auto flex w-full flex-col flex-wrap items-center md:flex-row  lg:w-4/5'>
+        {/* jumbo */}
+        {/* <div className='flex w-full flex-col items-start justify-center p-12 text-center md:w-2/5 md:text-left'>
+          <p className='w-full uppercase'>Next + React Three Fiber</p>
+          <h1 className='my-4 text-5xl font-bold leading-tight'>Next 3D Starter</h1>
+          <p className='mb-8 text-2xl leading-normal'>A minimalist starter for React, React-three-fiber and Threejs.</p>
+        </div> */}
+
+        {/* <div className='w-full text-center md:w-3/5'>
+          <View className='flex h-96 w-full flex-col items-center justify-center'>
+            <Suspense fallback={null}>
+              <MugModel />
+              {/* <MyBoxes /> */}
+              {/* <Common color={'lightblue'} />
+            </Suspense>
+          </View>
+        </div>  */}
+      {/* </div> */} 
+
+      <div className='mx-auto flex w-full flex-row flex-wrap items-center p-12 md:flex-row  lg:w-4/5'>
+        {/* first row */}
+        <div className='relative h-screen w-1/2 py-6'>
+          {' '}
+          {/* Ajustement de la hauteur ici */}
+          <h2 className='mb-3 text-3xl font-bold leading-none text-gray-800'>MUGd</h2>
+          <p className='mb-8 text-gray-600'>Drag, scroll, pinch, and rotate the canvas to explore the 3D scene.</p>
+        </div>
+        <div className='relative my-12 h-screen w-1/3 py-6'>
+          {' '}
+          {/* Ajustement de la hauteur ici */}
+          {/* <View orbit className='relative h-screen '>
+            <Suspense fallback={null}>
+              <MugModel postion ={[[0, 10, -5]]} scale={[10,10,10]}/>
+              
+              <Common color={'lightpink'} />
+            </Suspense>
+          </View> */}
+        </div>
+        {/* second row */}
+      </div>
+    </>
+  )
+}

@@ -2,7 +2,7 @@
 import { getServerSession } from 'next-auth';
 import Navbar from "../NavBar";
 import Footer from "../Footer";
-import RootLayout from "../layout";
+import RootLayout from "../layout.jsx";
 import RegisterForm from "./form";
 
 import { redirect } from 'next/navigation';

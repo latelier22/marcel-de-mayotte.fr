@@ -9,7 +9,7 @@ import VisibilityToggleButton from "./components/album/icons/VisibilityToggleBut
 import ShowAdminToggleButton from "./components/album/icons/ShowAdminToggleButton";
 import Dropdown from "./DropDown";
 import { useSelector } from 'react-redux';
-import useMenuStore from 'store/useStore';
+import useMenuStore from '@/store/useStore';
 import Image from "next/image";
 import { Heart, Star } from "./components/album/icons";
 

@@ -9,10 +9,12 @@ import './page.module.css';
 import 'react-quill/dist/quill.snow.css';
 import { site } from './site';
 
-import { NextAuthProvider} from "utils/NextAuthProvider"
+import { NextAuthProvider} from "@/utils/NextAuthProvider"
 import ReduxProvider from "./ReduxProvider";
 import useMenuStore from './store/useStore';
 import fetchMenus from "./components/fetchMenus"; // Assurez-vous que le chemin est correct
+import { Layout } from '@/components/dom/Layout'
+import '@/app/global.css'
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -55,7 +57,10 @@ export default function RootLayout({ children }) {
         <ReduxProvider>
           <NextAuthProvider>
             <AppInitializer>
+              <Layout>
               {children}
+
+              </Layout>
             </AppInitializer>
           </NextAuthProvider>
         </ReduxProvider>

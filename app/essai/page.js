@@ -1,5 +1,5 @@
 import React from "react";
-import RootLayout from "../layout";
+import RootLayout from "../layout.jsx";
 import Navbar from "../NavBar";
 import HeaderSimple from "../headerSimple";
 import Footer from "../Footer";

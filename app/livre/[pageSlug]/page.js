@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import Navbar from "../../NavBar";
 import Footer from "../../Footer";
-import RootLayout from "../../layout";
+import RootLayout from "../../layout.jsx";
 import FlipBook from "../../components/FlipBook";
 
 const Page = ({ params }) => {

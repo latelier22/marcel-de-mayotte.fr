@@ -2,7 +2,7 @@
 
 import Navbar from "../NavBar";
 import Footer from "../Footer";
-import RootLayout from "../layout";
+import RootLayout from "../layout.jsx";
 import FormContact from "../FormContact";
 
 const Contact = () => {
