@@ -4,7 +4,7 @@ import fetchPosts from "../../components/fetchPosts";
 import fetchPostBySlug from "../../components/fetchPostBySlug";
 import fetchComments from "../../components/fetchComments";
 import TitleLine from "../../TitleLine";
-import { site } from "site";
+import { site } from "@/site";
 import ListComments from "./ListComments";
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';

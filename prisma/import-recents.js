@@ -18,8 +18,7 @@ async function addPhotosToDatabase() {
           name: photoData.name,
           url: photoData.url,
           width: photoData.width,
-          height: photoData.height,
-          }
+          height: photoData.height
         }
       });
     }

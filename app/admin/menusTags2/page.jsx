@@ -3,7 +3,7 @@ import TitleLine from "../../TitleLine";
 import 'react-quill/dist/quill.snow.css'; // Import the CSS file for the Quill editor
 import fetchMenus from "../../components/getTags";
 
-import getTags from "components/getTags";
+import getTags from "@/components/getTags";
 import ManageTags from "./ManageTags";
 
 
