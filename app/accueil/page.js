@@ -1,3 +1,5 @@
+
+
 import React from "react";
 import Navbar from "../NavBar";
 import HeaderSimple from "../headerSimple";
@@ -7,6 +9,8 @@ import Banner from "../Banner";
 import {sections, site, photos} from "@/site"
 import Citation from "../Citation";
 import getCitations from "../components/getCitations";
+
+import PageClient from "./PageClient"
 
 
 async function Accueil () {
@@ -28,8 +32,12 @@ async function Accueil () {
       {/* <Picto 
       s /> */}
       <Citation citations={citations} section={sections[0]} />
+      <div className="h-96">
 
-      <Banner photo = {photos[0]} />
+      <PageClient />
+      </div>
+{/* 
+      <Banner photo = {photos[0]} /> */}
       <Section section={sections[0]} />
 
       <Footer />
