@@ -4,6 +4,9 @@ import dynamic from 'next/dynamic'
 import { Suspense } from 'react'
 import MugModel from '@/components/models3d/MugModel'
 import Palette from '@/components/models3d/Palette'
+import Easel from '@/components/models3d/Easel'
+import Easel1 from '@/components/models3d/Easel1'
+import WallArt06 from '@/src/components/models3d/WallArt06'
 
 const Logo = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Logo), { ssr: false })
 const Dog = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Dog), { ssr: false })
@@ -75,18 +78,19 @@ export default function Page() {
           <h2 className='mb-3 text-3xl font-bold leading-none text-gray-800'>MUGd</h2>
           <p className='mb-8 text-gray-600'>Drag, scroll, pinch, and rotate the canvas to explore the 3D scene.</p>
         </div>
-        <div className='relative my-12 h-screen w-1/3 py-6'>
-          {' '}
-          {/* Ajustement de la hauteur ici */}
-          {/* <View orbit className='relative h-screen '>
+        <div className='relative my-12 h-1/2 w-1/3 py-6'>
+      
+        
+         <View orbit className='relative h-screen '>
             <Suspense fallback={null}>
-              <MugModel postion ={[[0, 10, -5]]} scale={[10,10,10]}/>
-              
+              {/* <MugModel postion ={[[0, 10, -5]]} scale={[10,10,10]}/> */}
+              < Easel1 />
+              <WallArt06/>
               <Common color={'lightpink'} />
             </Suspense>
-          </View> */}
+          </View>
         </div>
-        {/* second row */}
+     
       </div>
     </>
   )
