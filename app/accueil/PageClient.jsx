@@ -49,7 +49,7 @@ const PageClient = () => {
           <Suspense fallback={null}>
             
             <ImagePlane
-              imageUrl="images/voule-sur-la-plage.web   p"
+              imageUrl="images/voule-sur-la-plage.webp"
               position={[0, 0, -50]}
               width={8}
               height={5}
