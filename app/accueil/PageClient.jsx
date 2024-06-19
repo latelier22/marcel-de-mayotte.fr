@@ -50,7 +50,7 @@ const PageClient = ({section, children}) => {
         <div className='flex w-full flex-col items-start justify-center text-center md:w-2/5 md:text-left'>
           <p className='w-full uppercase'>Bientôt disponible...</p>
           <h1 className='my-4 text-5xl font-bold leading-tight'>Une galerie virtuelle en 3D !</h1>
-          <p className='mb-8 text-2xl leading-normal'>Personnaliser un produit dérivé ou choisir l' encadrement d'une reproduction</p>
+          <p className='mb-8 text-2xl leading-normal'>Personnaliser un produit dérivé ou choisir l&apos; encadrement d&apos;une reproduction</p>
         </div> 
 
          <div className='w-full text-center md:w-3/5'>
