@@ -1,8 +1,11 @@
 "use client";
 import React from "react";
+import dynamic from "next/dynamic";
+
 import { Suspense } from "react";
 import ImagePlane from "@/src/components/models3d/ImagePlane";
-import dynamic from "next/dynamic";
+
+import Section from "@/Section";
 
 const View = dynamic(
   () => import("@/components/canvas/View").then((mod) => mod.View),
@@ -38,27 +41,36 @@ const Common = dynamic(
   { ssr: false }
 );
 
-const PageClient = () => {
+const PageClient = ({section, children}) => {
   return (
     
-      <div className="w-full text-center ">
-        <View
-          orbit
-          className="flex h-1/2 w-full flex-col items-center justify-center"
-        >
-          <Suspense fallback={null}>
-            
+     <>
+       <div className='mx-auto  flex w-full flex-col justify-center flex-wrap items-center md:flex-row lg:w-4/5'>
+        {/* jumbo */}
+        <div className='flex w-full flex-col items-start justify-center text-center md:w-2/5 md:text-left'>
+          <p className='w-full uppercase'>Bientôt disponible...</p>
+          <h1 className='my-4 text-5xl font-bold leading-tight'>Une galerie virtuelle en 3D !</h1>
+          <p className='mb-8 text-2xl leading-normal'>Personnaliser un produit dérivé ou choisir l' encadrement d'une reproduction</p>
+        </div> 
+
+         <div className='w-full text-center md:w-3/5'>
+          <View orbit className='flex h-96 w-full flex-col items-center justify-center'>
+            <Suspense fallback={null}>
             <ImagePlane
               imageUrl="images/voule-sur-la-plage.webp"
               position={[0, 0, -50]}
               width={8}
               height={5}
             />
-            <Common />
-          </Suspense>
-        </View>
-      </div>
-    
+              <Common color={''} />
+            </Suspense>
+          </View>
+       </div> 
+
+       </div>
+       <Section section={section} />
+    {children}
+        </>
   );
 };
 

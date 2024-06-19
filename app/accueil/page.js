@@ -34,13 +34,16 @@ async function Accueil () {
       <Citation citations={citations} section={sections[0]} />
       <div className="h-96">
 
-      <PageClient />
+      <PageClient section={sections[0]} >
+      <Footer />
+      </PageClient>
+
       </div>
 {/* 
       <Banner photo = {photos[0]} /> */}
-      <Section section={sections[0]} />
+      {/* <Section section={sections[0]} /> */}
 
-      <Footer />
+      
       </main>
   );
 };

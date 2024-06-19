@@ -49,7 +49,9 @@ const NavbarClient = () => {
         <div className="flex flex-row w-full gap-4 justify-start items-start px-3">
         
           <div className="flex flex-col justify-start items-center">
+            <Link href="/">
           <Image src={site.logo.url} alt="Accueil" width={48} height={48} />
+            </Link>
             <button
               className="border-0 bg-transparent px-2 text-xl leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-neutral-700 dark:hover:text-white dark:focus:text-white lg:hidden"
               type="button"
