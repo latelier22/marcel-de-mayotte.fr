@@ -294,6 +294,29 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     setAllSelected(false);
   };
 
+  const handleSendMail = () => {
+    if (selectedPhotoIds.length === 0) return;
+  
+    // Obtenir les informations des photos sélectionnées
+    const selectedPhotosInfo = photos
+      .filter((photo) => selectedPhotoIds.includes(photo.id))
+      .map((photo) => {
+        const encodedURL = encodeURI(photo.src);  // Utilise encodeURI pour ne pas affecter les caractères de l'URL de base
+        return `Title: ${photo.title || photo.name}, URL: ${encodedURL}`;
+      })
+      .join("\n");
+  
+    // Créer le lien mailto avec le body contenant les informations des photos sélectionnées
+    const subject = "Liste des photos sélectionnées";
+    const body = encodeURIComponent(`Voici la liste des photos sélectionnées :\n\n${selectedPhotosInfo}`);
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
+  
+    // Ouvrir le client mail
+    window.location.href = mailtoLink;
+  };
+  
+  
+  
   const toggleSelectAll = () => {
     if (allSelected) {
       handleDeselectAll();
@@ -1604,6 +1627,14 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
               >
                 Restaurer la sélection ({lastSelection.length})
               </button>
+<button
+  className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
+  onClick={handleSendMail}
+  disabled={selectedPhotoIds.length === 0} // Désactiver si aucune photo sélectionnée
+>
+  Mail
+</button>
+
             </div>
 
             <div className="flex flex-col">
