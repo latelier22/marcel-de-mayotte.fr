@@ -1,6 +1,9 @@
 'use client'
 
 import GalerieSimple from '@/src/components/models3d/GalerieSimple'
+import MugModel from '@/src/components/models3d/MugPerso'
+import CadrePP from '@/src/components/models3d/CadrePP'
+
 import dynamic from 'next/dynamic'
 
 // const Blob = dynamic(() => import('@/components/canvas/Examples').then((mod) => mod.Blob), { ssr: false })
@@ -37,6 +40,8 @@ export default function Page() {
 
       <View orbit className='absolute top-0 flex h-screen w-full flex-col items-center justify-center'>
         <GalerieSimple />
+        <CadrePP scale={10}/>
+        {/* <MugModel/> */}
         <Common cameraPosition ={[7, 7, 15]}/>
       </View>
     </>

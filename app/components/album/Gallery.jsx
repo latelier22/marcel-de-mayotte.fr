@@ -1627,7 +1627,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
               >
                 Restaurer la sélection ({lastSelection.length})
               </button>
-<button
+              <button
   className="rounded-md bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 m-2"
   onClick={handleSendMail}
   disabled={selectedPhotoIds.length === 0} // Désactiver si aucune photo sélectionnée

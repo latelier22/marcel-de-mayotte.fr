@@ -16,9 +16,9 @@ export function CadrePP(props) {
  const textureLoader = new THREE.TextureLoader()  // Utilisation de THREE.TextureLoader
  const texture = textureLoader.load('images/galerie-01-9.jpg')  // Remplacez par le chemin de votre image
  texture.wrapS = texture.wrapT = THREE.RepeatWrapping  // Options de répétition de la texture si nécessaire
- texture.repeat.set(1, 1)  // Paramètres de répétition de la texture si nécessaire
+//  texture.repeat.set(1, 1)  // Paramètres de répétition de la texture si nécessaire
  texture.flipY = false
- texture.scale = 0.5
+ texture.scale = 0.1
  texture.anisotropy = gl.capabilities.getMaxAnisotropy()
 //  texture.needsUpdate = true
 
