@@ -109,7 +109,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   const router = useRouter();
 
 
-  const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 50); // Valeur par défaut
+  const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 100); // Valeur par défaut
   const [currentPage, setCurrentPage] = useState(parseInt(queryCurrentPage) || 1); // Valeur par défaut
 
 
@@ -2589,7 +2589,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
               Page {currentPage} / {totalPages}
             </span>
             <span>
-              <label className="mr-2 text-white">Photos per page:</label>
+              <label className="mr-2 text-white">Photos par page:</label>
               <select
                 className="p-1 text-xl font-bold text-black bg-white"
                 onChange={(e) => changePhotosPerPage(Number(e.target.value))}
@@ -2598,6 +2598,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                 <option value={25}>25</option>
                 <option value={50}>50</option>
                 <option value={100}>100</option>
+                <option value={200}>200</option>
+                <option value={sortedAndFilteredPhotos.length}>
+                  TOUS ({sortedAndFilteredPhotos.length})
+                </option>
               </select>
             </span>
             <button
