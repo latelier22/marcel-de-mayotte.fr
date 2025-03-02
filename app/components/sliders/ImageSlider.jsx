@@ -9,26 +9,9 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { site } from "../../site"; // Assure-toi que `site` contient bien `vpsServer`
 import Link from "next/link";
 
-const API_URL = "https://proxy.latelier22.fr/https://www.marcel-de-mayotte.fr/api/getImagesByTag/89";
-
-const ImageSlider = () => {
-  const [images, setImages] = useState([]);
-
-  useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        if (data && data.tagImages) {
-          setImages(data.tagImages);
-        }
-      } catch (error) {
-        console.error("Erreur lors du chargement des images :", error);
-      }
-    };
-
-    fetchImages();
-  }, []);
+const ImageSlider = ( {images}) => {
+  
+    console.log("images", images[0])
 
   // Fonction pour générer l'URL correcte en fonction de la source
   const getImageUrl = (photoUrl) => {

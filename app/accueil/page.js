@@ -8,6 +8,7 @@ import { sections, site, photos } from "../site";
 import Citation from "../Citation";
 import getCitations from "../components/getCitations";
 import ImageSlider from "../components/sliders/ImageSlider";  // 👈 Import du composant
+import getImagesbyTag from "components/getImagesbyTag";
 
 async function Accueil() {
   const pageTitle = "Accueil";
@@ -15,6 +16,9 @@ async function Accueil() {
 
   const onlyPublished = true;
   const citations = await getCitations({ onlyPublished });
+  const expoImages = await getImagesbyTag("expo-2025",null);
+
+  console.log("expoImages", expoImages[0])
 
   return (
     <main>
@@ -23,7 +27,7 @@ async function Accueil() {
 
       <Citation citations={citations} section={sections[0]} />
 
-      <ImageSlider /> {/* 👈 Ajout du slider ici */}
+      <ImageSlider images={expoImages} /> {/* 👈 Ajout du slider ici */}
 
       <Banner photo={photos[0]} />
       <Section section={sections[0]} />
