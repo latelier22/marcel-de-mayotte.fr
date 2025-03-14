@@ -9,6 +9,7 @@ import Citation from "../Citation";
 import getCitations from "../components/getCitations";
 import ImageSlider from "../components/sliders/ImageSlider";  // 👈 Import du composant
 import getImagesbyTag from "components/getImagesbyTag";
+import Book3d from "Iframe/Book3d"
 
 async function Accueil() {
   const pageTitle = "Accueil";
@@ -24,6 +25,8 @@ async function Accueil() {
     <main>
       <Navbar />
       <HeaderSimple photos={photos} siteTitle={site.title} title={pageTitle} />
+
+      <Book3d />
 
       <Citation citations={citations} section={sections[0]} />
 

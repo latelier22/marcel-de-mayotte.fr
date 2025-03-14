@@ -161,6 +161,18 @@ export const Pages = {
     ],
     cards: [
       {
+        title: "Des couleurs pour Mayotte",
+        text: "Une expo de Marcel, peintre Magnégné",
+        button: "",
+        buttonColor: "bg-gold-500",
+        link: "/livre/6",
+        url: "livre-6.png",
+        alt: "Mémoires de Marcel Séjour, Une expo de Marcel, peintre Magnégné",
+        nbPages :"48",
+        bookHeight :"600",
+        bookWidth :"600"
+      },
+      {
         title: "Mémoires d'un artiste Magnégné",
         text: "En cours d'écriture",
         button: "",

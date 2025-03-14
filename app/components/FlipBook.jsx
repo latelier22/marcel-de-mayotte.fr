@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from 'next/dynamic';
-
+import Image from 'next/image';
 
 
 // components/FlipBook.js
@@ -20,7 +20,12 @@ function FlipBook( {livre, nbPages,bookWidth,bookHeight}) {
                 <PageFlip className="mx-auto" width={bookWidth} height={bookHeight}>
                     {images.map((image, index) => (
                         <div key={index} className="page">
-                            <img src={image} alt={`Page ${index + 1}`} />
+                            <Image 
+                            src={image}
+                            alt={`Page ${index + 1}`}
+                            layout="fill" 
+                            objectFit="contain"
+                            className="rounded-lg shadow-lg"/>
                         </div>
                     ))}
                 </PageFlip>
