@@ -9,7 +9,7 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { site } from "../../site"; // Vérifie que `site.vpsServer` est bien défini
 import Link from "next/link";
 
-const ImageSlider = ({ images }) => {
+const ImageSlider = ({ images, title }) => {
   // Vérification des images
   if (!images || images.length === 0) {
     return <p className="text-center text-gray-500">Aucune image disponible</p>;
@@ -26,7 +26,7 @@ const ImageSlider = ({ images }) => {
 
   return (
     <div className="max-w-screen-xl mx-auto my-8 px-4">
-      <h2 className="text-3xl font-bold text-center mb-6">Tableaux exposés en 2025</h2>
+      <h2 className="text-3xl font-bold text-center mb-6">{title}</h2>
 
       <Swiper
         modules={[Navigation, Autoplay]}

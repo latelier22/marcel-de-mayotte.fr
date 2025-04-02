@@ -19,7 +19,9 @@ async function Accueil() {
   const citations = await getCitations({ onlyPublished });
   const expoImages = await getImagesbyTag("expo-2025",null);
 
-  console.log("expoImages", expoImages[0])
+  const prepaImages = await getImagesbyTag("sallertaine-preparation",null);
+
+  console.log("prepaImages", expoImages[0])
 
   return (
     <main>
@@ -28,9 +30,11 @@ async function Accueil() {
 
       <Book3d />
 
+      <ImageSlider images={prepaImages} title={"Préparatifs de l'exposition à Sallertaine, du 4 au 6 avril 2025"}/> {/* 👈 Ajout du slider ici */}
+
       <Citation citations={citations} section={sections[0]} />
 
-      <ImageSlider images={expoImages} /> {/* 👈 Ajout du slider ici */}
+      <ImageSlider images={expoImages} title={"Tableaux exposés en 2025"}/> {/* 👈 Ajout du slider ici */}
 
       <Banner photo={photos[0]} />
       <Section section={sections[0]} />
