@@ -13,6 +13,8 @@ import useMenuStore from 'store/useStore';
 import Image from "next/image";
 import { Heart, Star } from "./components/album/icons";
 
+const shopUrl = process.env.NEXT_PUBLIC_SHOP_URL;
+
 const NavbarClient = () => {
   const menuItems = useMenuStore((state) => state.menuItems);
   const { data: session } = useSession();
@@ -49,7 +51,7 @@ const NavbarClient = () => {
         <div className="flex flex-row w-full gap-4 justify-start items-start px-3">
         
           <div className="flex flex-col justify-start items-center">
-          <Image src={site.logo.url} alt="Accueil" width={48} height={48} />
+            <Image src={site.logo.url} alt="Accueil" width={48} height={48} />
             <button
               className="border-0 bg-transparent px-2 text-xl leading-none transition-shadow duration-150 ease-in-out hover:text-neutral-700 focus:text-neutral-700 dark:hover:text-white dark:focus:text-white lg:hidden"
               type="button"
@@ -66,7 +68,6 @@ const NavbarClient = () => {
               </span>
             </button>
           </div>
-         
 
           <div className="hidden grow basis-[100%] items-center lg:!flex lg:basis-auto ml-auto" id="navbarSupportedContentY" data-te-collapse-item>
             <ul className="flex flex-col lg:flex-row flex-wrap lg:justify-end" data-te-navbar-nav-ref>
@@ -74,6 +75,16 @@ const NavbarClient = () => {
                 <li key={menuItem.id} className={`lg:mb-0 lg:pl-2`} data-te-nav-item-ref>
                   {menuItem.children && menuItem.children.length ? (
                     <Dropdown className="" item={menuItem} />
+                  ) : menuItem.label === "BOUTIQUE" ? (
+                    <a
+                      className={`font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                      href={shopUrl} // <-- remplace par l'URL réelle de ta boutique
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {getIconForRoute(menuItem.route)}
+                      {menuItem.label}
+                    </a>
                   ) : (
                     <a
                       className={`font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
