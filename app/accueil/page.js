@@ -10,6 +10,9 @@ import getCitations from "../components/getCitations";
 import ImageSlider from "../components/sliders/ImageSlider";  // 👈 Import du composant
 import getImagesbyTag from "components/getImagesbyTag";
 import Book3d from "Iframe/Book3d"
+import getTaxons from "../shop/getTaxons";
+import Taxons from "../shop/components/Taxons";
+
 
 async function Accueil() {
   const pageTitle = "Accueil";
@@ -21,12 +24,17 @@ async function Accueil() {
 
   const prepaImages = await getImagesbyTag("sallertaine-preparation",null);
 
+  const taxons = await getTaxons(); // 👈 fetch server-side depuis /shop
+
+
   console.log("prepaImages", expoImages[0])
 
   return (
     <main>
       <Navbar />
       <HeaderSimple photos={photos} siteTitle={site.title} title={pageTitle} />
+
+      <Taxons taxons={taxons} /> {/* 👈 Ajout de la liste des taxons */}
 
       <Book3d />
 
