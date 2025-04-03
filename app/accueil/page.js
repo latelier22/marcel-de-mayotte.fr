@@ -12,6 +12,8 @@ import getImagesbyTag from "components/getImagesbyTag";
 import Book3d from "Iframe/Book3d"
 import getTaxons from "../shop/getTaxons";
 import Taxons from "../shop/components/Taxons";
+import getProductVariantsFront from "../shop/getProductVariantsFront"; // 👈 Import de la fonction
+import ProductCards from "../shop/components/ProductCards";
 
 
 async function Accueil() {
@@ -25,6 +27,7 @@ async function Accueil() {
   const prepaImages = await getImagesbyTag("sallertaine-preparation",null);
 
   const taxons = await getTaxons(); // 👈 fetch server-side depuis /shop
+  const productVariantsFront = await getProductVariantsFront(); // 👈 fetch server-side depuis /shop
 
 
   console.log("taxons", taxons)
@@ -35,6 +38,7 @@ async function Accueil() {
       <HeaderSimple photos={photos} siteTitle={site.title} title={pageTitle} />
 
       <Taxons taxons={taxons} /> {/* 👈 Ajout de la liste des taxons */}
+      <ProductCards products={productVariantsFront} />
 
       <Book3d />
 
