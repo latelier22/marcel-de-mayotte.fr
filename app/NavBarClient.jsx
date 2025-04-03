@@ -50,7 +50,7 @@ const NavbarClient = ({ taxons }) => {
     <>
       <nav className="z-40 md:fixed flex w-full items-center justify-between bg-neutral-200 py-2 text-white shadow-lg hover:text-neutral-700 focus:text-neutral-700 dark:bg-black dark:text-gold-500 md:flex-wrap" data-te-navbar-ref>
         <div className="flex flex-row w-full gap-4 justify-start items-start px-3">
-        
+
           <div className="flex flex-col justify-start items-center">
             <Image src={site.logo.url} alt="Accueil" width={48} height={48} />
             <button
@@ -101,30 +101,52 @@ const NavbarClient = ({ taxons }) => {
                 </li>
               ))}
 
-              {/* Insertion du menu Boutique avec sous-menu des taxons */}
-              <li className="relative lg:mb-0 lg:pl-2" data-te-nav-item-ref>
-                <button
-                  onClick={() => setShowBoutiqueMenu(!showBoutiqueMenu)}
-                  className="font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2"
-                >
-                  Boutique ▼
-                </button>
-                {showBoutiqueMenu && (
-                  <ul className="absolute left-0 top-full mt-2 bg-white text-black rounded-md shadow-lg z-50">
-                    {taxons.map((taxon) => (
-                      <li key={taxon.id}>
-                        <Link
-                          href={`${shopUrl}/fr_FR/taxons/${taxon.slug}`}
-                          onClick={() => setShowBoutiqueMenu(false)}
-                          className="block px-4 py-2 hover:bg-gray-100"
-                        >
-                          {taxon.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
+<li className="relative lg:mb-0 lg:pl-2 group">
+  <span className="font-lien flex items-center cursor-pointer transition duration-150 text-black hover:text-gold-800 dark:text-gold-200 dark:hover:text-gold-800 lg:p-2">
+    Boutique
+    <svg className="ml-1 w-4 h-4 fill-current" viewBox="0 0 20 20">
+      <path d="M5.25 7.5l4.75 5 4.75-5H5.25z" />
+    </svg>
+  </span>
+
+  {/* menu principal */}
+  <div className="absolute top-full left-0 hidden group-hover:flex flex-col bg-white text-black rounded-md shadow-lg z-50 min-w-[220px]">
+    {taxons.map((taxon) => (
+      <div key={taxon.id} className="relative group/taxon">
+        <Link
+          href={`${shopUrl}/fr_FR/taxons/${taxon.slug}`}
+          className="block px-4 py-2 whitespace-nowrap hover:bg-gray-100 flex justify-between items-center"
+        >
+          {taxon.name}
+          {taxon.children?.length > 0 && (
+            <svg className="w-3 h-3 ml-2 fill-current" viewBox="0 0 20 20">
+              <path d="M7.5 5.25l5 4.75-5 4.75V5.25z" />
+            </svg>
+          )}
+        </Link>
+
+        {/* sous-menu enfants */}
+        {taxon.children?.length > 0 && (
+          <div className="absolute top-0 left-full hidden group-hover/taxon:flex flex-col bg-white text-black rounded-md shadow-lg z-50 min-w-[200px]">
+            {taxon.children.map((child) => (
+              <Link
+                key={child.id}
+                href={`${shopUrl}/fr_FR/taxons/${child.slug}`}
+                className="block px-4 py-2 whitespace-nowrap hover:bg-gray-100"
+              >
+                {child.name}
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+</li>
+
+
+
+
 
               {session ? (
                 <>
