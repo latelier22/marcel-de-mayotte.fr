@@ -9,7 +9,7 @@ import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import { site } from "../../site"; // Vérifie que `site.vpsServer` est bien défini
 import Link from "next/link";
 
-const ImageSlider = ({ images, title }) => {
+const ImageSlider = ({ images, title , slug}) => {
   // Vérification des images
   if (!images || images.length === 0) {
     return <p className="text-center text-gray-500">Aucune image disponible</p>;
@@ -46,7 +46,7 @@ const ImageSlider = ({ images, title }) => {
       >
         {images.map((img) => (
           <SwiperSlide key={img.id} className="flex justify-center">
-            <Link href={`/catalogue/expo-2025`} className="block">
+            <Link href={`/catalogue/${slug}`} className="block">
               <div className="w-full max-w-xs lg:max-w-sm xl:max-w-md mx-auto">
                 <img
                   src={getImageUrl(img.url)}

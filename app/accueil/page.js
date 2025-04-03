@@ -30,11 +30,10 @@ async function Accueil() {
 
       <Book3d />
 
-      <ImageSlider images={prepaImages} title={"Préparatifs de l'exposition à Sallertaine, du 4 au 6 avril 2025"}/> {/* 👈 Ajout du slider ici */}
-
+      <ImageSlider images={prepaImages} title={"Préparatifs de l'exposition à Sallertaine, du 4 au 6 avril 2025"} slug={"sallertaine-preparation"}/> 
       <Citation citations={citations} section={sections[0]} />
 
-      <ImageSlider images={expoImages} title={"Tableaux exposés en 2025"}/> {/* 👈 Ajout du slider ici */}
+      <ImageSlider images={expoImages} title={"Tableaux exposés en 2025"} slug={"expo-2025"}/> {/* 👈 Ajout du slider ici */}
 
       <Banner photo={photos[0]} />
       <Section section={sections[0]} />
