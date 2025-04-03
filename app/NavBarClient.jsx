@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { site } from "./site";
@@ -15,17 +15,18 @@ import { Heart, Star } from "./components/album/icons";
 
 const shopUrl = process.env.NEXT_PUBLIC_SHOP_URL;
 
-const NavbarClient = () => {
+const NavbarClient = ({ taxons }) => {
   const menuItems = useMenuStore((state) => state.menuItems);
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === 'admin';
   const isVisible = useSelector(state => state.visible.isVisible);
   const isShowAdmin = useSelector(state => state.showAdmin.isShowAdmin);
   const router = useRouter();
+  const [showBoutiqueMenu, setShowBoutiqueMenu] = useState(false);
 
   // Séparer l'item ADMIN des autres items de menu
   const regularMenuItems = menuItems.filter(item => item.route !== '/admin');
-  const adminMenuItem = menuItems.find(item => (item.route === '/admin') || (item.route === '/catalogue/non-publiees') );
+  const adminMenuItem = menuItems.find(item => (item.route === '/admin') || (item.route === '/catalogue/non-publiees'));
 
   useEffect(() => {
     const init = async () => {
@@ -72,13 +73,13 @@ const NavbarClient = () => {
           <div className="hidden grow basis-[100%] items-center lg:!flex lg:basis-auto ml-auto" id="navbarSupportedContentY" data-te-collapse-item>
             <ul className="flex flex-col lg:flex-row flex-wrap lg:justify-end" data-te-navbar-nav-ref>
               {regularMenuItems.map((menuItem) => (
-                <li key={menuItem.id} className={`lg:mb-0 lg:pl-2`} data-te-nav-item-ref>
+                <li key={menuItem.id} className="lg:mb-0 lg:pl-2" data-te-nav-item-ref>
                   {menuItem.children && menuItem.children.length ? (
                     <Dropdown className="" item={menuItem} />
                   ) : menuItem.label === "BOUTIQUE" ? (
                     <a
-                      className={`font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
-                      href={shopUrl} // <-- remplace par l'URL réelle de ta boutique
+                      className="font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90"
+                      href={shopUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -87,7 +88,7 @@ const NavbarClient = () => {
                     </a>
                   ) : (
                     <a
-                      className={`font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                      className="font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90"
                       href={menuItem.route}
                       data-te-nav-link-ref
                       data-te-ripple-init
@@ -100,14 +101,37 @@ const NavbarClient = () => {
                 </li>
               ))}
 
+              {/* Insertion du menu Boutique avec sous-menu des taxons */}
+              <li className="relative lg:mb-0 lg:pl-2" data-te-nav-item-ref>
+                <button
+                  onClick={() => setShowBoutiqueMenu(!showBoutiqueMenu)}
+                  className="font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2"
+                >
+                  Boutique ▼
+                </button>
+                {showBoutiqueMenu && (
+                  <ul className="absolute left-0 top-full mt-2 bg-white text-black rounded-md shadow-lg z-50">
+                    {taxons.map((taxon) => (
+                      <li key={taxon.id}>
+                        <Link
+                          href={`${shopUrl}/fr_FR/taxons/${taxon.slug}`}
+                          onClick={() => setShowBoutiqueMenu(false)}
+                          className="block px-4 py-2 hover:bg-gray-100"
+                        >
+                          {taxon.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+
               {session ? (
                 <>
                   <li className="lg:mb-0 lg:pl-2">
                     <button
-                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
-                      onClick={() => {
-                        signOut({ callbackUrl: '/accueil' });
-                      }}
+                      className="font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90"
+                      onClick={() => signOut({ callbackUrl: '/accueil' })}
                     >
                       {session.user.email.split("@", 1)} / déconnexion
                     </button>
@@ -128,14 +152,17 @@ const NavbarClient = () => {
                 <>
                   <li className="lg:mb-0 lg:pl-2">
                     <button
-                      className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`}
+                      className="font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90"
                       onClick={() => signIn()}
                     >
                       Connexion
                     </button>
                   </li>
                   <li className="lg:mb-0 lg:pl-2">
-                    <Link className={`font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90`} href={"/inscription"}>
+                    <Link
+                      className="font-lien block transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90"
+                      href="/inscription"
+                    >
                       Inscription
                     </Link>
                   </li>

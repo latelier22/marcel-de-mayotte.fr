@@ -27,11 +27,11 @@ async function Accueil() {
   const taxons = await getTaxons(); // 👈 fetch server-side depuis /shop
 
 
-  console.log("prepaImages", expoImages[0])
+  console.log("taxons", taxons)
 
   return (
     <main>
-      <Navbar />
+      <Navbar taxons={taxons}/>
       <HeaderSimple photos={photos} siteTitle={site.title} title={pageTitle} />
 
       <Taxons taxons={taxons} /> {/* 👈 Ajout de la liste des taxons */}
