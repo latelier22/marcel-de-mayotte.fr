@@ -9,6 +9,7 @@ import Banner from "../Banner";
 import {cards, sections, site, photos} from "../site"
 import Citation from "../Citation";
 
+
 const Accueil = () => {
   // Dynamic metadata for the home page
   const pageTitle = "Accueil";
