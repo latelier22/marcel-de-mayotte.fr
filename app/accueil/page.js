@@ -31,7 +31,7 @@ async function Accueil() {
 
   return (
     <main>
-      <Navbar taxons={taxons}/>
+      <Navbar />
       <HeaderSimple photos={photos} siteTitle={site.title} title={pageTitle} />
 
       <Taxons taxons={taxons} /> {/* 👈 Ajout de la liste des taxons */}

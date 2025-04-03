@@ -1,6 +1,9 @@
 import NavbarClient from "./NavBarClient";
+import getTaxons from "./shop/getTaxons";
 
-async function NavBar( {taxons}) {
+async function NavBar( ) {
+
+  const taxons = await getTaxons(); // 👈 fetch server-side depuis /shop
 
   return (
     <div>
