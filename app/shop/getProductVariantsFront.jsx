@@ -1,4 +1,9 @@
-import getProductByCode from "./getProductByCode";
+import getProductByCode from "./getProductByCode"; // ← reste le même
+
+const extractProductCode = (productUri) => {
+  // Extrait le code depuis "/api/v2/shop/products/PUZ00"
+  return productUri.split("/").pop();
+};
 
 const getProductVariantsFront = async () => {
   const baseUrl = process.env.NEXT_PUBLIC_SHOP_URL + "/api/v2/shop/product-variants";
@@ -19,9 +24,11 @@ const getProductVariantsFront = async () => {
 
       const enriched = await Promise.all(
         filtered.map(async (variant) => {
-          const product = await getProductByCode(variant.code);
+          const productCode = extractProductCode(variant.product);
+          const product = await getProductByCode(productCode);
           return {
             ...variant,
+            productCode,
             images: product?.images || [],
           };
         })
