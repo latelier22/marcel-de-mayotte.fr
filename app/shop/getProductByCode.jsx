@@ -8,26 +8,27 @@ const getProductByCode = async (code) => {
       const data = await res.json();
   
       const images = (data.images || []).map((img) => {
-        let fullUrl = img.path;
+        let url = img.path;
   
-        // Correction automatique du path
-        if (fullUrl && !fullUrl.startsWith("http")) {
-          fullUrl = `${baseUrl}${fullUrl}`;
+        // ✅ Cas spécial : path Sylius galerie
+        if (url.includes("/gallery/images/")) {
+          url = url.replace("/media/image/", "/media/");
         }
   
-        // Log de chaque image complète
-        console.log(`[${code}] Image URL:`, fullUrl);
+        // ✅ Préfixe complet si ce n'est pas déjà une URL
+        if (!url.startsWith("http")) {
+          url = `${baseUrl}${url}`;
+        }
   
-        return {
-          ...img,
-          url: fullUrl,
-        };
+        console.log(`[${code}] Image URL:`, url);
+  
+        return { ...img, url };
       });
   
       return { ...data, images };
   
     } catch (error) {
-      console.error(`❌ Erreur produit ${code} :`, error);
+      console.error(`Erreur lors de la récupération du produit ${code} :`, error);
       return null;
     }
   };
