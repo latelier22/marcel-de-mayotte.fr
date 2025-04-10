@@ -26,18 +26,18 @@ async function Accueil() {
 
   const prepaImages = await getImagesbyTag("sallertaine-preparation",null);
 
-  const taxons = await getTaxons(); // 👈 fetch server-side depuis /shop
-  const productVariantsFront = await getProductVariantsFront(); // 👈 fetch server-side depuis /shop
+  // const taxons = await getTaxons(); // 👈 fetch server-side depuis /shop
+  // const productVariantsFront = await getProductVariantsFront(); // 👈 fetch server-side depuis /shop
 
 
-  console.log("taxons", taxons)
+  // console.log("taxons", taxons)
 
   return (
     <main>
       <Navbar />
       <HeaderSimple photos={photos} siteTitle={site.title} title={pageTitle} />
 
-      <Taxons taxons={taxons} /> {/* 👈 Ajout de la liste des taxons */}
+      {/* <Taxons taxons={taxons} /> 👈 Ajout de la liste des taxons */}
       {/* <ProductCards products={productVariantsFront} /> */}
 
       <Book3d />
