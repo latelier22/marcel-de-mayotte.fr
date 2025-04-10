@@ -2300,36 +2300,39 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                     title={photo.src}
                   >
                     {zoomGallery >= 200 && (
-                      <>
-                        <EditableButton
-                          text={titles[photo.id] || ""}
-                          onChange={(e) => {
-                            const newTitles = {
-                              ...titles,
-                              [photo.id]: e.target.value,
-                            };
-                            setTitles(newTitles);
-                          }}
-                          onBlur={() =>
-                            updatePhotoTitle(photo.id, titles[photo.id])
-                          }
-                          isEditable={!isReadOnly}
-                          inputRef={inputRef}
-                        />
-                        {!titles[photo.id] && (
-                          <>
-                            <s
-                              className="text-white bg-transparent text-center w-full absolute -bottom-7">{photo.name}</s>
-                            <input
-                              className="absolute -bottom-7"
-                              title="Utiliser le nom comme titre"
-                              type="checkbox"
-                              onChange={() => handleCheckboxChange(photo.id)}
-                            />
-                          </>
-                        )}
-                      </>
-                    )}
+  <>
+    <div className="text-white text-sm font-mono text-center mb-1">
+      ID: {photo.id}
+    </div>
+    <EditableButton
+      text={titles[photo.id] || ""}
+      onChange={(e) => {
+        const newTitles = {
+          ...titles,
+          [photo.id]: e.target.value,
+        };
+        setTitles(newTitles);
+      }}
+      onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
+      isEditable={!isReadOnly}
+      inputRef={inputRef}
+    />
+    {!titles[photo.id] && (
+      <>
+        <s className="text-white bg-transparent text-center w-full absolute -bottom-7">
+          {photo.name}
+        </s>
+        <input
+          className="absolute -bottom-7"
+          title="Utiliser le nom comme titre"
+          type="checkbox"
+          onChange={() => handleCheckboxChange(photo.id)}
+        />
+      </>
+    )}
+  </>
+)}
+
                     {zoomGallery >= 200 && (
                       <button
                         onClick={(e) => {

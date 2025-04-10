@@ -8,7 +8,8 @@ async function NavBar( ) {
   return (
     <div>
       {/* <NavbarClient menuItems={menuItems} /> */}
-      <NavbarClient taxons={taxons} />
+      {/* <NavbarClient taxons={taxons} /> */}
+      <NavbarClient/>
     </div>
   );
 }

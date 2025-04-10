@@ -15,7 +15,7 @@ import { Heart, Star } from "./components/album/icons";
 
 const shopUrl = process.env.NEXT_PUBLIC_SHOP_URL;
 
-const NavbarClient = ({ taxons }) => {
+const NavbarClient = () => {
   const menuItems = useMenuStore((state) => state.menuItems);
   const { data: session } = useSession();
   const isAdmin = session && session.user.role === 'admin';
@@ -101,16 +101,16 @@ const NavbarClient = ({ taxons }) => {
                 </li>
               ))}
 
-<li className="relative lg:mb-0 lg:pl-2 group">
+{/* <li className="relative lg:mb-0 lg:pl-2 group">
   <span className="font-lien flex items-center cursor-pointer transition duration-150 text-black hover:text-gold-800 dark:text-gold-200 dark:hover:text-gold-800 lg:p-2">
     Boutique
     <svg className="ml-1 w-4 h-4 fill-current" viewBox="0 0 20 20">
       <path d="M5.25 7.5l4.75 5 4.75-5H5.25z" />
     </svg>
-  </span>
+  </span> */}
 
   {/* menu principal */}
-  <div className="absolute top-full left-0 hidden group-hover:flex flex-col bg-white text-black rounded-md shadow-lg z-50 min-w-[220px]">
+  {/* <div className="absolute top-full left-0 hidden group-hover:flex flex-col bg-white text-black rounded-md shadow-lg z-50 min-w-[220px]">
     {taxons.map((taxon) => (
       <div key={taxon.id} className="relative group/taxon">
         <Link
@@ -126,7 +126,7 @@ const NavbarClient = ({ taxons }) => {
         </Link>
 
         {/* sous-menu enfants */}
-        {taxon.children?.length > 0 && (
+        {/* {taxon.children?.length > 0 && (
           <div className="absolute top-0 left-full hidden group-hover/taxon:flex flex-col bg-white text-black rounded-md shadow-lg z-50 min-w-[200px]">
             {taxon.children.map((child) => (
               <Link
@@ -141,8 +141,8 @@ const NavbarClient = ({ taxons }) => {
         )}
       </div>
     ))}
-  </div>
-</li>
+  </div> */}
+{/* </li> */}
 
 
 
