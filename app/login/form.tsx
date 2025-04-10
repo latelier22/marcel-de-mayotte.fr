@@ -25,7 +25,7 @@ export default function Form() {
   };
   return (
     <>
-    <FormAuth title={"CONNECTEZ VOUS AVEC VOTRE EMAIL"} btnAction={"Se connectre"} handleSubmit={handleSubmit}/>
+    <FormAuth title={"CONNECTEZ VOUS AVEC VOTRE EMAIL"} btnAction={"SE CONNECTER"} handleSubmit={handleSubmit}/>
     </>
   );
 }

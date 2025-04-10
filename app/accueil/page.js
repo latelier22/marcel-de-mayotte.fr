@@ -38,7 +38,7 @@ async function Accueil() {
       <HeaderSimple photos={photos} siteTitle={site.title} title={pageTitle} />
 
       <Taxons taxons={taxons} /> {/* 👈 Ajout de la liste des taxons */}
-      <ProductCards products={productVariantsFront} />
+      {/* <ProductCards products={productVariantsFront} /> */}
 
       <Book3d />
 
