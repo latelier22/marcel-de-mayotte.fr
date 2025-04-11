@@ -19,7 +19,7 @@ jobs:
           script: |
             cd /home/debian/marcel-de-mayotte.fr
             git pull origin shop
-            rm -rf .next  # <-- supprime les build précédents si nécessaire
+            echo "Installing dependencies..."
             pnpm install
             pnpm run build
             pm2 restart 0

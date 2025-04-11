@@ -37,7 +37,7 @@ async function Accueil() {
       <Navbar />
       <HeaderSimple photos={photos} siteTitle={site.title} title={pageTitle} />
       
-      <ImageSlider images={expoImages} title={"Tableaux exposés en 2025"} slug={"expo-2025"}/> {/* 👈 Ajout du slider ici */}
+      <ImageSlider images={expoImages} title={"Tableaux exposés en 2025..."} slug={"expo-2025"}/> {/* 👈 Ajout du slider ici */}
 
       <Citation citations={citations} section={sections[0]} />
       
