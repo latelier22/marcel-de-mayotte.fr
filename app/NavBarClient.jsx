@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+
 import { site } from "./site";
 import Link from "next/link";
 import VisibilityToggleButton from "./components/album/icons/VisibilityToggleButton";
@@ -15,6 +18,13 @@ import { Heart, Star } from "./components/album/icons";
 
 const shopUrl = process.env.NEXT_PUBLIC_SHOP_URL;
 
+const resolveRoute = (route) => {
+  if (route.startsWith("/shop")) {
+    return `${shopUrl}/fr_FR${route.slice(5)}`;
+  }
+  return route;
+};
+
 const NavbarClient = () => {
   const menuItems = useMenuStore((state) => state.menuItems);
   const { data: session } = useSession();
@@ -22,7 +32,6 @@ const NavbarClient = () => {
   const isVisible = useSelector(state => state.visible.isVisible);
   const isShowAdmin = useSelector(state => state.showAdmin.isShowAdmin);
   const router = useRouter();
-  const [showBoutiqueMenu, setShowBoutiqueMenu] = useState(false);
 
   // Séparer l'item ADMIN des autres items de menu
   const regularMenuItems = menuItems.filter(item => item.route !== '/admin');
@@ -72,81 +81,51 @@ const NavbarClient = () => {
 
           <div className="hidden grow basis-[100%] items-center lg:!flex lg:basis-auto ml-auto" id="navbarSupportedContentY" data-te-collapse-item>
             <ul className="flex flex-col lg:flex-row flex-wrap lg:justify-end" data-te-navbar-nav-ref>
-              {regularMenuItems.map((menuItem) => (
-                <li key={menuItem.id} className="lg:mb-0 lg:pl-2" data-te-nav-item-ref>
-                  {menuItem.children && menuItem.children.length ? (
-                    <Dropdown className="" item={menuItem} />
-                  ) : menuItem.label === "BOUTIQUE" ? (
-                    <a
-                      className="font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90"
-                      href={shopUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {getIconForRoute(menuItem.route)}
-                      {menuItem.label}
-                    </a>
-                  ) : (
-                    <a
-                      className="font-lien flex flex-row transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90"
-                      href={menuItem.route}
-                      data-te-nav-link-ref
-                      data-te-ripple-init
-                      data-te-ripple-color="light"
-                    >
-                      {getIconForRoute(menuItem.route)}
-                      {menuItem.label}
-                    </a>
-                  )}
-                </li>
-              ))}
-
-{/* <li className="relative lg:mb-0 lg:pl-2 group">
-  <span className="font-lien flex items-center cursor-pointer transition duration-150 text-black hover:text-gold-800 dark:text-gold-200 dark:hover:text-gold-800 lg:p-2">
-    Boutique
-    <svg className="ml-1 w-4 h-4 fill-current" viewBox="0 0 20 20">
-      <path d="M5.25 7.5l4.75 5 4.75-5H5.25z" />
-    </svg>
-  </span> */}
-
-  {/* menu principal */}
-  {/* <div className="absolute top-full left-0 hidden group-hover:flex flex-col bg-white text-black rounded-md shadow-lg z-50 min-w-[220px]">
-    {taxons.map((taxon) => (
-      <div key={taxon.id} className="relative group/taxon">
-        <Link
-          href={`${shopUrl}/fr_FR/taxons/${taxon.slug}`}
-          className="block px-4 py-2 whitespace-nowrap hover:bg-gray-100 flex justify-between items-center"
-        >
-          {taxon.name}
-          {taxon.children?.length > 0 && (
-            <svg className="w-3 h-3 ml-2 fill-current" viewBox="0 0 20 20">
-              <path d="M7.5 5.25l5 4.75-5 4.75V5.25z" />
-            </svg>
+            {regularMenuItems.map((menuItem) => (
+  <li
+    key={menuItem.id}
+    className={`lg:mb-0 lg:pl-2 ${menuItem.label === 'BOUTIQUE' ? 'bg-cyan-500' : ''}`}
+    data-te-nav-item-ref
+  >
+    {menuItem.children && menuItem.children.length > 0 ? (
+      <div className="relative group">
+        <span className="font-lien flex items-center cursor-pointer transition duration-150 text-black hover:text-gold-800 dark:text-gold-200 dark:hover:text-gold-800 lg:p-2">
+          {menuItem.label === 'BOUTIQUE' && (
+            <ShoppingCartIcon className="h-5 w-5 mr-2" />
           )}
-        </Link>
-
-        {/* sous-menu enfants */}
-        {/* {taxon.children?.length > 0 && (
-          <div className="absolute top-0 left-full hidden group-hover/taxon:flex flex-col bg-white text-black rounded-md shadow-lg z-50 min-w-[200px]">
-            {taxon.children.map((child) => (
-              <Link
-                key={child.id}
-                href={`${shopUrl}/fr_FR/taxons/${child.slug}`}
-                className="block px-4 py-2 whitespace-nowrap hover:bg-gray-100"
-              >
-                {child.name}
-              </Link>
-            ))}
-          </div>
-        )}
+          {menuItem.label}
+          <svg className="ml-1 w-4 h-4 fill-current" viewBox="0 0 20 20">
+            <path d="M5.25 7.5l4.75 5 4.75-5H5.25z" />
+          </svg>
+        </span>
+        <div className="absolute top-full left-0 hidden group-hover:flex flex-col bg-white text-black rounded-md shadow-lg z-50 min-w-[220px]">
+          {menuItem.children.map((child) => (
+            <a
+              key={child.id}
+              href={resolveRoute(child.route)}
+              className="block px-4 py-2 whitespace-nowrap hover:bg-gray-100"
+            >
+              {child.label}
+            </a>
+          ))}
+        </div>
       </div>
-    ))}
-  </div> */}
-{/* </li> */}
-
-
-
-
+    ) : (
+      <a
+        className="font-lien flex flex-row items-center transition duration-150 text-black ease-in-out hover:text-gold-800 focus:text-gold-500 disabled:text-black/30 dark:text-gold-200 dark:hover:text-gold-800 dark:focus:text-gold-500 lg:p-2 [&.active]:text-black/90"
+        href={resolveRoute(menuItem.route)}
+        data-te-nav-link-ref
+        data-te-ripple-init
+        data-te-ripple-color="light"
+      >
+        {menuItem.label === 'BOUTIQUE' && (
+          <ShoppingCartIcon className="h-5 w-5 mr-2" />
+        )}
+        {menuItem.label}
+      </a>
+    )}
+  </li>
+))}
 
               {session ? (
                 <>
