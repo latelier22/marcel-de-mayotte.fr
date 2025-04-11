@@ -23,3 +23,5 @@ jobs:
             pnpm run build
             pm2 restart 0
             echo "Deployment completed successfully."
+
+ 
