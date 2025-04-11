@@ -1,0 +1,25 @@
+name: Deploy on push to shop
+
+on:
+  push:
+    branches:
+      - shop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: vps.latelier22.fr
+          username: debian
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/marcel-de-mayotte.fr
+            git pull origin shop
+            pnpm install
+            pnpm run build
+            pm2 restart 0
+            echo "Deployment completed successfully."
