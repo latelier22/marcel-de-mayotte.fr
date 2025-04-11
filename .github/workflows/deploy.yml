@@ -15,7 +15,7 @@ jobs:
         with:
           host: vps.latelier22.fr
           username: debian
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_MARCEL }}
           script: |
             cd ~/marcel-de-mayotte.fr
             git pull origin shop
