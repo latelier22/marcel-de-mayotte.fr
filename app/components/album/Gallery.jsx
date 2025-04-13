@@ -109,7 +109,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   const router = useRouter();
 
 
-  const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 100); // Valeur par défaut
+  const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 1500); // Valeur par défaut
   const [currentPage, setCurrentPage] = useState(parseInt(queryCurrentPage) || 1); // Valeur par défaut
 
 

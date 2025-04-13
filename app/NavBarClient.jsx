@@ -121,7 +121,7 @@ const NavbarClient = () => {
               );
             })}
 
-{session ? (
+            {session ? (
               <>
                 <li className="lg:mb-0 lg:pl-2">
                   <button
