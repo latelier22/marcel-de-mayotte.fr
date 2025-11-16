@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import Image from "next/image"; // 🔹 AJOUT : on importe Image de Next
 
 // import DotLoaderSpinner from "../../components/spinners/DotLoaderSpinner";
 import UploadImageComponent from "./UploadImageComponent";
@@ -45,6 +44,10 @@ import { Button } from "@mantine/core";
 const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPerPage = { photosPerPage }, queryCurrentPage = { currentPage } }) => {
   const { data: session } = useSession();
   // const [cookies, setCookie] = useCookies(['hideDragAlert']);
+
+
+
+
 
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
@@ -186,6 +189,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     closeDeleteConfirmationModal();
     await handleDeleteSelectedPhotos();
   };
+
+
+
+
+
+
+
 
   // const localTag = allMyTags.filter((t) => t.slug === tagSlug);
   // const tagSlugName = localTag && localTag[0].name;
@@ -1545,6 +1555,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         };
       });
 
+
+
+
       console.log("newPhotos", newPhotos)
       setPhotos((prevPhotos) => [...newPhotos, ...prevPhotos]);
 
@@ -1924,6 +1937,37 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                       </>
                     )}
                   </TagCrudModal>
+
+                  {/* <div>
+                  <h4 className="text-lg text-center font-semibold">
+                    Autres Tags
+                  </h4>
+                  <div className="mt-4 flex flex-col">
+                    {unusedTags.map((tag) => {
+                      return (
+                        <div
+                          className="flex items-center justify-between"
+                          key={tag.id}
+                        >
+                          <button
+                            className={`flex flex-col w-[95%] items-center justify-between flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2 ${
+                              tag.mainTag ? "border-4  border-black" : ""
+                            }`}
+                            onClick={() => handleTagClick(tag.name)}
+                          >
+                            {tag.name}
+                          </button>
+                          <input
+                            type="checkbox"
+                            checked={tag.mainTag}
+                            onChange={() => handleToggleMainTag(tag.id)}
+                            className="ml-2"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div> */}
                 </div>
                 <PublishedModal
                   isOpen={showPublishedModal}
@@ -2226,8 +2270,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             layout="rows"
             targetRowHeight={zoomGallery}
             onClick={({ index }) => setIndex(index)}
-            // 🔹 ICI : on ne prend plus renderDefaultPhoto
-            renderPhoto={({ photo, wrapperStyle }) => {
+            renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
               const getBorderStyle = (photo) => {
                 if (selectedPhotoIds.includes(photo.id)) {
                   return "8px solid green";
@@ -2240,10 +2283,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
               return (
                 <>
+
                   <div
+
                     key={photo.id}
                     onClick={(e) => handlePhotoClick(e, photo.id)}
-                    onDragStart={handleDragStart}
+                    onDragStart={handleDragStart} // Ajoutez le gestionnaire onDragStart ici
                     style={{
                       ...wrapperStyle,
                       border: getBorderStyle(photo),
@@ -2252,41 +2297,42 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                       maxWidth: "33.33%",
                     }}
                     className="mb-4"
+
                     title={photo.src}
                   >
                     {zoomGallery >= 200 && (
-                      <>
-                        <div className="text-white text-sm font-mono text-center mb-1">
-                          ID: {photo.id}
-                        </div>
-                        <EditableButton
-                          text={titles[photo.id] || ""}
-                          onChange={(e) => {
-                            const newTitles = {
-                              ...titles,
-                              [photo.id]: e.target.value,
-                            };
-                            setTitles(newTitles);
-                          }}
-                          onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
-                          isEditable={!isReadOnly}
-                          inputRef={inputRef}
-                        />
-                        {!titles[photo.id] && (
-                          <>
-                            <s className="text-white bg-transparent text-center w-full absolute -bottom-7">
-                              {photo.name}
-                            </s>
-                            <input
-                              className="absolute -bottom-7"
-                              title="Utiliser le nom comme titre"
-                              type="checkbox"
-                              onChange={() => handleCheckboxChange(photo.id)}
-                            />
-                          </>
-                        )}
-                      </>
-                    )}
+  <>
+    <div className="text-white text-sm font-mono text-center mb-1">
+      ID: {photo.id}
+    </div>
+    <EditableButton
+      text={titles[photo.id] || ""}
+      onChange={(e) => {
+        const newTitles = {
+          ...titles,
+          [photo.id]: e.target.value,
+        };
+        setTitles(newTitles);
+      }}
+      onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
+      isEditable={!isReadOnly}
+      inputRef={inputRef}
+    />
+    {!titles[photo.id] && (
+      <>
+        <s className="text-white bg-transparent text-center w-full absolute -bottom-7">
+          {photo.name}
+        </s>
+        <input
+          className="absolute -bottom-7"
+          title="Utiliser le nom comme titre"
+          type="checkbox"
+          onChange={() => handleCheckboxChange(photo.id)}
+        />
+      </>
+    )}
+  </>
+)}
 
                     {zoomGallery >= 200 && (
                       <button
@@ -2345,7 +2391,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                                 type="text"
                                 placeholder="Search tags..."
                                 value={photoTagSearch}
-                                onClick={(e) => e.stopPropagation()}
+                                onClick={(e) => e.stopPropagation()} // Ajoutez ceci pour empêcher la désélection
                                 onChange={(e) =>
                                   setPhotoTagSearch(e.target.value)
                                 }
@@ -2506,15 +2552,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                         <Star isOpen={recentPhotos.has(photo.id)} />
                       </button>
                     )}
-
-                    {/* 🔹 ICI : on remplace renderDefaultPhoto par Image de Next */}
-                    <Image
-                      src={photo.src}
-                      alt={photo.title || photo.name || ""}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      style={{ objectFit: "cover" }}
-                    />
+                    {renderDefaultPhoto({ wrapped: true })}
                   </div>
                 </>
               );
@@ -2529,6 +2567,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
             zoom={{
               maxZoomPixelRatio: 3,
+              // zoomInMultiplier,
+              // doubleTapDelay,
+              // doubleClickDelay,
+              // doubleClickMaxStops,
+              // keyboardMoveDistance,
+              // wheelZoomDistanceFactor,
+              // pinchZoomDistanceFactor,
               scrollToZoom: true,
             }}
           />
