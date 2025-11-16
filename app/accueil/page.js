@@ -24,7 +24,7 @@ async function Accueil() {
   const citations = await getCitations({ onlyPublished });
   const expoImages = await getImagesbyTag("expo-2025",null);
 
-  const prepaImages = await getImagesbyTag("sallertaine-preparation",null);
+  // const prepaImages = await getImagesbyTag("sallertaine-preparation",null);
 
   const taxons = await getTaxons(); // 👈 fetch server-side depuis /shop
   // const productVariantsFront = await getProductVariantsFront(); // 👈 fetch server-side depuis /shop
@@ -41,13 +41,13 @@ async function Accueil() {
 
       <Citation citations={citations} section={sections[0]} />
       
-      <Taxons taxons={taxons} /> 
+      {/* <Taxons taxons={taxons} />  */}
       {/* 👈 Ajout de la liste des taxons */}
       {/* <ProductCards products={productVariantsFront} /> */}
 
       <Book3d />
 
-      <ImageSlider images={prepaImages} title={"Préparatifs de l'exposition à Sallertaine, du 4 au 6 avril 2025"} slug={"sallertaine-preparation"}/> 
+      {/* <ImageSlider images={prepaImages} title={"Préparatifs de l'exposition à Sallertaine, du 4 au 6 avril 2025"} slug={"sallertaine-preparation"}/>  */}
 
 
       <Banner photo={photos[0]} />
