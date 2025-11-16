@@ -281,7 +281,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const handleSelectAll = () => {
-    const allPhotoIds = paginatedPhotos
+    const allPhotoIds = cleanedPaginatedPhotos
       .filter((photo) => isVisible || photo.published)
       .map((photo) => photo.id);
     setSelectedPhotoIds(allPhotoIds);
@@ -933,6 +933,18 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     return sortedAndFilteredPhotos.slice(startIndex, endIndex);
   }, [currentPage, photosPerPage, sortedAndFilteredPhotos]);
 
+  const cleanedPaginatedPhotos = useMemo(
+  () =>
+    cleanedPaginatedPhotos.map((photo) => ({
+      ...photo,
+      src:
+        typeof photo.src === "string"
+          ? photo.src.split("?")[0] // <-- ICI on enlève ?format=...
+          : photo.src,
+    })),
+  [paginatedPhotos]
+);
+
   const totalPages = useMemo(() => {
     return Math.ceil(sortedAndFilteredPhotos.length / photosPerPage);
   }, [photosPerPage, sortedAndFilteredPhotos]);
@@ -1011,7 +1023,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const togglePublished = async (photoId, published) => {
-    console.log("tog pub : ", photoId, published, paginatedPhotos);
+    console.log("tog pub : ", photoId, published, cleanedPaginatedPhotos);
 
     const newPhotos = photos.map((photo) => {
       if (photo.id === photoId) {
@@ -1361,20 +1373,25 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     }
   };
 
-  const ImageWithFallback = ({ file }) => {
-    const thumbnailUrl =
-      file.formats && file.formats.thumbnail
-        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.formats.thumbnail.url}`
-        : `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.url}`;
+ const ImageWithFallback = ({ file }) => {
+  const rawThumb =
+    file.formats && file.formats.thumbnail
+      ? file.formats.thumbnail.url
+      : file.url;
 
-    return (
-      <img
-        src={thumbnailUrl}
-        alt={file.name}
-        style={{ width: 100, height: "auto" }}
-      />
-    );
-  };
+  const thumbnailUrl = `${process.env.NEXT_PUBLIC_STRAPI_URL}${
+    rawThumb.split("?")[0]   // <-- encore le coupeur de ?format
+  }`;
+
+  return (
+    <img
+      src={thumbnailUrl}
+      alt={file.name}
+      style={{ width: 100, height: "auto" }}
+    />
+  );
+};
+
 
   const handleFileClick = (fileId) => {
     console.log(
@@ -2265,7 +2282,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
           </div>
 
           <PhotoAlbum
-            photos={paginatedPhotos}
+            photos={cleanedPaginatedPhotos}
             spacing={zoomGallery / 7}
             layout="rows"
             targetRowHeight={zoomGallery}
@@ -2562,7 +2579,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             open={isActive && index >= 0}
             index={index}
             close={() => setIndex(-1)}
-            slides={paginatedPhotos}
+            slides={cleanedPaginatedPhotos}
             render={{ slide: NextJsImage }}
             plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
             zoom={{
