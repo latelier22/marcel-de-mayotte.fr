@@ -4,14 +4,12 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 
-
-// import DotLoaderSpinner from "../../components/spinners/DotLoaderSpinner";
 import UploadImageComponent from "./UploadImageComponent";
 import { useRouter } from "next/navigation";
-import { getCookies, setCookie, deleteCookie, getCookie } from 'cookies-next';
+import { getCookie, setCookie } from "cookies-next";
 
 import FavoriteModal from "../Modals/Modal";
-import DragAlertModal from "../Modals/Modal"
+import DragAlertModal from "../Modals/Modal";
 import TagModal from "../Modals/Modal";
 import RecentsModal from "../Modals/Modal";
 import PublishedModal from "../Modals/Modal";
@@ -35,7 +33,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { Eye, Star, Htag, Heart, Trash, Upload, ZoomIn, ZoomOut } from "./icons";
 import EditableButton from "./buttons/EditableButton";
-import NavigationButtons from "./buttons/NavigationButtons"
+import NavigationButtons from "./buttons/NavigationButtons";
 
 import { useSelector } from "react-redux";
 
@@ -43,13 +41,16 @@ import myFetch from "../../components/myFetch";
 import ChangeOrderButton from "./ChangeOrderButton";
 import { Button } from "@mantine/core";
 
-const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPerPage = { photosPerPage }, queryCurrentPage = { currentPage } }) => {
+// ATTENTION : j’ai gardé ta signature telle qu’elle était
+const Gallery = ({
+  photos: initialPhotos,
+  allTags,
+  tagSlug,
+  tagId,
+  queryPhotosPerPage = { photosPerPage },
+  queryCurrentPage = { currentPage },
+}) => {
   const { data: session } = useSession();
-  // const [cookies, setCookie] = useCookies(['hideDragAlert']);
-
-
-
-
 
   const [favorites, setFavorites] = useState(new Set());
   const [index, setIndex] = useState(-1);
@@ -106,26 +107,21 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
   const [doNotShowAgain, setDoNotShowAgain] = useState(false);
 
-  // Utilisation de la fonction de navigation
-
   const router = useRouter();
 
-
-  const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 1500); // Valeur par défaut
-  const [currentPage, setCurrentPage] = useState(parseInt(queryCurrentPage) || 1); // Valeur par défaut
-
-
+  const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 1500);
+  const [currentPage, setCurrentPage] = useState(parseInt(queryCurrentPage) || 1);
 
   const handleChangePhotosPerPage = (number) => {
     setPhotosPerPage(number);
-    setCurrentPage(1); // Réinitialiser à la première page
+    setCurrentPage(1);
     router.push({
       pathname: router.pathname,
       query: {
         ...router.query,
         photosPerPage: number,
-        currentPage: 1
-      }
+        currentPage: 1,
+      },
     });
   };
 
@@ -136,30 +132,28 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       query: {
         ...router.query,
         photosPerPage: photosPerPage,
-        currentPage: newPage
-      }
+        currentPage: newPage,
+      },
     });
   };
 
-  // Exemple de fonction de navigation
   const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
     router.push({
       pathname: `/catalogue/${tagSlug}`,
       query: {
         photosPerPage: photosPerPage,
-        currentPage: currentPage
-      }
+        currentPage: currentPage,
+      },
     });
   };
 
   useEffect(() => {
-    const hideDragAlert = getCookie('hideDragAlert') === 'true';
+    const hideDragAlert = getCookie("hideDragAlert") === "true";
     setDoNotShowAgain(hideDragAlert);
   }, []);
 
   const handleDragStart = (event) => {
-    event.preventDefault(); // Empêche le glissement
-    
+    event.preventDefault();
     if (!doNotShowAgain) {
       setShowDragAlertModal(true);
     }
@@ -167,17 +161,14 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
   const handleCloseDragModal = () => {
     if (doNotShowAgain) {
-      setCookie('hideDragAlert', 'true', { path: '/' });
+      setCookie("hideDragAlert", "true", { path: "/" });
     }
-    setShowDragAlertModal(false); // Ferme la modal
+    setShowDragAlertModal(false);
   };
-
 
   const handleUpdatePhotos = (newPhotos) => {
     setPhotos((prevPhotos) => [...prevPhotos, ...newPhotos]);
   };
-
-
 
   const openDeleteConfirmationModal = () => {
     setShowDeleteConfirmationModal(true);
@@ -192,17 +183,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     await handleDeleteSelectedPhotos();
   };
 
-
-
-
-
-
-
-
-  // const localTag = allMyTags.filter((t) => t.slug === tagSlug);
-  // const tagSlugName = localTag && localTag[0].name;
-
-  // Définir le nom de la catégorie pour le tagSlug et CAS si tagSlug =favoris
   const localTag = allMyTags.filter((t) => t.slug === tagSlug);
   const tagSlugName =
     tagSlug === "favoris" ? "CATALOGUE COMPLET" : localTag[0]?.name || "";
@@ -210,10 +190,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   const filteredTags = (tags) => {
     if (!photoTagSearch) return tags;
     return tags.filter(
-      (tag) =>
-        tag &&
-        tag.name &&
-        tag.name.toLowerCase().includes(photoTagSearch.toLowerCase())
+      (tag) => tag && tag.name && tag.name.toLowerCase().includes(photoTagSearch.toLowerCase())
     );
   };
 
@@ -223,10 +200,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const handleTagClickForPhoto = async (photoId, tagName) => {
-   
-    setSelectedPhotoIds([photoId]); // Select the clicked photo
-
-    // Call your function to add the tag
+    setSelectedPhotoIds([photoId]);
     await updateTagInBulk(true, tagName);
     setPhotoTagSearch("");
   };
@@ -236,7 +210,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     await handleAddTag(tagName);
     setSelectedPhotoIds([photoId]);
     await updateTagInBulk(true, tagName);
-    // Update local state to reflect the removed tag
     setPhotos((prevPhotos) =>
       prevPhotos.map((photo) => {
         if (photo.id === photoId) {
@@ -251,10 +224,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   }
 
   const handleRemoveTagForPhoto = async (photoId, tagName) => {
-    // Call your function to remove the tag
     await updateTagInBulk(false, tagName);
 
-    // Update local state to reflect the removed tag
     setPhotos((prevPhotos) =>
       prevPhotos.map((photo) => {
         if (photo.id === photoId) {
@@ -266,10 +237,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         return photo;
       })
     );
-
-    // Update localTags to remove the tag from used tags if it's no longer used
-    // const photoTagNames = photos.flatMap(photo => photo.tags.map(tag => tag.name));
-    // setLocalTags(localTags.filter(tag => photoTagNames.includes(tag)));
   };
 
   const getNonPhotoUsedTags = (photo) => {
@@ -315,10 +282,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
         setSelectedPhotoIds([]);
       }
     };
@@ -383,7 +347,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     setUnusedTags([...newUnusedTags.mainTags, ...newUnusedTags.otherTags]);
   }, [allMyTags, photos, isShowAdmin]);
 
-
   const isTagNameExist = (tagName) => {
     return allMyTags.some((tag) => tag.name === tagName);
   };
@@ -404,19 +367,14 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             url: `generated-url-for-${trimmedTagName}`,
           },
         ]);
-        // toast.success(`Tag "${trimmedTagName}" added successfully!`);
 
-        // Update selected photos with the new tag if there are any selected
         if (selectedPhotoIds.length > 0) {
           await updateTagInBulk(true, createdTag.name);
         }
         return createTag;
       } catch (error) {
         console.error("Failed to create tag:", error);
-        // toast.error(`Failed to add tag: ${error.message}`)
       }
-    } else {
-      // toast.error("This tag already exists or invalid tag name!");
     }
   }
 
@@ -457,18 +415,14 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
       const newTags = allMyTags.filter((tag) => tag.name !== tagName);
       setAllMyTags(newTags);
-      // toast.success(`Tag "${tagName}" removed successfully!`);
     } catch (error) {
       console.error("Error deleting tag:", error);
-      // toast.error(`Failed to delete tag: ${error.message}`);
     }
   };
 
   const handleDeleteTag = (tagName) => {
     if (allMyTags.some((tag) => tag.name === tagName)) {
       deleteTag(tagName);
-    } else {
-      // toast.error("Tag does not exist!");
     }
   };
 
@@ -477,12 +431,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     newTagName = newTagName.trim();
 
     if (!isTagNameExist(oldTagName)) {
-      // toast.error("Original tag does not exist.");
       return;
     }
 
     if (oldTagName === newTagName) {
-      // toast.info("No changes detected.");
       return;
     }
 
@@ -505,13 +457,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
           tag.name === oldTagName ? { ...tag, name: newTagName } : tag
         );
         setAllMyTags(newTags);
-        // toast.success(`Tag "${oldTagName}" updated to "${newTagName}" successfully!`);
-      } else {
-        // toast.error(result.message);
       }
     } catch (error) {
       console.error("Failed to update the tag:", error);
-      // toast.error(`Error updating tag: ${error.message}`);
     }
   };
 
@@ -540,7 +488,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     return Array.from(tags);
   }, [photos, isVisible]);
 
-  // Séparer les tags utilisés et non utilisés
   const mainUsedTags = allMyTags.filter(
     (tag) => tag.mainTag && localTags.includes(tag.name)
   );
@@ -560,8 +507,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   const filteredMainUnusedTags = mainUnusedTags.filter((tag) =>
     tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
-  const filteredOtherUnusedTags = otherUnusedTags.filter((tag) =>
-    tag.name && tag.name.toLowerCase().includes(tagSearch.toLowerCase())
+  const filteredOtherUnusedTags = otherUnusedTags.filter(
+    (tag) => tag.name && tag.name.toLowerCase().includes(tagSearch.toLowerCase())
   );
 
   useEffect(() => {
@@ -625,12 +572,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         newTagStatus[tag] = isTagInAll
           ? "bg-green-500"
           : isTagInSome
-            ? "bg-orange-500"
-            : "bg-red-500";
+          ? "bg-orange-500"
+          : "bg-red-500";
       });
     }
 
-    // Sort tags so that mainTags are first, followed by other tags alphabetically
     const sortedTagStatus = Object.fromEntries(
       Object.entries(newTagStatus).sort((a, b) => {
         const tagA = allMyTags.find((t) => t.name === a[0]);
@@ -691,11 +637,18 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     const updatedPhotos = photos.map((photo) => {
       if (
         selectedPhotoIds.includes(photo.id) &&
+        addTag &&
         !photo.tags.find((t) => t.name === tag)
       ) {
         return {
           ...photo,
           tags: [...photo.tags, { name: tag, id: Date.now() }],
+        };
+      }
+      if (!addTag && selectedPhotoIds.includes(photo.id)) {
+        return {
+          ...photo,
+          tags: photo.tags.filter((t) => t.name !== tag),
         };
       }
       return photo;
@@ -715,10 +668,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       if (!response.ok) {
         throw new Error("Failed to update tags on the server");
       }
-      // toast.success("Tags updated successfully!");
     } catch (error) {
       console.error("Failed to update tags:", error);
-      // toast.error("Error updating tags.");
     }
   };
 
@@ -775,19 +726,16 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     }
   };
 
-
   const handleDeleteButtonClick = async (photoId) => {
     try {
-      // Vérifier si la photo est importée
       const strapiResponse = await myFetch(
         `/api/pictures?filters[photoId][$eq]=${photoId}`,
         "GET",
         null,
         "photo import status"
       );
-      const picture = strapiResponse.data[0]; // On suppose qu'il n'y a qu'une seule photo avec cet ID
+      const picture = strapiResponse.data[0];
 
-      // Si la photo est importée, mettre à jour son état pour refléter qu'elle n'est plus importée
       if (picture && picture.attributes.imported) {
         await myFetch(
           `/api/pictures/${picture.id}`,
@@ -801,7 +749,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         );
       }
 
-      // Supprimer la photo
       const response = await fetch(`/api/deletePhoto`, {
         method: "DELETE",
         headers: {
@@ -814,11 +761,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         throw new Error("Failed to delete the photo");
       }
 
-      // Mettre à jour l'état des photos après suppression
-      setPhotos((prevPhotos) =>
-        prevPhotos.filter((photo) => photo.id !== photoId)
-      );
-      // toast.success("Photo deleted successfully!");
+      setPhotos((prevPhotos) => prevPhotos.filter((photo) => photo.id !== photoId));
     } catch (error) {
       console.error("Delete failed:", error);
       toast.error("Failed to delete photo");
@@ -848,19 +791,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         await handleDeleteButtonClick(photoId);
       }
       setSelectedPhotoIds([]);
-      // toast.success("Photos deleted successfully!");
     } catch (error) {
       console.error("Failed to delete photos:", error);
-      // toast.error("Failed to delete photos");
     }
   };
 
   const handleTagButtonClick = (photoId) => {
-    photos.forEach((photo) => {
-      if (selectedPhotoIds.includes(photo.id)) {
-      }
-    });
-
     const isSelected = selectedPhotoIds.includes(photoId);
     let newSelectedPhotoIds = selectedPhotoIds.slice();
 
@@ -873,9 +809,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     setSelectedPhotoIds(newSelectedPhotoIds);
   };
 
-  useEffect(() => {
-   
-  }, [selectedPhotoIds]);
+  useEffect(() => {}, [selectedPhotoIds]);
 
   const handleTagSelection = (tagId) => {
     const isSelected = selectedTags.includes(tagId);
@@ -886,7 +820,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       setSelectedTags([...selectedTags, tagId]);
     }
   };
-
 
   function normalizeString(str) {
     return str
@@ -914,9 +847,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       );
     }
 
-    return filteredPhotos; // Remove additional sorting here
+    return filteredPhotos;
   }, [photos, isAdmin, isVisible, searchTerm]);
-
 
   useEffect(() => {
     const initialFavorites = photos.reduce((favoritesSet, photo) => {
@@ -940,11 +872,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   }, [photosPerPage, sortedAndFilteredPhotos]);
 
   const goToNextPage = () => {
-    setCurrentPage(currentPage + 1);
+    setCurrentPage((p) => (p < totalPages ? p + 1 : p));
   };
 
   const goToPreviousPage = () => {
-    setCurrentPage(currentPage - 1);
+    setCurrentPage((p) => (p > 1 ? p - 1 : p));
   };
 
   const changePhotosPerPage = (number) => {
@@ -1002,19 +934,13 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
           );
           setPublishedPhotos(remainingPhotos);
         }
-        // toast.success("Mise à jour réussie!");
-      } else {
-        // throw new Error("Failed to update the photo tags");
       }
     } catch (error) {
       console.error("Failed to toggle recent tag:", error);
-      // toast.error("Erreur lors de la mise à jour des photos récentes.");
     }
   };
 
   const togglePublished = async (photoId, published) => {
-   
-
     const newPhotos = photos.map((photo) => {
       if (photo.id === photoId) {
         return { ...photo, published: !photo.published };
@@ -1052,8 +978,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       selectedPhotoIds.includes(photo.id)
     );
 
-    
-
     setShowPublishedModal(true);
     setModalContent("Que voulez-vous faire? :");
   };
@@ -1064,7 +988,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const updatePublishedsInBulk = async (selectedPhotoIds, makePublished) => {
-    // Mettre à jour l'état local avant l'appel à l'API pour un retour visuel rapide
     const newPhotos = photos.map((photo) => {
       if (selectedPhotoIds.includes(photo.id)) {
         return { ...photo, published: makePublished };
@@ -1096,7 +1019,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       toast.error(
         "Erreur lors de la mise à jour des Images publiées en masse."
       );
-      // Revert local state in case of error
       setPhotos((prevPhotos) =>
         prevPhotos.map((photo) =>
           selectedPhotoIds.includes(photo.id)
@@ -1112,8 +1034,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       selectedPhotoIds.includes(photo.id)
     );
 
-    
-
     setShowRecentsModal(true);
     setModalContent("Que voulez-vous faire? :");
   };
@@ -1128,11 +1048,18 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     const updatedPhotos = photos.map((photo) => {
       if (
         selectedPhotoIds.includes(photo.id) &&
+        addTag &&
         !photo.tags.find((t) => t.name === tagName)
       ) {
         return {
           ...photo,
           tags: [...photo.tags, { name: tagName, id: Date.now() }],
+        };
+      }
+      if (!addTag && selectedPhotoIds.includes(photo.id)) {
+        return {
+          ...photo,
+          tags: photo.tags.filter((t) => t.name !== tagName),
         };
       }
       return photo;
@@ -1156,10 +1083,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       if (!response.ok) {
         throw new Error("Failed to update tags on the server");
       }
-      // toast.success("Tags updated successfully!");
     } catch (error) {
       console.error("Failed to update tags:", error);
-      // toast.error("Error updating tags.");
     }
   };
 
@@ -1167,8 +1092,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     const selectedPhotos = photos.filter((photo) =>
       selectedPhotoIds.includes(photo.id)
     );
-
-   
 
     setShowFavoriteModal(true);
     setModalContent("Que voulez-vous faire? :");
@@ -1196,7 +1119,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       if (!response.ok) {
         throw new Error("Failed to update favorites in bulk");
       }
-      // toast.success("Favorites updated successfully in bulk!");
 
       const newPhotos = photos.map((photo) => {
         if (selectedPhotoIds.includes(photo.id)) {
@@ -1220,13 +1142,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         "An error occurred while updating favorites in bulk:",
         error
       );
-      // toast.error("Erreur lors de la mise à jour des favoris en masse.");
     }
   };
 
   const toggleFavorite = async (photoId) => {
     if (!session) {
-      // toast.info("Veuillez vous connecter ou vous inscrire pour mémoriser vos favoris.");
+      toast.info("Veuillez vous connecter ou vous inscrire pour mémoriser vos favoris.");
       return;
     }
 
@@ -1251,7 +1172,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const updateFavoriteOnServer = async (photoId, toggleFavorite, userId) => {
-   
     try {
       const response = await fetch(`/api/updateFavorite`, {
         method: "POST",
@@ -1266,12 +1186,10 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       }
     } catch (error) {
       console.error("An error occurred while updating favorites:", error);
-      // toast.error("Erreur lors de la mise à jour des favoris.");
     }
   };
 
   const handleToggleMainTag = async (tagId) => {
-   
     try {
       const response = await fetch(`/api/toggleMainTag/${tagId}`, {
         method: "GET",
@@ -1286,41 +1204,27 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         throw new Error(result.message || "Failed to toggle main tag status");
       }
 
-      // Update the tag's mainTag status in state
       setAllMyTags((prevTags) =>
         prevTags.map((tag) =>
           tag.id === tagId ? { ...tag, mainTag: !tag.mainTag } : tag
         )
       );
-      // toast.success("Tag updated successfully!");
     } catch (error) {
       console.error("Failed to toggle main tag status:", error);
-      // toast.error("Failed to update tag status.");
     }
   };
 
   const handleShowImported = () => {
-    // Get the photoIds of the selected files
     const selectedPhotoIds = selectedFileIds
       .map((fileId) => {
         const picture = allPictures.find((p) => p.fileId === fileId);
         return picture ? picture.photoId : null;
       })
-      .filter((photoId) => photoId !== null); // Filter out null values
+      .filter((photoId) => photoId !== null);
 
-    // Save selected photo IDs to local storage
     localStorage.setItem("selectedPhotoIds", JSON.stringify(selectedPhotoIds));
-
-    const storedPhotoIds = localStorage.getItem("selectedPhotoIds");
-    if (storedPhotoIds) {
-      
-    }
-
-    // Navigate to the /catalogue/import page
     router.push("/catalogue/import");
   };
-
-
 
   const handleUploadImage = async (event) => {
     const selectedFiles = event.target.files;
@@ -1346,7 +1250,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
           published: false,
           imported: false,
           uploadedAt: new Date(file.updatedAt),
-          posts: [], // Initialize posts as an empty array for new files
+          posts: [],
         }));
         setFiles((prevFiles) => [...prevFiles, ...newFiles]);
 
@@ -1376,8 +1280,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         numero: file.id,
         name: file.name,
         dimensions: `${file.width}x${file.height}`,
-        // url: `${file.url}?format=webp&width=800`,
-        url: file.url.split('?')[0],
+        // IMPORTANT : PAS DE ?format=webp ICI
+        url: file.url.split("?")[0],
         width: file.width,
         height: file.height,
         title: file.name.replace(/\.[^/.]+$/, ""),
@@ -1386,7 +1290,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         tags: [...file.tags, "CATALOGUE COMPLET"],
       }));
 
-      // Make sure this is only called once per import action
       const response = await fetch("/api/importPhotos", {
         method: "POST",
         headers: {
@@ -1402,9 +1305,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       const result = await response.json();
       const photoIds = result.photoIds;
       const createdPhotos = result.createdPhotos;
-     
 
-      // Ensure the following loop does not create duplicates
       for (const [index, photoId] of photoIds.entries()) {
         const fileId = selectedFiles[index].id;
 
@@ -1437,8 +1338,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         }),
       });
 
-      const resultTag1 = await tagResponse1.json();
-      
+      await tagResponse1.json();
+
       const tagResponse2 = await fetch("/api/updateTagInBulk", {
         method: "POST",
         headers: {
@@ -1451,8 +1352,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         }),
       });
 
-      const resultTag2 = await tagResponse2.json();
-      
+      await tagResponse2.json();
+
       if (tagSlugName && tagSlugName !== "CATALOGUE COMPLET") {
         const tagResponse3 = await fetch("/api/updateTagInBulk", {
           method: "POST",
@@ -1466,11 +1367,9 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
           }),
         });
 
-        const resultTag3 = await tagResponse3.json();
-     
+        await tagResponse3.json();
       }
 
-      // Update local state to reflect imported status
       setFiles((prevFiles) =>
         prevFiles.map((file) => {
           if (selectedFileIds.includes(file.id)) {
@@ -1479,7 +1378,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
           return file;
         })
       );
-      // Prepare tags
+
       const newTags = [
         { name: "IMPORT", id: Date.now() },
         { name: "CATALOGUE COMPLET", id: Date.now() },
@@ -1488,8 +1387,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         newTags.push({ name: tagSlugName, id: Date.now() });
       }
 
-      const newPhotos = createdPhotos.map(photo => {
-        const baseURL = photo.url.startsWith('/uploads')
+      const newPhotos = createdPhotos.map((photo) => {
+        const baseURL = photo.url.startsWith("/uploads")
           ? process.env.NEXT_PUBLIC_STRAPI_URL
           : `${site.vpsServer}/images/`;
 
@@ -1506,22 +1405,19 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
           published: photo.published,
           isFavorite: photo.isFavorite,
           title: photo.title,
-          description: photo.description
+          description: photo.description,
         };
       });
 
       setPhotos((prevPhotos) => [...newPhotos, ...prevPhotos]);
 
-      console.log(photos.slice(0, 3))
-
-      setImportedFilesCount(selectedFileIds.length); // Update importedFilesCount
+      setImportedFilesCount(selectedFileIds.length);
 
       return selectedFileIds.length;
     } catch (error) {
       console.error("Failed to import images:", error);
     }
   };
-
 
   return (
     <>
@@ -1548,10 +1444,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
               </button>
               <button
                 onClick={handleRestoreSelection}
-                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${!lastSelection.length
-                  ? "bg-neutral-200 hover:bg-neutral-200"
-                  : "bg-green-700 hover:bg-green-500 text-black"
-                  }`}
+                className={`rounded-md text-white font-bold py-2 px-4 m-2 ${
+                  !lastSelection.length
+                    ? "bg-neutral-200 hover:bg-neutral-200"
+                    : "bg-green-700 hover:bg-green-500 text-black"
+                }`}
                 disabled={!lastSelection.length}
               >
                 Restaurer la sélection ({lastSelection.length})
@@ -1588,11 +1485,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                             {tag.name}
                             <Link
                               onClick={(e) => {
-                                e.stopPropagation()
+                                e.stopPropagation();
                               }}
                               key={tag.id}
                               href={`/catalogue/${tag.slug}`}
-                              className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                              className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+                            >
                               Voir
                             </Link>
                           </div>
@@ -1627,6 +1525,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                   <div className="flex flex-col mt-4">
                     {filteredOtherUsedTags.map((tag) => {
                       const color = tagStatus[tag];
+                      const tagObj = allMyTags.find((t) => t.name === tag);
                       return (
                         <div
                           className="flex items-center justify-between"
@@ -1644,8 +1543,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                                   onClick={(e) => {
                                     e.stopPropagation();
                                   }}
-                                  key={allMyTags.find((t) => t.name === tag)?.id}
-                                  href={`/catalogue/${allMyTags.find((t) => t.name === tag)?.slug}`}
+                                  key={tagObj?.id}
+                                  href={`/catalogue/${tagObj?.slug}`}
                                   className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
                                 >
                                   Voir
@@ -1675,11 +1574,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                                   -
                                 </Button>
                                 <div className="flex-none ml-4">
-                                  {tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}
+                                  {tagCounts.selectedCounts[tag] || 0} /{" "}
+                                  {tagCounts.counts[tag] || 0}
                                 </div>
                               </div>
                             </div>
-
                           </button>
                           <input
                             type="checkbox"
@@ -1720,10 +1619,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                     </button>
 
                     <button
-                      className={`bg-gray-500 border-4 rounded-md ${isShowUpload
-                        ? "border-green-500 hover:border-green-700"
-                        : ""
-                        } text-white font-bold py-2 px-4 m-2`}
+                      className={`bg-gray-500 border-4 rounded-md ${
+                        isShowUpload
+                          ? "border-green-500 hover:border-green-700"
+                          : ""
+                      } text-white font-bold py-2 px-4 m-2`}
                       onClick={() => setIsShowUpload(!isShowUpload)}
                       title={
                         isShowUpload
@@ -1735,10 +1635,11 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                     </button>
 
                     <button
-                      className={`bg-gray-500 border-2 rounded-md ${canDeleteSelection
-                        ? "border-red-500 hover:border-red-700"
-                        : " cursor-not-allowed"
-                        } text-white font-bold py-2 px-4 m-2`}
+                      className={`bg-gray-500 border-2 rounded-md ${
+                        canDeleteSelection
+                          ? "border-red-500 hover:border-red-700"
+                          : " cursor-not-allowed"
+                      } text-white font-bold py-2 px-4 m-2`}
                       onClick={
                         canDeleteSelection
                           ? openDeleteConfirmationModal
@@ -1766,16 +1667,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                     <button
                       onClick={() => openModal("add")}
                       disabled={!tagName.trim() || isTagNameExist(tagName)}
-                      className={`rounded-md ${!tagName.trim() || isTagNameExist(tagName)
-                        ? `bg-green-700`
-                        : `bg-green-500  hover:bg-green-300`
-                        }  text-white font-bold py-2 px-4 m-2`}
+                      className={`rounded-md ${
+                        !tagName.trim() || isTagNameExist(tagName)
+                          ? `bg-green-700`
+                          : `bg-green-500  hover:bg-green-300`
+                      }  text-white font-bold py-2 px-4 m-2`}
                       title={
                         !tagName.trim()
                           ? "Entrez un nom pour un nouveau tag."
                           : allMyTags.some((tag) => tag.name === tagName)
-                            ? "Ce tag existe déjà!"
-                            : "Ajouter un tag"
+                          ? "Ce tag existe déjà!"
+                          : "Ajouter un tag"
                       }
                     >
                       Add Tag
@@ -1789,8 +1691,8 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                         !tagName.trim()
                           ? "Entrez le nom du tag à supprimer."
                           : !tagName.trim() || !isTagNameExist(tagName)
-                            ? "Ce tag n'existe pas!"
-                            : "Supprimer un tag"
+                          ? "Ce tag n'existe pas!"
+                          : "Supprimer un tag"
                       }
                     >
                       Delete Tag
@@ -1804,16 +1706,23 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                         !tagName.trim()
                           ? "Entrez le nom du tag à éditer."
                           : !tagName.trim() || !isTagNameExist(tagName)
-                            ? "Ce tag n'existe pas!"
-                            : "Éditer un tag"
+                          ? "Ce tag n'existe pas!"
+                          : "Éditer un tag"
                       }
                     >
                       Edit Tag
                     </button>
                   </div>
                   {showDragAlertModal && (
-                    <DragAlertModal isOpen={showDragAlertModal} onClose={handleCloseDragModal} title="TRI MANUEL DES PHOTOS">
-                      <p>Le tri manuel des photos est désactivé. Voulez-vous trier les photos manuellement ?</p>
+                    <DragAlertModal
+                      isOpen={showDragAlertModal}
+                      onClose={handleCloseDragModal}
+                      title="TRI MANUEL DES PHOTOS"
+                    >
+                      <p>
+                        Le tri manuel des photos est désactivé. Voulez-vous
+                        trier les photos manuellement ?
+                      </p>
                       <button
                         className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
                         onClick={() => {
@@ -1827,17 +1736,22 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                         <input
                           type="checkbox"
                           checked={doNotShowAgain}
-                          onChange={(e) => setDoNotShowAgain(e.target.checked)}
+                          onChange={(e) =>
+                            setDoNotShowAgain(e.target.checked)
+                          }
                         />
-                        <label className="ml-2">Ne plus afficher ce message</label>
+                        <label className="ml-2">
+                          Ne plus afficher ce message
+                        </label>
                       </div>
                     </DragAlertModal>
                   )}
                   <TagCrudModal
                     isOpen={showTagCrudModal}
                     onClose={() => setShowTagCrudModal(false)}
-                    title={`${tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
-                      } Tag`}
+                    title={`${
+                      tagAction.charAt(0).toUpperCase() + tagAction.slice(1)
+                    } Tag`}
                   >
                     <p className="p-8">
                       Are you sure you want to {tagAction} the tag &quot;
@@ -1888,37 +1802,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                       </>
                     )}
                   </TagCrudModal>
-
-                  {/* <div>
-                  <h4 className="text-lg text-center font-semibold">
-                    Autres Tags
-                  </h4>
-                  <div className="mt-4 flex flex-col">
-                    {unusedTags.map((tag) => {
-                      return (
-                        <div
-                          className="flex items-center justify-between"
-                          key={tag.id}
-                        >
-                          <button
-                            className={`flex flex-col w-[95%] items-center justify-between flex-wrap py-2 px-4 rounded-md text-gray-800 bg-white hover:bg-gray-100 m-2 ${
-                              tag.mainTag ? "border-4  border-black" : ""
-                            }`}
-                            onClick={() => handleTagClick(tag.name)}
-                          >
-                            {tag.name}
-                          </button>
-                          <input
-                            type="checkbox"
-                            checked={tag.mainTag}
-                            onChange={() => handleToggleMainTag(tag.id)}
-                            className="ml-2"
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div> */}
                 </div>
                 <PublishedModal
                   isOpen={showPublishedModal}
@@ -2032,18 +1915,18 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                       onClick={() => handleTagClick(tag.name)}
                     >
                       <div className="flex items-center justify-between flex-wrap py-2 px-4">
-                        <div className="flex-wrap text-center">{tag.name}
+                        <div className="flex-wrap text-center">
+                          {tag.name}
                           <Link
                             onClick={(e) => {
-                              e.stopPropagation()
+                              e.stopPropagation();
                             }}
                             key={tag.id}
                             href={`/catalogue/${tag.slug}`}
-                            className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                            className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+                          >
                             Voir
                           </Link>
-
-
                         </div>
                       </div>
                     </button>
@@ -2086,11 +1969,12 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                               {tag.name}
                               <Link
                                 onClick={(e) => {
-                                  e.stopPropagation()
+                                  e.stopPropagation();
                                 }}
                                 key={tag.id}
                                 href={`/catalogue/${tag.slug}`}
-                                className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
+                                className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+                              >
                                 Voir
                               </Link>
                             </div>
@@ -2126,47 +2010,36 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             />
           </div>
           {isAdmin && isShowAdmin && isShowUpload && (
-
             <div>
               <UploadImageComponent
                 handleImportedFiles={handleImportedFiles}
                 handleImportImage={handleImportImage}
                 importedFilesCount={importedFilesCount}
                 handleUpdatePhotos={handleUpdatePhotos}
-                photos={photos} // Ajoutez cette ligne
+                photos={photos}
               />
-
-              {/* Le reste du composant Gallery */}
             </div>
           )}
           <div className="flex flex-wrap justify-center items-center gap-8 p-2 my-4 bg-neutral-700 rounded-md border border-white relative">
-            {/* Add the ChangeOrderButton here */}
-
-            {/* Browser navigation buttons */}
-            {/* Use the new NavigationButtons component */}
-            <NavigationButtons
-
-            />
-
-
+            <NavigationButtons />
 
             {session && (
               <Link
                 className={`rounded-md 
                bg-green-500  hover:bg-green-300
              text-white font-bold py-2 px-4 m-2`}
-                href={`/catalogueTri/${tagSlug}?photosPerPage=${photosPerPage}&currentPage=${currentPage}`}>
+                href={`/catalogueTri/${tagSlug}?photosPerPage=${photosPerPage}&currentPage=${currentPage}`}
+              >
                 TRIER
               </Link>
-
             )}
             <div>
-
               <button
-                className={`p-1 md:p-2 rounded-sm ${currentPage === 1
-                  ? "bg-neutral-500 text-neutral-700"
-                  : "bg-neutral-700 text-white"
-                  }`}
+                className={`p-1 md:p-2 rounded-sm ${
+                  currentPage === 1
+                    ? "bg-neutral-500 text-neutral-700"
+                    : "bg-neutral-700 text-white"
+                }`}
                 onClick={goToPreviousPage}
                 disabled={currentPage === 1}
               >
@@ -2202,347 +2075,356 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             <div>
               <button
                 className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
-                onClick={() => setZoomGallery(zoomGallery + 50)}
+                onClick={() => setZoomGallery((z) => z + 50)}
               >
                 <ZoomIn />
               </button>
               <button
                 className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
-                onClick={() => setZoomGallery(zoomGallery - 50)}
+                onClick={() => setZoomGallery((z) => z - 50)}
               >
-                <ZoomIn />
+                <ZoomOut />
               </button>
             </div>
           </div>
 
-          <PhotoAlbum
-            photos={paginatedPhotos}
-            spacing={zoomGallery / 7}
-            layout="rows"
-            targetRowHeight={zoomGallery}
-            onClick={({ index }) => setIndex(index)}
-            renderPhoto={({ photo, wrapperStyle /*, renderDefaultPhoto*/ }) => {
-              const getBorderStyle = (photo) => {
-                if (selectedPhotoIds.includes(photo.id)) {
-                  return "8px solid green";
-                } else {
-                  return photo.tags?.some((tag) => tag.name === "NOIR ET BLANC")
-                    ? "4px solid white"
-                    : "4px solid black";
-                }
-              };
+          {/* ********************* PHOTOALBUM + LIGHTBOX ********************* */}
+         <PhotoAlbum
+  photos={paginatedPhotos}
+  spacing={zoomGallery / 7}
+  layout="rows"
+  targetRowHeight={zoomGallery}
+  onClick={({ index, photo, event }) => {
+    // MODE ADMIN : on sélectionne au lieu d’ouvrir la lightbox
+    if (isAdmin && isShowAdmin) {
+      event.stopPropagation();
+      handleTagButtonClick(photo.id);
+      return;
+    }
+    // MODE NORMAL : on ouvre la lightbox
+    setIndex(index);
+  }}
+  renderPhoto={({ photo, wrapperStyle, imageProps }) => {
+    const getBorderStyle = (photo) => {
+      if (selectedPhotoIds.includes(photo.id)) {
+        return "8px solid green";
+      } else {
+        return photo.tags?.some((tag) => tag.name === "NOIR ET BLANC")
+          ? "4px solid white"
+          : "4px solid black";
+      }
+    };
 
-              return (
-                <>
-                  <div
-                    key={photo.id}
-                    onClick={(e) => handlePhotoClick(e, photo.id)}
-                    onDragStart={handleDragStart}
-                    style={{
-                      ...wrapperStyle,
-                      border: getBorderStyle(photo),
-                      position: "relative",
-                      opacity: photo.published ? 1 : 0.2,
-                      maxWidth: "33.33%",
-                      overflow: "hidden", // pour éviter que l'image déborde
-                    }}
-                    className="mb-4"
-                    title={photo.src}
-                  >
-                    {zoomGallery >= 200 && (
-                      <>
-                        <div className="text-white text-sm font-mono text-center mb-1">
-                          ID: {photo.id}
-                        </div>
-                        <EditableButton
-                          text={titles[photo.id] || ""}
-                          onChange={(e) => {
-                            const newTitles = {
-                              ...titles,
-                              [photo.id]: e.target.value,
-                            };
-                            setTitles(newTitles);
-                          }}
-                          onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
-                          isEditable={!isReadOnly}
-                          inputRef={inputRef}
-                        />
-                        {!titles[photo.id] && (
-                          <>
-                            <s className="text-white bg-transparent text-center w-full absolute -bottom-7">
-                              {photo.name}
-                            </s>
-                            <input
-                              className="absolute -bottom-7"
-                              title="Utiliser le nom comme titre"
-                              type="checkbox"
-                              onChange={() => handleCheckboxChange(photo.id)}
-                            />
-                          </>
-                        )}
-                      </>
-                    )}
+    // On récupère le onClick fourni par PhotoAlbum
+    const { onClick, style: imgStyle, ...restImageProps } = imageProps;
 
-                    {zoomGallery >= 200 && (
+    return (
+      <div
+        key={photo.id}
+        onDragStart={handleDragStart}
+        style={{
+          ...wrapperStyle,
+          border: getBorderStyle(photo),
+          position: "relative",
+          opacity: photo.published ? 1 : 0.2,
+          maxWidth: "33.33%",
+          overflow: "hidden",
+        }}
+        className="mb-4"
+        title={photo.src}
+      >
+                  {zoomGallery >= 200 && (
+                    <>
+                      <div className="text-white text-sm font-mono text-center mb-1">
+                        ID: {photo.id}
+                      </div>
+                      <EditableButton
+                        text={titles[photo.id] || ""}
+                        onChange={(e) => {
+                          const newTitles = {
+                            ...titles,
+                            [photo.id]: e.target.value,
+                          };
+                          setTitles(newTitles);
+                        }}
+                        onBlur={() =>
+                          updatePhotoTitle(photo.id, titles[photo.id])
+                        }
+                        isEditable={!isReadOnly}
+                        inputRef={inputRef}
+                      />
+                      {!titles[photo.id] && (
+                        <>
+                          <s className="text-white bg-transparent text-center w-full absolute -bottom-7">
+                            {photo.name}
+                          </s>
+                          <input
+                            className="absolute -bottom-7"
+                            title="Utiliser le nom comme titre"
+                            type="checkbox"
+                            onChange={() => handleCheckboxChange(photo.id)}
+                          />
+                        </>
+                      )}
+                    </>
+                  )}
+
+                  {zoomGallery >= 200 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(photo.id);
+                      }}
+                      className={`absolute top-2 left-2`}
+                    >
+                      <Heart isOpen={favorites.has(photo.id)} />
+                    </button>
+                  )}
+
+                  {zoomGallery >= 200 &&
+                    isAdmin &&
+                    isShowAdmin &&
+                    !photo.published &&
+                    isVisible && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          toggleFavorite(photo.id);
+                          setIndex(-1);
+                          handleDeleteButtonClick(photo.id);
                         }}
-                        className={`absolute top-2 left-2`}
+                        className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
                       >
-                        <Heart isOpen={favorites.has(photo.id)} />
+                        <Trash isOpen={true} />
                       </button>
                     )}
-                    {zoomGallery >= 200 &&
-                      isAdmin &&
-                      isShowAdmin &&
-                      !photo.published &&
-                      isVisible && (
+
+                  {zoomGallery >= 200 &&
+                    isAdmin &&
+                    isShowAdmin &&
+                    photo.published && (
+                      <>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setIndex(-1);
-                            handleDeleteButtonClick(photo.id);
+                            toggleTagDiv(photo.id);
                           }}
                           className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
                         >
-                          <Trash isOpen={true} />
+                          <Htag isOpen={true} />
                         </button>
-                      )}
-
-                    {zoomGallery >= 200 &&
-                      isAdmin &&
-                      isShowAdmin &&
-                      photo.published && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleTagDiv(photo.id);
+                        {openTagDiv === photo.id && (
+                          <div
+                            ref={tagDivRef}
+                            className="bg-neutral-800 p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
+                            style={{
+                              top: "100%",
+                              left: "0",
+                              right: "0",
+                              maxHeight: "300px",
                             }}
-                            className={`absolute bottom-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg`}
                           >
-                            <Htag isOpen={true} />
-                          </button>
-                          {openTagDiv === photo.id && (
-                            <div
-                              ref={tagDivRef}
-                              className="bg-neutral-800 p-2 rounded-md shadow-md absolute z-10 overflow-y-scroll"
-                              style={{
-                                top: "100%",
-                                left: "0",
-                                right: "0",
-                                maxHeight: "300px",
-                              }}
-                            >
-                              <input
-                                type="text"
-                                placeholder="Search tags..."
-                                value={photoTagSearch}
-                                onClick={(e) => e.stopPropagation()} // Ajoutez ceci pour empêcher la désélection
-                                onChange={(e) =>
-                                  setPhotoTagSearch(e.target.value)
-                                }
-                                className="mb-2 p-1 md:p-2 border text-black border-gray-300 rounded w-full"
-                              />
-                              {photoTagSearch ? (
+                            <input
+                              type="text"
+                              placeholder="Search tags..."
+                              value={photoTagSearch}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) =>
+                                setPhotoTagSearch(e.target.value)
+                              }
+                              className="mb-2 p-1 md:p-2 border text-black border-gray-300 rounded w-full"
+                            />
+                            {photoTagSearch ? (
+                              <div>
+                                {filteredTags(allMyTags).map((tag) => (
+                                  <span
+                                    key={tag.id}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleTagClickForPhoto(
+                                        photo.id,
+                                        tag.name
+                                      );
+                                    }}
+                                    className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                                  >
+                                    {tag.name}
+                                  </span>
+                                ))}
+                                {filteredTags(allMyTags).length === 0 && (
+                                  <button
+                                    onClick={async (e) => {
+                                      e.stopPropagation();
+                                      await handleCreateTagandUpdate(
+                                        photoTagSearch,
+                                        photo.id
+                                      );
+                                    }}
+                                    className="bg-green-500 text-white px-2 py-1 rounded m-1"
+                                  >
+                                    Create Tag: {photoTagSearch}
+                                  </button>
+                                )}
+                              </div>
+                            ) : (
+                              <>
                                 <div>
-                                  {filteredTags(allMyTags).map((tag) => (
+                                  {photo.tags.map((tag) => (
                                     <span
                                       key={tag.id}
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleTagClickForPhoto(
+                                        handleRemoveTagForPhoto(
                                           photo.id,
                                           tag.name
                                         );
                                       }}
-                                      className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                                      className="inline-block bg-green-500 m-1 p-1 rounded relative"
                                     >
                                       {tag.name}
-                                    </span>
-                                  ))}
-                                  {filteredTags(allMyTags).length === 0 && (
-                                    <button
-                                      onClick={async (e) => {
-                                        e.stopPropagation();
-                                        await handleCreateTagandUpdate(
-                                          photoTagSearch,
-                                          photo.id
-                                        );
-                                      }}
-                                      className="bg-green-500 text-white px-2 py-1 rounded m-1"
-                                    >
-                                      Create Tag: {photoTagSearch}
-                                    </button>
-                                  )}
-                                </div>
-                              ) : (
-                                <>
-                                  <div>
-                                    {photo.tags.map((tag) => (
-                                      <span
-                                        key={tag.id}
+                                      <Link
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          handleRemoveTagForPhoto(
-                                            photo.id,
-                                            tag.name
-                                          );
                                         }}
-                                        className="inline-block bg-green-500 m-1 p-1 rounded relative"
+                                        key={tag.id}
+                                        href={`/catalogue/${tag.slug}`}
+                                        className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
                                       >
-                                        {tag.name}
-                                        <Link
-                                          onClick={(e) => {
-                                            e.stopPropagation()
-                                          }}
-                                          key={tag.id}
-                                          href={`/catalogue/${tag.slug}`}
-                                          className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
-                                          Voir
-                                        </Link>
-                                        <span
-                                          className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
-                                          style={{
-                                            width: "20px",
-                                            height: "20px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                          }}
-                                        >
-                                          &times;
-                                        </span>
+                                        Voir
+                                      </Link>
+                                      <span
+                                        className="absolute top-0 right-0 cursor-pointer bg-white text-red-500 font-bold rounded-full"
+                                        style={{
+                                          width: "20px",
+                                          height: "20px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                        }}
+                                      >
+                                        &times;
                                       </span>
-                                    ))}
-                                  </div>
-                                  <div>
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setShowOtherTags(!showOtherTags);
-                                      }}
-                                      className="bg-blue-500 text-white px-2 py-1 rounded m-1"
-                                    >
-                                      {showOtherTags
-                                        ? "Hide Other Tags"
-                                        : "Show Other Tags"}
-                                    </button>
-                                    {showOtherTags && (
-                                      <div>
-                                        {allMyTags
-                                          .filter(
-                                            (tag) =>
-                                              !photo.tags.some(
-                                                (photoTag) =>
-                                                  photoTag.name === tag.name
-                                              )
-                                          )
-                                          .map((tag) => (
-                                            <>
-                                              <span
-                                                key={tag.id}
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  handleTagClickForPhoto(
-                                                    photo.id,
-                                                    tag.name
-                                                  );
-                                                }}
-                                                className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
-                                              >
-                                                {tag.name}
-                                                <Link
-                                                  onClick={(e) => {
-                                                    e.stopPropagation()
-                                                  }}
-                                                  key={tag.id}
-                                                  href={`/catalogue/${tag.slug}`}
-                                                  className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700">
-                                                  Voir
-                                                </Link>
-                                              </span>
-
-                                            </>
-                                          ))}
-                                      </div>
-                                    )}
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                    {zoomGallery >= 200 && isAdmin && isShowAdmin && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePublished(photo.id, photo.published);
-                        }}
-                        className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
-                          }`}
-                      >
-                        <Eye isOpen={photo.published} />
-                      </button>
+                                    </span>
+                                  ))}
+                                </div>
+                                <div>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setShowOtherTags(!showOtherTags);
+                                    }}
+                                    className="bg-blue-500 text-white px-2 py-1 rounded m-1"
+                                  >
+                                    {showOtherTags
+                                      ? "Hide Other Tags"
+                                      : "Show Other Tags"}
+                                  </button>
+                                  {showOtherTags && (
+                                    <div>
+                                      {allMyTags
+                                        .filter(
+                                          (tag) =>
+                                            !photo.tags.some(
+                                              (photoTag) =>
+                                                photoTag.name === tag.name
+                                            )
+                                        )
+                                        .map((tag) => (
+                                          <span
+                                            key={tag.id}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleTagClickForPhoto(
+                                                photo.id,
+                                                tag.name
+                                              );
+                                            }}
+                                            className="inline-block bg-gray-200 text-black m-1 p-1 rounded cursor-pointer hover:bg-gray-400"
+                                          >
+                                            {tag.name}
+                                            <Link
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                              }}
+                                              key={tag.id}
+                                              href={`/catalogue/${tag.slug}`}
+                                              className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+                                            >
+                                              Voir
+                                            </Link>
+                                          </span>
+                                        ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </>
                     )}
-                    {zoomGallery >= 200 && isAdmin && isShowAdmin && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleRecent(photo.id);
-                        }}
-                        className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${photo.published ? "" : "text-red-700 font-extrabold"
-                          }`}
-                      >
-                        <Star isOpen={recentPhotos.has(photo.id)} />
-                      </button>
-                    )}
-                    {/* {renderDefaultPhoto({ wrapped: true })} */}
-                    {/* ICI : on remplace l'ancien renderDefaultPhoto */}
-        <Image
-          src={photo.src}  // URL propre, sans ?format
+
+                  {zoomGallery >= 200 && isAdmin && isShowAdmin && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        togglePublished(photo.id, photo.published);
+                      }}
+                      className={`absolute top-2 right-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
+                        photo.published ? "" : "text-red-700 font-extrabold"
+                      }`}
+                    >
+                      <Eye isOpen={photo.published} />
+                    </button>
+                  )}
+                  {zoomGallery >= 200 && isAdmin && isShowAdmin && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleRecent(photo.id);
+                      }}
+                      className={`absolute bottom-2 left-2 bg-white text-gray-800 px-2 py-1 rounded-lg ${
+                        photo.published ? "" : "text-red-700 font-extrabold"
+                      }`}
+                    >
+                      <Star isOpen={recentPhotos.has(photo.id)} />
+                    </button>
+                  )}
+
+                  <Image
+          src={photo.src} // PAS de ?format
           alt={photo.title || photo.name || ""}
           fill
-          sizes="(max-width: 640px) 50vw,
+                    sizes="(max-width: 640px) 50vw,
                  (max-width: 1024px) 33vw,
                  20vw"
-          style={{ objectFit: "cover" }}
+                    style={{ objectFit: "cover" }}
+          onClick={onClick} // *** LIGNE CRUCIALE ***
+          {...restImageProps}
         />
-                  </div>
-                </>
+                </div>
               );
             }}
           />
+
           <Lightbox
-            open={isActive && index >= 0}
+            open={index >= 0}
             index={index}
             close={() => setIndex(-1)}
             slides={paginatedPhotos}
             render={{ slide: NextJsImage }}
             plugins={[Fullscreen, Slideshow, Thumbnails, Zoom]}
-            zoom={{
-              maxZoomPixelRatio: 3,
-              // zoomInMultiplier,
-              // doubleTapDelay,
-              // doubleClickDelay,
-              // doubleClickMaxStops,
-              // keyboardMoveDistance,
-              // wheelZoomDistanceFactor,
-              // pinchZoomDistanceFactor,
-              scrollToZoom: true,
-            }}
+            zoom={{ maxZoomPixelRatio: 3, scrollToZoom: true }}
           />
+
           <ToastContainer />
+
           <div className="flex flex-row justify-center gap-8 p-1 md:p-2 my-4 bg-neutral-700 rounded-md border border-white">
             <button
-              className={`p-1 md:p-2 rounded-sm ${currentPage === 1
-                ? "bg-neutral-500 text-neutral-700"
-                : "bg-neutral-700 text-white"
-                }`}
+              className={`p-1 md:p-2 rounded-sm ${
+                currentPage === 1
+                  ? "bg-neutral-500 text-neutral-700"
+                  : "bg-neutral-700 text-white"
+              }`}
               onClick={goToPreviousPage}
               disabled={currentPage === 1}
             >

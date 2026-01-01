@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { site } from "./site";
 import Title from "./TitleLine";
+import Image from "next/image";
 
 const HeaderSimple = ({ photos, siteTitle, title }) => {
   useEffect(() => {
@@ -17,10 +18,15 @@ const HeaderSimple = ({ photos, siteTitle, title }) => {
       <div className="text-center text-neutral-200 dark:bg-neutral-900 dark:text-neutral-200">
         <div className="flex flex-col  lg:flex-row first-letter:lg:justify-around  justify-center items-center">
           <div className="hidden md:block lg:self-start">
-            <img
+            <Image
               src={site.Logo.url}
               className=" rounded-2xl mx-4 mt-16  p-4 w-40 lg:w-64 h-auto "
-              alt=""
+              alt="logo-site"
+              width={256}
+              height={256}
+              priority
+
+
             />
             <h3 className=" text-gold-200 text-2xl font-bold">
 
