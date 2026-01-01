@@ -3,7 +3,6 @@ import prisma from "../../../prisma/prisma";
 
 export async function POST(request) {
   const { addTag, selectedPhotoIds, selectedTag } = await request.json();
-  console.log("reçu :", addTag, selectedPhotoIds, selectedTag);
 
   try {
     // Trouver le tag par son nom
@@ -20,7 +19,6 @@ export async function POST(request) {
     }
 
     const tagId = tag.id;
-    console.log("tagId", tagId);
 
     // Préparation des opérations de mise à jour pour chaque photoId
     const operations = selectedPhotoIds.map(photoId => {
@@ -47,7 +45,6 @@ export async function POST(request) {
 
     // Exécuter toutes les opérations en une transaction
     const results = await prisma.$transaction(operations);
-    console.log("results", results);
 
     // Convertir BigInt en string pour la sérialisation JSON
     const sanitizedResults = results.map(result => ({

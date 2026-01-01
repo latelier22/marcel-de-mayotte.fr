@@ -50,8 +50,6 @@ export const authOptions = {
           user.password
         );
 
-        console.log({ passwordCorrect });
-
         if (passwordCorrect) {
           return {
             id: user.id,

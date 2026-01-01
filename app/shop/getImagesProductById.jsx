@@ -12,7 +12,7 @@ const getImagesProductById = async (variantId) => {
         url: `${baseUrl}${data.path}`
       };
   
-      console.log(`Image enrichie du variant ${variantId} :`, imageWithUrl);
+    
       return imageWithUrl;
   
     } catch (error) {

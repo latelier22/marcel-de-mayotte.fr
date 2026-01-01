@@ -53,7 +53,7 @@ const useTagStore = create((set) => ({
         rootTagItems.sort((a, b) => a.order - b.order);
         sortChildren(rootTagItems);
   
-        console.log("rootTagItems", rootTagItems);
+        
   
         set({ tagItems: rootTagItems });
       } catch (error) {
@@ -72,7 +72,7 @@ const useTagStore = create((set) => ({
         });
   
         const createdTag = await response.json();
-        console.log("createdTag",createdTag)
+      
         set((state) => ({
           tagItems: [...state.tagItems, createdTag],
         }));

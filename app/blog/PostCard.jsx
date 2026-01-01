@@ -4,7 +4,6 @@ import Link from "next/link";
 import getBaseUrl from "../components/getBaseUrl";
 
 const PostCard = ({ post }) => {
-    console.log("card post", post)
 
     function formatContent(content, maxLength) {
         if (!content) return '';

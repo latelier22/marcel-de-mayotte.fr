@@ -26,8 +26,6 @@ export async function DELETE(request) {
       },
     });
 
-    console.log("Photo supprimée avec l'ID:", photoId, deletedPhoto);
-
     return new NextResponse(JSON.stringify({
       message: 'Photo supprimée avec succès',
       photoIds: photoId,

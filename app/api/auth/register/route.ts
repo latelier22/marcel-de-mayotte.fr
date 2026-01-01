@@ -7,9 +7,7 @@ export async function POST(request: Request) {
 
   try {
     const { email, password } = await request.json();
-    // validate email and password
-    console.log({ email, password });
-
+    
     const hashedPassword = await hash(password, 10);
 
     // Utiliser Prisma pour insérer l'utilisateur
@@ -20,8 +18,6 @@ export async function POST(request: Request) {
         role : "visit"
       }
     });
-
-    console.log({ user }); // Log pour vérifier que l'utilisateur a été créé
 
   } catch (e) {
     console.log({ e });

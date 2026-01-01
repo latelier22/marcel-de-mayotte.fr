@@ -7,7 +7,7 @@ export async function POST(request) {
 
   try {
       // Toggle favorite logic
-      console.log(userId, photoId, "toggleFavorite",toggleFavorite)
+    
       if (toggleFavorite) {
           // Attempt to add to favorites
           const existingFavorite = await prisma.favorite.findUnique({
@@ -20,7 +20,7 @@ export async function POST(request) {
           });
 
           if (!existingFavorite) {
-            console.log("pas de favori donct on jaoute")
+    
               await prisma.favorite.create({
                   data: {
                       userId: userId,

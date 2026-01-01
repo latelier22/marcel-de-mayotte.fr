@@ -29,7 +29,7 @@ const ChangeOrderButton = ({ tagId, photos }) => {
         }
       }
       const photoTagOrders = await fetchOrders(tagId); 
-      console.log("photoTagOrders",photoTagOrders)
+     
     } catch (error) {
       console.error("An error occurred while saving order:", error);
     }

@@ -18,7 +18,6 @@ async function fetchPostBySlug(slug) {
             slug: post.attributes.slug,
         };
 
-        console.log('fetched post', formattedPost);
         return [formattedPost];
     } catch (error) {
         // Log the error and return an empty array

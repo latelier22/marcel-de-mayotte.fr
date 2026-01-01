@@ -3,11 +3,8 @@ import { NextResponse } from 'next/server';
 import prisma from "../../../prisma/prisma"
 
 export async function POST(request) {
-
-
+  
   const { photoId, title } = await request.json();
-
-  console.log(photoId, "titre" ,title)
 
   try {
     const updatedPhoto = await prisma.photo.update({

@@ -6,8 +6,6 @@ async function fetchMenus(id = null) {
 
   let { data: menuItems } = response;
 
-  console.log(response);
-
   // Create a map of items by their ID
   const itemMap = {};
   menuItems.forEach((item) => {

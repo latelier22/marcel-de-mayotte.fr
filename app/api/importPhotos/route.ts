@@ -29,9 +29,6 @@ export async function POST(request) {
     
         const photoIds = createdPhotos.map(p => p.id);
     
-        // Logique supplémentaire pour utiliser les IDs...
-        console.log("Created Photos with IDs:", photoIds, createdPhotos);
-    
         return new NextResponse(JSON.stringify({
             message: 'Photos added successfully',
             photoIds: photoIds,

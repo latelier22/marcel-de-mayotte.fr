@@ -4,8 +4,6 @@ import prisma from "../../../prisma/prisma"
 export async function POST(request) {
     const { selectedPhotoIds, makePublished } = await request.json();
 
-    console.log("Updating published status for photos:", selectedPhotoIds, "Make published:", makePublished);
-
     try {
         // Conditionnel pour ajouter ou retirer la publication en masse
         if (makePublished) {

@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
+
 
 // import DotLoaderSpinner from "../../components/spinners/DotLoaderSpinner";
 import UploadImageComponent from "./UploadImageComponent";
@@ -31,7 +33,7 @@ import "yet-another-react-lightbox/plugins/thumbnails.css";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { Eye, Star, Htag, Heart, Trash, Upload ,ZoomIn, ZoomOut} from "./icons";
+import { Eye, Star, Htag, Heart, Trash, Upload, ZoomIn, ZoomOut } from "./icons";
 import EditableButton from "./buttons/EditableButton";
 import NavigationButtons from "./buttons/NavigationButtons"
 
@@ -157,7 +159,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
   const handleDragStart = (event) => {
     event.preventDefault(); // Empêche le glissement
-    console.log("cookie", doNotShowAgain ? 'true' : 'false');
+    
     if (!doNotShowAgain) {
       setShowDragAlertModal(true);
     }
@@ -221,7 +223,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const handleTagClickForPhoto = async (photoId, tagName) => {
-    console.log("clic", photoId, tagName);
+   
     setSelectedPhotoIds([photoId]); // Select the clicked photo
 
     // Call your function to add the tag
@@ -872,7 +874,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   useEffect(() => {
-    console.log("Selected Photo IDs:", selectedPhotoIds);
+   
   }, [selectedPhotoIds]);
 
   const handleTagSelection = (tagId) => {
@@ -1011,7 +1013,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const togglePublished = async (photoId, published) => {
-    console.log("tog pub : ", photoId, published, paginatedPhotos);
+   
 
     const newPhotos = photos.map((photo) => {
       if (photo.id === photoId) {
@@ -1019,11 +1021,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       }
       return photo;
     });
-
-    console.log(
-      "recheche photo par id ",
-      newPhotos.filter((p) => p.id === photoId)
-    );
 
     setPhotos(newPhotos);
 
@@ -1055,7 +1052,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       selectedPhotoIds.includes(photo.id)
     );
 
-    selectedPhotos.map((photo) => console.log(photo.id));
+    
 
     setShowPublishedModal(true);
     setModalContent("Que voulez-vous faire? :");
@@ -1115,7 +1112,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       selectedPhotoIds.includes(photo.id)
     );
 
-    selectedPhotos.map((photo) => console.log(photo.id));
+    
 
     setShowRecentsModal(true);
     setModalContent("Que voulez-vous faire? :");
@@ -1171,7 +1168,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       selectedPhotoIds.includes(photo.id)
     );
 
-    selectedPhotos.map((photo) => console.log(photo.id, photo.isFavorite));
+   
 
     setShowFavoriteModal(true);
     setModalContent("Que voulez-vous faire? :");
@@ -1254,7 +1251,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const updateFavoriteOnServer = async (photoId, toggleFavorite, userId) => {
-    console.log("updateFavoritesOnServer", photoId, toggleFavorite, userId);
+   
     try {
       const response = await fetch(`/api/updateFavorite`, {
         method: "POST",
@@ -1274,7 +1271,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
   };
 
   const handleToggleMainTag = async (tagId) => {
-    console.log("tagId", tagId);
+   
     try {
       const response = await fetch(`/api/toggleMainTag/${tagId}`, {
         method: "GET",
@@ -1316,7 +1313,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
     const storedPhotoIds = localStorage.getItem("selectedPhotoIds");
     if (storedPhotoIds) {
-      console.log(storedPhotoIds);
+      
     }
 
     // Navigate to the /catalogue/import page
@@ -1358,43 +1355,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
     } catch (error) {
       console.error("Upload failed:", error);
       setIsUploading(false);
-    }
-  };
-
-  const ImageWithFallback = ({ file }) => {
-    const thumbnailUrl =
-      file.formats && file.formats.thumbnail
-        ? `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.formats.thumbnail.url}`
-        : `${process.env.NEXT_PUBLIC_STRAPI_URL}${file.url}`;
-
-    return (
-      <img
-        src={thumbnailUrl}
-        alt={file.name}
-        style={{ width: 100, height: "auto" }}
-      />
-    );
-  };
-
-  const handleFileClick = (fileId) => {
-    console.log(
-      fileId,
-      files.filter((f) => f.id === fileId)
-    );
-    setSelectedFileIds((prev) => {
-      if (prev.includes(fileId)) {
-        return prev.filter((id) => id !== fileId);
-      } else {
-        return [...prev, fileId];
-      }
-    });
-  };
-
-  const handleFileSelectAll = () => {
-    if (selectedFileIds.length === files.length) {
-      setSelectedFileIds([]);
-    } else {
-      setSelectedFileIds(files.map((file) => file.id));
     }
   };
 
@@ -1442,7 +1402,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       const result = await response.json();
       const photoIds = result.photoIds;
       const createdPhotos = result.createdPhotos;
-      console.log(result, createdPhotos)
+     
 
       // Ensure the following loop does not create duplicates
       for (const [index, photoId] of photoIds.entries()) {
@@ -1478,7 +1438,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       });
 
       const resultTag1 = await tagResponse1.json();
-      console.log("Photos added and tagged successfully:", result, resultTag1);
+      
       const tagResponse2 = await fetch("/api/updateTagInBulk", {
         method: "POST",
         headers: {
@@ -1492,8 +1452,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
       });
 
       const resultTag2 = await tagResponse2.json();
-      console.log("Photos added and tagged successfully:", result, resultTag2);
-
+      
       if (tagSlugName && tagSlugName !== "CATALOGUE COMPLET") {
         const tagResponse3 = await fetch("/api/updateTagInBulk", {
           method: "POST",
@@ -1508,11 +1467,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         });
 
         const resultTag3 = await tagResponse3.json();
-        console.log(
-          "Photos added and tagged successfully:",
-          result,
-          resultTag3
-        );
+     
       }
 
       // Update local state to reflect imported status
@@ -1555,10 +1510,6 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
         };
       });
 
-
-
-
-      console.log("newPhotos", newPhotos)
       setPhotos((prevPhotos) => [...newPhotos, ...prevPhotos]);
 
       console.log(photos.slice(0, 3))
@@ -1686,48 +1637,48 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                             style={{ margin: "5px" }}
                             onClick={() => handleTagClick(tag)}
                           >
-                       <div className="flex items-center justify-between flex-wrap py-2 px-4">
-  <div className="flex text-left">{tag}</div>
-  <div className="flex items-center">
-    <Link
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
-      key={allMyTags.find((t) => t.name === tag)?.id}
-      href={`/catalogue/${allMyTags.find((t) => t.name === tag)?.slug}`}
-      className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
-    >
-      Voir
-    </Link>
-    <Button
-      title="Ajouter ce tag à la sélection"
-      disabled={selectedPhotoIds.length === 0}
-      onClick={(e) => {
-        e.stopPropagation();
-        updateTagInBulk(true, tag);
-      }}
-      key={`${tag}-add`}
-      className="ml-2 bg-green-500 text-white py-1 px-2 rounded hover:bg-blue-700"
-    >
-      +
-    </Button>
-    <Button
-      title="Supprimer ce tag de la sélection"
-      disabled={selectedPhotoIds.length === 0}
-      onClick={(e) => {
-        e.stopPropagation();
-        updateTagInBulk(false, tag);
-      }}
-      key={`${tag}-remove`}
-      className="ml-2 bg-red-500 text-white py-1 px-2 rounded hover:bg-blue-700"
-    >
-      -
-    </Button>
-    <div className="flex-none ml-4">
-      {tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}
-    </div>
-  </div>
-</div>
+                            <div className="flex items-center justify-between flex-wrap py-2 px-4">
+                              <div className="flex text-left">{tag}</div>
+                              <div className="flex items-center">
+                                <Link
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                  }}
+                                  key={allMyTags.find((t) => t.name === tag)?.id}
+                                  href={`/catalogue/${allMyTags.find((t) => t.name === tag)?.slug}`}
+                                  className="ml-2 bg-blue-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+                                >
+                                  Voir
+                                </Link>
+                                <Button
+                                  title="Ajouter ce tag à la sélection"
+                                  disabled={selectedPhotoIds.length === 0}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateTagInBulk(true, tag);
+                                  }}
+                                  key={`${tag}-add`}
+                                  className="ml-2 bg-green-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+                                >
+                                  +
+                                </Button>
+                                <Button
+                                  title="Supprimer ce tag de la sélection"
+                                  disabled={selectedPhotoIds.length === 0}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    updateTagInBulk(false, tag);
+                                  }}
+                                  key={`${tag}-remove`}
+                                  className="ml-2 bg-red-500 text-white py-1 px-2 rounded hover:bg-blue-700"
+                                >
+                                  -
+                                </Button>
+                                <div className="flex-none ml-4">
+                                  {tagCounts.selectedCounts[tag] || 0} / {tagCounts.counts[tag] || 0}
+                                </div>
+                              </div>
+                            </div>
 
                           </button>
                           <input
@@ -2201,37 +2152,37 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
             {session && (
               <Link
-              className={`rounded-md 
+                className={`rounded-md 
                bg-green-500  hover:bg-green-300
              text-white font-bold py-2 px-4 m-2`}
-              href={`/catalogueTri/${tagSlug}?photosPerPage=${photosPerPage}&currentPage=${currentPage}`}>
-              TRIER
-            </Link>
+                href={`/catalogueTri/${tagSlug}?photosPerPage=${photosPerPage}&currentPage=${currentPage}`}>
+                TRIER
+              </Link>
 
             )}
-           <div>
+            <div>
 
-            <button
-              className={`p-1 md:p-2 rounded-sm ${currentPage === 1
-                ? "bg-neutral-500 text-neutral-700"
-                : "bg-neutral-700 text-white"
-                }`}
-              onClick={goToPreviousPage}
-              disabled={currentPage === 1}
-            >
-              Page Précédente
-            </button>
-            <span>
-              Page {currentPage} / {totalPages}
-            </span>
-            <button
-              className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages}
-            >
-              Page Suivante
-            </button>
-           </div>
+              <button
+                className={`p-1 md:p-2 rounded-sm ${currentPage === 1
+                  ? "bg-neutral-500 text-neutral-700"
+                  : "bg-neutral-700 text-white"
+                  }`}
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+              >
+                Page Précédente
+              </button>
+              <span>
+                Page {currentPage} / {totalPages}
+              </span>
+              <button
+                className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Page Suivante
+              </button>
+            </div>
             <span>
               <label className="mr-2 text-white">Photos par page:</label>
               <select
@@ -2249,18 +2200,18 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
               </select>
             </span>
             <div>
-            <button
-              className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
-              onClick={() => setZoomGallery(zoomGallery + 50)}
-            >
-              <ZoomIn/>
-            </button>
-            <button
-              className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
-              onClick={() => setZoomGallery(zoomGallery - 50)}
-            >
-              <ZoomIn/>
-            </button>
+              <button
+                className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
+                onClick={() => setZoomGallery(zoomGallery + 50)}
+              >
+                <ZoomIn />
+              </button>
+              <button
+                className="p-1 md:p-2 rounded-sm bg-neutral-700 text-white"
+                onClick={() => setZoomGallery(zoomGallery - 50)}
+              >
+                <ZoomIn />
+              </button>
             </div>
           </div>
 
@@ -2270,7 +2221,7 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
             layout="rows"
             targetRowHeight={zoomGallery}
             onClick={({ index }) => setIndex(index)}
-            renderPhoto={({ photo, wrapperStyle, renderDefaultPhoto }) => {
+            renderPhoto={({ photo, wrapperStyle /*, renderDefaultPhoto*/ }) => {
               const getBorderStyle = (photo) => {
                 if (selectedPhotoIds.includes(photo.id)) {
                   return "8px solid green";
@@ -2283,56 +2234,54 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
 
               return (
                 <>
-
                   <div
-
                     key={photo.id}
                     onClick={(e) => handlePhotoClick(e, photo.id)}
-                    onDragStart={handleDragStart} // Ajoutez le gestionnaire onDragStart ici
+                    onDragStart={handleDragStart}
                     style={{
                       ...wrapperStyle,
                       border: getBorderStyle(photo),
                       position: "relative",
                       opacity: photo.published ? 1 : 0.2,
                       maxWidth: "33.33%",
+                      overflow: "hidden", // pour éviter que l'image déborde
                     }}
                     className="mb-4"
-
                     title={photo.src}
                   >
                     {zoomGallery >= 200 && (
-  <>
-    <div className="text-white text-sm font-mono text-center mb-1">
-      ID: {photo.id}
-    </div>
-    <EditableButton
-      text={titles[photo.id] || ""}
-      onChange={(e) => {
-        const newTitles = {
-          ...titles,
-          [photo.id]: e.target.value,
-        };
-        setTitles(newTitles);
-      }}
-      onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
-      isEditable={!isReadOnly}
-      inputRef={inputRef}
-    />
-    {!titles[photo.id] && (
-      <>
-        <s className="text-white bg-transparent text-center w-full absolute -bottom-7">
-          {photo.name}
-        </s>
-        <input
-          className="absolute -bottom-7"
-          title="Utiliser le nom comme titre"
-          type="checkbox"
-          onChange={() => handleCheckboxChange(photo.id)}
-        />
-      </>
-    )}
-  </>
-)}
+                      <>
+                        <div className="text-white text-sm font-mono text-center mb-1">
+                          ID: {photo.id}
+                        </div>
+                        <EditableButton
+                          text={titles[photo.id] || ""}
+                          onChange={(e) => {
+                            const newTitles = {
+                              ...titles,
+                              [photo.id]: e.target.value,
+                            };
+                            setTitles(newTitles);
+                          }}
+                          onBlur={() => updatePhotoTitle(photo.id, titles[photo.id])}
+                          isEditable={!isReadOnly}
+                          inputRef={inputRef}
+                        />
+                        {!titles[photo.id] && (
+                          <>
+                            <s className="text-white bg-transparent text-center w-full absolute -bottom-7">
+                              {photo.name}
+                            </s>
+                            <input
+                              className="absolute -bottom-7"
+                              title="Utiliser le nom comme titre"
+                              type="checkbox"
+                              onChange={() => handleCheckboxChange(photo.id)}
+                            />
+                          </>
+                        )}
+                      </>
+                    )}
 
                     {zoomGallery >= 200 && (
                       <button
@@ -2552,7 +2501,17 @@ const Gallery = ({ photos: initialPhotos, allTags, tagSlug, tagId, queryPhotosPe
                         <Star isOpen={recentPhotos.has(photo.id)} />
                       </button>
                     )}
-                    {renderDefaultPhoto({ wrapped: true })}
+                    {/* {renderDefaultPhoto({ wrapped: true })} */}
+                    {/* ICI : on remplace l'ancien renderDefaultPhoto */}
+        <Image
+          src={photo.src}  // URL propre, sans ?format
+          alt={photo.title || photo.name || ""}
+          fill
+          sizes="(max-width: 640px) 50vw,
+                 (max-width: 1024px) 33vw,
+                 20vw"
+          style={{ objectFit: "cover" }}
+        />
                   </div>
                 </>
               );

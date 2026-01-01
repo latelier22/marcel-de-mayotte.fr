@@ -29,9 +29,6 @@ async function Accueil() {
   const taxons = await getTaxons(); // 👈 fetch server-side depuis /shop
   // const productVariantsFront = await getProductVariantsFront(); // 👈 fetch server-side depuis /shop
 
-
-  // console.log("taxons", taxons)
-
   return (
     <main>
       <Navbar />

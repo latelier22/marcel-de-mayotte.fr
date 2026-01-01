@@ -3,7 +3,6 @@ import prisma from "../../../prisma/prisma";
 
 export async function POST(request) {
   const { oldTagName, updatedTag} = await request.json();
-console.log("oldTagName, newTagName",oldTagName, updatedTag)
   try {
     // Trouver le tag par son ancien nom
     const tag = await prisma.tag.findUnique({
@@ -15,17 +14,6 @@ console.log("oldTagName, newTagName",oldTagName, updatedTag)
     if (!tag) {
       return NextResponse.json({ success: false, error: "Tag not found", message: `No tag found with the name '${oldTagName}'` });
     }
-
-    // // Vérifier si le nouveau nom de tag existe déjà pour éviter les doublons
-    // const existingTag = await prisma.tag.findUnique({
-    //   where: {
-    //     name: newTagName
-    //   }
-    // });
-
-    // if (existingTag) {
-    //   return NextResponse.json({ success: false, error: "Tag name already exists", message: `Tag name '${newTagName}' already exists.` });
-    // }
 
     // Mettre à jour le nom du tag
     await prisma.tag.update({

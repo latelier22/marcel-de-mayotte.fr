@@ -6,7 +6,6 @@ export async function GET( req: NextRequest, context: {params: {tagId: string, a
 
 const tagId = context.params.tagId;
 
-  console.log(tagId);
   try {
     if (tagId) {
       const tagImages = await prisma.photo.findMany({

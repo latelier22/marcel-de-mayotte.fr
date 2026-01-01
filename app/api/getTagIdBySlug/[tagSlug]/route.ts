@@ -7,8 +7,6 @@ export async function GET( req: NextRequest, context: {params: {tagSlug: string}
 
   const tagSlug = context.params.tagSlug;
 
-  console.log(tagSlug,"tagSlug")
-
   try {
     // Trouver le tag par son nom
     const tag = await prisma.tag.findFirst({

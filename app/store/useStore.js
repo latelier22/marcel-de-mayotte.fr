@@ -53,7 +53,7 @@ const useMenuStore = create((set) => ({
 
     rootMenuItems.sort((a, b) => a.order - b.order);
     sortChildren(rootMenuItems);
-    console.log("rootMenuItems",)
+    
 
     set({ menuItems: rootMenuItems });
   },
@@ -94,7 +94,7 @@ const useMenuStore = create((set) => ({
 
     try {
       await myFetch(`/api/menus/${updatedItem.id}`, 'PUT', payload);
-      console.log('Menu item updated successfully');
+      
       // Re-fetch the updated menus after updating an item
       await useMenuStore.getState().fetchAndSetMenus();
     } catch (error) {
@@ -126,7 +126,7 @@ const useMenuStore = create((set) => ({
         await updateMenu(menu);
       }
 
-      console.log('Menus updated successfully');
+     
       // Re-fetch the updated menus after updating items
       await useMenuStore.getState().fetchAndSetMenus();
     } catch (error) {
@@ -138,7 +138,7 @@ const useMenuStore = create((set) => ({
   deleteMenuItem: async (id) => {
     try {
       await myFetch(`/api/menus/${id}`, 'DELETE');
-      console.log('Menu item deleted successfully');
+      
       // Re-fetch the updated menus after deleting an item
       await useMenuStore.getState().fetchAndSetMenus();
     } catch (error) {

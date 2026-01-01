@@ -16,10 +16,10 @@ async function main() {
         data: { width, height },
       });
 
-      console.log(`Dimensions de la photo ${photo.id} mises à jour.`);
+      
     }
 
-    console.log('Mise à jour des dimensions terminée.');
+   
   } catch (error) {
     console.error('Erreur lors de la mise à jour des dimensions :', error);
   } finally {

@@ -11,8 +11,6 @@ async function fetchPhotoTagOrders(id = null) {
       ...item.attributes
   }));
 
-  console.log(orders)
-
   return orders;
 }
 

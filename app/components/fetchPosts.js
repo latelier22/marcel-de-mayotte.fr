@@ -28,7 +28,6 @@ async function fetchPosts(id = null) {
         };
     });
 
-    console.log('fetched posts', formattedPosts.slice(0, 2));
     return formattedPosts;
 }
 

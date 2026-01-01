@@ -22,7 +22,6 @@ async function updateTagSlugs() {
     });
 
     await Promise.all(updates);
-    console.log('All slugs have been updated.');
 
     // Always close the Prisma Client connection
     await prisma.$disconnect();

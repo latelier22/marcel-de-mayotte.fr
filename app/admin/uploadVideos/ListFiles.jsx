@@ -134,9 +134,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
     localStorage.setItem('selectedPhotoIds', JSON.stringify(selectedPhotoIds));
 
     const storedPhotoIds = localStorage.getItem('selectedPhotoIds');
-  if (storedPhotoIds) {
-    console.log(storedPhotoIds);
-  }
+
 
     // Navigate to the /catalogue/import page
     router.push('/catalogue/import');
@@ -282,7 +280,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
         }
   
         const result = await response.json();
-        console.log(result);
+        
       }
   
       // Update local state to reflect imported status
@@ -363,8 +361,7 @@ function ListFiles({ allFiles, allPictures, allPosts }) {
 
   const handleEditImage = (fileId) => {
     const file = files.find((f) => f.id === fileId);
-    console.log(`Editing image with ID: ${fileId}`, file);
-    // Add your edit logic here
+   
   };
 
   const renderPostsTitles = (file) => {

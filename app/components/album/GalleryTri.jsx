@@ -168,8 +168,7 @@ const GalleryTri = ({ photos: initialPhotos, allTags, tagSlug, tagId , queryPhot
 
   // Définir une variable pour vérifier l'état de DnD
   const isDragAndDropEnabled = isAdmin && isShowAdmin || tagSlug === "favoris";
-  // console.log("isDragAndDropEnabled",isDragAndDropEnabled)
-
+ 
   const router = useRouter();
 
   const [photosPerPage, setPhotosPerPage] = useState(parseInt(queryPhotosPerPage) || 50); // Valeur par défaut
@@ -480,7 +479,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
   );
 
   const handleDragStart = ({ active }) => {
-    console.log("active", active)
+   
     if (isDragAndDropEnabled) {
       setActiveId(active.id);
     }
@@ -624,7 +623,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
   };
 
   const handleTagClickForPhoto = async (photoId, tagName) => {
-    console.log("clic", photoId, tagName);
+    
     setSelectedPhotoIds([photoId]); // Select the clicked photo
 
     // Call your function to add the tag
@@ -1136,22 +1135,6 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
     setTitles(initialTitles);
   }, [photos]);
 
-  const handleTitleChange = (e) => {
-    console.log(changed)
-    const newTitles = {
-      ...props.titles,
-      [photo.id]: e.target.value,
-    };
-    props.setTitles(newTitles);
-
-  };
-
-  const handleSaveTitle = () => {
-    props.updatePhotoTitle(photo.id, props.titles[photo.id]);
-    setIsTitleChanged(false);
-  };
-
-
 
   const updatePhotoTitle = async (photoId, title) => {
     try {
@@ -1411,19 +1394,13 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
   };
 
   const togglePublished = async (photoId, published) => {
-    console.log("tog pub : ", photoId, published, paginatedPhotos);
-
+    
     const newPhotos = photos.map((photo) => {
       if (photo.id === photoId) {
         return { ...photo, published: !photo.published };
       }
       return photo;
     });
-
-    console.log(
-      "recheche photo par id ",
-      newPhotos.filter((p) => p.id === photoId)
-    );
 
     setPhotos(newPhotos);
 
@@ -1454,8 +1431,6 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
     const selectedPhotos = photos.filter((photo) =>
       selectedPhotoIds.includes(photo.id)
     );
-
-    selectedPhotos.map((photo) => console.log(photo.id));
 
     setShowPublishedModal(true);
     setModalContent("Que voulez-vous faire? :");
@@ -1515,7 +1490,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
       selectedPhotoIds.includes(photo.id)
     );
 
-    selectedPhotos.map((photo) => console.log(photo.id));
+   
 
     setShowRecentsModal(true);
     setModalContent("Que voulez-vous faire? :");
@@ -1571,7 +1546,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
       selectedPhotoIds.includes(photo.id)
     );
 
-    selectedPhotos.map((photo) => console.log(photo.id, photo.isFavorite));
+   
 
     setShowFavoriteModal(true);
     setModalContent("Que voulez-vous faire? :");
@@ -1707,7 +1682,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
   
   
   const updateFavoriteOnServer = async (photoId, toggleFavorite, userId) => {
-    console.log("updateFavoritesOnServer", photoId, toggleFavorite, userId);
+    
     try {
       const response = await fetch(`/api/updateFavorite`, {
         method: "POST",
@@ -1727,7 +1702,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
   };
 
   const handleToggleMainTag = async (tagId) => {
-    console.log("tagId", tagId);
+    
     try {
       const response = await fetch(`/api/toggleMainTag/${tagId}`, {
         method: "GET",
@@ -1768,10 +1743,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
     localStorage.setItem("selectedPhotoIds", JSON.stringify(selectedPhotoIds));
 
     const storedPhotoIds = localStorage.getItem("selectedPhotoIds");
-    if (storedPhotoIds) {
-      console.log(storedPhotoIds);
-    }
-
+  
     // Navigate to the /catalogue/import page
     router.push("/catalogue/import");
   };
@@ -1827,27 +1799,6 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
     );
   };
 
-  const handleFileClick = (fileId) => {
-    console.log(
-      fileId,
-      files.filter((f) => f.id === fileId)
-    );
-    setSelectedFileIds((prev) => {
-      if (prev.includes(fileId)) {
-        return prev.filter((id) => id !== fileId);
-      } else {
-        return [...prev, fileId];
-      }
-    });
-  };
-
-  const handleFileSelectAll = () => {
-    if (selectedFileIds.length === files.length) {
-      setSelectedFileIds([]);
-    } else {
-      setSelectedFileIds(files.map((file) => file.id));
-    }
-  };
 
   const handleImportedFiles = (newFiles) => {
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
@@ -1892,7 +1843,6 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
       const result = await response.json();
       const photoIds = result.photoIds;
       const createdPhotos = result.createdPhotos;
-      console.log(result, createdPhotos);
 
       // Ensure the following loop does not create duplicates
       for (const [index, photoId] of photoIds.entries()) {
@@ -1928,7 +1878,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
       });
 
       const resultTag1 = await tagResponse1.json();
-      console.log("Photos added and tagged successfully:", result, resultTag1);
+      
       const tagResponse2 = await fetch("/api/updateTagInBulk", {
         method: "POST",
         headers: {
@@ -1942,7 +1892,6 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
       });
 
       const resultTag2 = await tagResponse2.json();
-      console.log("Photos added and tagged successfully:", result, resultTag2);
 
       if (tagSlugName && tagSlugName !== "CATALOGUE COMPLET") {
         const tagResponse3 = await fetch("/api/updateTagInBulk", {
@@ -1958,11 +1907,7 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
         });
 
         const resultTag3 = await tagResponse3.json();
-        console.log(
-          "Photos added and tagged successfully:",
-          result,
-          resultTag3
-        );
+        
       }
 
       // Update local state to reflect imported status
@@ -2004,11 +1949,8 @@ const navigateToPage = (tagSlug, photosPerPage, currentPage) => {
           description: photo.description,
         };
       });
-
-      console.log("newPhotos", newPhotos);
+     
       setPhotos((prevPhotos) => [...newPhotos, ...prevPhotos]);
-
-      console.log(photos.slice(0, 3));
 
       setImportedFilesCount(selectedFileIds.length); // Update importedFilesCount
 

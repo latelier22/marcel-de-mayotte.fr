@@ -40,7 +40,7 @@ function ListPosts({ allPosts, allComments, allFiles }) {
     useEffect(() => {
         const initialPosts = groupPosts(allPosts, allComments);
         setPosts(initialPosts);
-        console.log(initialPosts)
+        
     }, [allComments, allPosts]);
 
     const groupPosts = (posts, comments) => {

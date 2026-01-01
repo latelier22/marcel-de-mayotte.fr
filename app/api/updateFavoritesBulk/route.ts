@@ -4,7 +4,6 @@ import prisma from "../../../prisma/prisma"
 export async function POST(request) {
   const { userId, selectedPhotoIds, makeFavorite } = await request.json();
 
-  console.log(userId, selectedPhotoIds, makeFavorite)
   try {
     if (makeFavorite) {
       // Add to favorites in bulk

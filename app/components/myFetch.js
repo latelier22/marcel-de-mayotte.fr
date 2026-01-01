@@ -3,14 +3,11 @@
 async function myFetch(endpoint, method, body, entity) {
     const baseUrl = process.env.STRAPI_PUBLIC_URL;
 
-    console.log("endpoint, method, body, entity", endpoint, method, body, entity);
-
     const headers = {};
 
     // Adjust headers and body for FormData
     if (body instanceof FormData) {
-        // For FormData, browser automatically sets the Content-Type to 'multipart/form-data'
-        // with the boundary, so we don't manually set 'Content-Type' here.
+       
     } else {
         headers['Content-Type'] = 'application/json';
         body = body ? JSON.stringify(body) : null;
