@@ -24,7 +24,7 @@ async function Accueil() {
   const citations = await getCitations({ onlyPublished });
   const expoImages = await getImagesbyTag("expo-2025",null);
 
-  // const prepaImages = await getImagesbyTag("sallertaine-preparation",null);
+  const prepaImages = await getImagesbyTag("sallertaine-preparation",null);
 
   const taxons = await getTaxons(); // 👈 fetch server-side depuis /shop
   // const productVariantsFront = await getProductVariantsFront(); // 👈 fetch server-side depuis /shop
